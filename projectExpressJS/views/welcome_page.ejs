@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><%= nickname %></title>
+</head>
+<body>
+    <h1>Welcome, <%= nickname %>!</h1>
+    <p>Your avatar: <%= avatar %></p>
+    <p>Your background: <%= background %></p>
+
+    <h2>Lobbies</h2>
+    <div id="lobbies"></div>
+
+    <h2>Create or join lobby</h2>
+    <form id="lobby-form">
+        <input type="text" id="lobby-name" placeholder="Lobby name">
+        <button type="submit" id="create-lobby">Create lobby</button>
+        <button type="submit" id="join-lobby">Join lobby</button>
+        <button type="button" id="leave-lobby">Leave lobby</button>
+    </form>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const lobbyForm = document.getElementById('lobby-form');
+        const lobbyNameInput = document.getElementById('lobby-name');
+        const createLobbyButton = document.getElementById('create-lobby');
+        const joinLobbyButton = document.getElementById('join-lobby');
+        const leaveLobbyButton = document.getElementById('leave-lobby');
+        const lobbiesDiv = document.getElementById('lobbies');
+
+        // Обработчик создания лобби
+        createLobbyButton.addEventListener('click', (event) => {
+            event.preventDefault();
+            const lobbyName = lobbyNameInput.value;
+            socket.emit('create lobby', { nickname: '<%= nickname %>', avatar: '<%= avatar %>', background: '<%= background %>', lobbyName });
+        });
+
+        // Обработчик присоединения к лобби
+        joinLobbyButton.addEventListener('click', (event) => {
+            event.preventDefault();
+            const lobbyName = lobbyNameInput.value;
+            socket.emit('join lobby', { nickname: '<%= nickname %>', avatar: '<%= avatar %>', background: '<%= background %>', lobbyName });
+        });
+
+        // Обработчик выхода из лобби
+        leaveLobbyButton.addEventListener('click', () => {
+            socket.emit('leave lobby');
+        });
+
+        // Обработчик обновления списка лобби
+        socket.on('lobby list', (lobbies) => {
+            const lobbiesDiv = document.getElementById('lobbies');
+            lobbiesDiv.innerHTML = '';
+            for (const lobby of lobbies) {
+                const lobbyDiv = document.createElement('div');
+                lobbyDiv.textContent = lobby.name;
+                const playersDiv = document.createElement('div');
+                playersDiv.textContent = lobby.players.map(player => player.nickname).join(', ');
+                lobbyDiv.appendChild(playersDiv);
+                lobbiesDiv.appendChild(lobbyDiv);
+            }
+        });
+
+    </script>
+</body>
+</html>
