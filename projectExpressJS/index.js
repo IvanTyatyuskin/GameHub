@@ -55,6 +55,13 @@ io.on('connection', (socket) => {
     socket.on('create lobby', (data) => {
       if (!currentLobby) {
         const lobbyName = data.lobbyName;
+  
+        // Check if a lobby with the same name already exists
+        if (lobbies.hasOwnProperty(lobbyName)) {
+          socket.emit('error', 'A lobby with this name already exists');
+          return;
+        }
+  
         const lobby = {
           name: lobbyName,
           players: [{

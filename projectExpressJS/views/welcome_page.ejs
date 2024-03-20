@@ -53,12 +53,12 @@
             const lobbiesDiv = document.getElementById('lobbies');
             lobbiesDiv.innerHTML = '';
             for (const lobby of lobbies) {
-            const lobbyDiv = document.createElement('div');
-            lobbyDiv.textContent = lobby.name;
-            const playersDiv = document.createElement('div');
-            playersDiv.textContent = lobby.players.map(player => player.nickname).join(', ');
-            lobbyDiv.appendChild(playersDiv);
-            lobbiesDiv.appendChild(lobbyDiv);
+                const lobbyDiv = document.createElement('div');
+                lobbyDiv.textContent = lobby.name;
+                const playersDiv = document.createElement('div');
+                playersDiv.textContent = lobby.players.map(player => player.nickname).join(', ');
+                lobbyDiv.appendChild(playersDiv);
+                lobbiesDiv.appendChild(lobbyDiv);
             }
         });
     </script>
