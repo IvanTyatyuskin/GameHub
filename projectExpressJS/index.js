@@ -48,6 +48,8 @@ const lobbies = {};
 io.on('connection', (socket) => {
     console.log('User connected');
 
+    socket.emit('lobby list', Object.values(lobbies));
+
     let currentLobby = null;
 
     socket.on('create lobby', (data) => {
