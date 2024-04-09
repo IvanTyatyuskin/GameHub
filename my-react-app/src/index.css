@@ -1,0 +1,52 @@
+.OptionButton{
+border: 1px solid rgb(29, 28, 28);
+border-radius: 10px;
+box-shadow: 5px 5px 5px hsl(0, 4%, 39%);
+max-width: 300px;
+height: auto;
+display: inline-block;
+text-align: center;
+background-color: hsla(218, 52%, 40%, 0.759);
+padding: 20px;
+margin: 5px;
+font-family: Verdana, Geneva, Tahoma, sans-serif;
+font-size: 18px;
+color: aliceblue;
+}
+.card{
+  
+  box-shadow: 5px 5px 5px hsl(0, 4%, 39%);
+  max-width: 300px;
+  height: auto;
+  display: inline-block;
+  text-align: center;
+  background-color: hsla(218, 52%, 40%, 0.0);
+  padding: 20px;
+  margin: 20px;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-size: 18px;
+  color: aliceblue;
+  }
+.BottomPanel{
+  position: absolute;
+  bottom: 0px;
+  left: 2%;
+}
+.TopPanel{
+  position: absolute;
+  top: 0px;
+  left: 2%;
+}
+.DisplayText{
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-size: 24px;
+  display: inline;
+}
+.OptionImage{
+  height: 100px;
+  width: 100px;
+}
+.Player{
+  display: inline-block;
+  margin-left: 30px;
+}
