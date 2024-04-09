@@ -165,14 +165,17 @@ count++
     else{
       alert("Назначьте ставку")
     }
-    
+    function EndTurn(emit_name) {
+      setIsActive(false);
+      io.emit('EndTurn',{emit_name,deck,bet});
+    }
   }
   function Pass() {
-   setIsActive(false)
-  socket.emit('pass');
+   EndTurn("Pass");
+ 
   }
   function updateIsFlipping() {
-    setIsFlipping(true)
+    setIsFlipping(true);
   }
   const FlipCard = (ind) => () => {
     const newDeck = [...deck];
@@ -180,7 +183,7 @@ count++
     if (!newDeck[ind].IsDown&&isActive&&!isFlipping){
       newDeck[ind].IsDown=true;
       newDeck[ind].Image=back;
-      socket.emit('play',ind);
+
     }
     else if (newDeck[ind].IsDown&&isActive&&isFlipping){
      
@@ -190,14 +193,14 @@ count++
       if (!newDeck[ind].IsSkull){
         let n=bet-1;
         setBet(bet-1);
-        socket.emit('flip_success',ind);
+      
       }
       else{
         alert("Поиграно"); 
         console.log(Math.floor(Math.random()*(3+1)));
         newDeck[Math.floor(Math.random()*(3+1))].IsDisabled=true;
         fail=true;
-         socket.emit('flip_fail',ind);
+
       }
       console.log(bet);
       
