@@ -165,10 +165,11 @@ count++
     else{
       alert("Назначьте ставку")
     }
-    function EndTurn(emit_name) {
-      setIsActive(false);
-      io.emit('EndTurn',{emit_name,deck,bet});
-    }
+    
+  }
+  function EndTurn(emit_name) {
+    setIsActive(false);
+    socket.emit('EndTurn',{emit_name,deck,bet});
   }
   function EndTurn(emit_name) {
     setIsActive(false);
