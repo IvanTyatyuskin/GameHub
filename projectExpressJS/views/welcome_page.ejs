@@ -17,7 +17,9 @@
         <button type="submit" id="create-lobby">Create lobby</button>
         <button type="submit" id="join-lobby">Join lobby</button>
         <button type="button" id="leave-lobby">Leave lobby</button>
+        <button type="button" id="start-game">Запустить игру</button>
     </form>
+
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
@@ -28,6 +30,11 @@
         const joinLobbyButton = document.getElementById('join-lobby');
         const leaveLobbyButton = document.getElementById('leave-lobby');
         const lobbiesDiv = document.getElementById('lobbies');
+        const startGameButton = document.getElementById('start-game');
+
+        startGameButton.addEventListener('click', () => {
+            socket.emit('start game');
+        });
 
         // Обработчик создания лобби
         createLobbyButton.addEventListener('click', (event) => {
@@ -61,6 +68,12 @@
                 lobbiesDiv.appendChild(lobbyDiv);
             }
         });
+
+        socket.on('game started', () => {
+            console.log('pis');
+            window.location.href = '/game'; // перенаправляем пользователя на страницу игры
+        });
+
     </script>
 </body>
 </html>

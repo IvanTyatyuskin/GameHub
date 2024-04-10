@@ -12,6 +12,15 @@
     "cookie-parser": "^1.4.6",
     "ejs": "^3.1.9",
     "express": "^4.18.3",
-    "socket.io": "^4.7.4"
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "socket.io": "^4.7.4",
+    "socket.io-client": "^4.7.5"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.24.4",
+    "@babel/preset-env": "^7.24.4",
+    "@babel/preset-react": "^7.24.1",
+    "babel-loader": "^9.1.3"
   }
 }

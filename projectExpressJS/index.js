@@ -11,7 +11,7 @@ const io = socketIo(server);
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 app.set('view engine', 'ejs');
-app.use(express.static('public'));
+app.use(express.static('public', { extensions: ['jsx', 'js'] }));
 
 const maxAge = 20 * 365 * 24 * 60 * 60;
 
@@ -42,6 +42,11 @@ app.get('/welcome', (req, res) => {
 
     res.render('welcome_page.ejs', { nickname, avatar, background });
 });
+
+app.get('/game', (req, res) => {
+  res.render('skull.ejs'); // отправляем клиенту страницу игры
+});
+
 
 const lobbies = {};
 
@@ -141,6 +146,21 @@ io.on('connection', (socket) => {
       }
       currentLobby = null;
     });
+
+    socket.on('start game', () => {
+      if (currentLobby) {
+        console.log('puk');
+        const lobbyName = currentLobby; // сохраняем имя лобби, которое было запущено
+        io.to(lobbyName).emit('game started'); // отправляем событие "game started" всем клиентам в лобби, которое было запущено
+        socket.leave(currentLobby);
+        currentLobby = null;
+      }
+    });
+
+    socket.on('game started', () => {
+      console.log('pis');
+      window.location.href = '/game'; // перенаправляем пользователя на страницу игры
+  });
 });
 
 const PORT = process.env.PORT || 3000;
