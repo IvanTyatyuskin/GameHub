@@ -24,10 +24,11 @@ const PlayersScore = ({ playerData }) => {
         <div className='infoList--c'>
             {playerData.map((player, index) =>
                 <PlayerScore
-                    key={index}
-                    imageIndex={player.imageId}
-                    nickName={player.nickName}
-                    score={player.score}
+                key={index}
+                imageIndex={player.imageId}
+                ruby={player.score}
+                star={player.relics.length}
+                   
                 />
             )}
         </div>

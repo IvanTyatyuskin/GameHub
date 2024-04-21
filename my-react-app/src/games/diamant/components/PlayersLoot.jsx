@@ -3,7 +3,7 @@ import ImageLib from "./ImageLib";
 import '../../../Components/css/dataList.css'
 
 
-const PlayersLoot = ({ imageIndex, ruby, star, atTheBase }) => {
+const PlayersLoot = ({ imageIndex, ruby, atTheBase }) => {
     return (
         <div className={atTheBase? 'dataItem semi-transparent': 'dataItem' }>
             <ImageLib index={imageIndex} />
@@ -12,11 +12,7 @@ const PlayersLoot = ({ imageIndex, ruby, star, atTheBase }) => {
                 <p>x</p>
                 <p>{ruby}</p>
             </div>
-            <div className='dataItem'>
-                <ImageLib index={5} />
-                <p>x</p>
-                <p>{star}</p>
-            </div>
+            
         </div>
     )
 }

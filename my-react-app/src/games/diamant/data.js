@@ -3,6 +3,8 @@ import ruby from './Images/ruby.png'
 import snake from './Images/snake.png'
 import spider from './Images/spider.png'
 import star from './Images/star.png'
+import wood from './Images/wood.png'
+import magma from './Images/magma.png'
 import dino1 from './Images/Dino1.png'
 import dino2 from './Images/Dino2.png'
 import dino3 from './Images/Dino3.png'
@@ -77,6 +79,7 @@ export const ImageInfo = [
         height: "48",
         imageRendering: 'auto',
     },
+    
     {
         alt: 'corner',
         src: corner,
@@ -91,4 +94,18 @@ export const ImageInfo = [
         height: "124",
         imageRendering: 'auto',
     },
+    {
+        alt: 'wood',
+        src: wood,
+        width: "48",
+        height: "48",
+        imageRendering: 'auto',
+    },
+    {
+        alt: 'magma',
+        src: magma,
+        width: "48",
+        height: "48",
+        imageRendering: 'auto',
+    }
 ]

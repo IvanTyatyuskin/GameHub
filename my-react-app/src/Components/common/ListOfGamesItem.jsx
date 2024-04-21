@@ -1,7 +1,7 @@
 import '../css/image.css'
 import './ListOfGamesItem.css'
 import testImg from '../../assets/react.svg'
-
+import { Link } from 'react-router-dom';
 
 export default function ListOfGamesItem({ ImageSrc, Name,
     Description, rule, onlineCount = '0',
@@ -9,7 +9,9 @@ export default function ListOfGamesItem({ ImageSrc, Name,
     return (
         <div className='item'>
             <img className='size128' src={ImageSrc} alt="GameImage" />
-            <div className='Name'><h1>{Name}</h1></div>
+            <Link to={`/${Name}`}>
+                <div className='Name'><h1>{Name}</h1></div>
+            </Link>
             <div className='Description'>
                 {Description}
                 <a onClick={() => { setActive(true); setContent(<><h1>Правила {Name}</h1> { rule }</>) }}>

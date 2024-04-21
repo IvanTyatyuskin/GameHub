@@ -1,7 +1,3 @@
-.fit{
-    width:124px;
-    height:124px;
-}
 
 .turn90{
     transform: rotate(90deg);
@@ -18,7 +14,7 @@
     --size: 124px;
     width: var(--size);
     height: var(--size);
-    /*position:static;*/
+    position:static;
     position: relative;
 }
 

@@ -9,7 +9,6 @@ const PlayersLootList = ({ playersData }) => {
                     key={index}
                     imageIndex={player.imageId}
                     ruby={player.ruby}
-                    star={player.star}
                     atTheBase={player.atTheBase}
                 />
             )}

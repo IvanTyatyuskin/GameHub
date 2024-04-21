@@ -70,7 +70,7 @@ export const playersDataJS2 = [
     },
 ]
 
-export const roundData = {
+export const roundData2 = {
     round: '1',
     time: '10:00',
 }
