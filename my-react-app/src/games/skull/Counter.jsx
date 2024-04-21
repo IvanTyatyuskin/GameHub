@@ -3,6 +3,7 @@ import io from 'socket.io-client';
 import flower from '../../assets/flower.png'
 import skull from '../../assets/skull.png'
 import back from '../../assets/back.png'
+import './index.css'
 const socket = io.connect('http://localhost:3000');
 class Card {
   constructor(isSkull, isDown,initialImage,image, isDisabled) {
