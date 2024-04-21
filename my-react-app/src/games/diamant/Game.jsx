@@ -8,7 +8,7 @@ import Spider from './Images/spider.png'
 import Snake from './Images/snake.png'
 import Magma from './Images/magma.png'
 import Wood from './Images/wood.png'
-import Tile from "./components/tile"
+import Tile from "./components/Tile.jsx"
 import { GameContext } from './GameContext';
 
 
