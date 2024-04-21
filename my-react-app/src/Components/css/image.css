@@ -1,0 +1,43 @@
+.size16 {
+    height: 16px;
+    width: 16px;
+}
+.size16 .round {
+    border-radius:8px;
+}
+
+.size24 {
+    height: 24px;
+    width: 24px;
+}
+.size24 .round {
+    border-radius: 12px;
+}
+
+.size32 {
+    height: 32px;
+    width: 32px;
+}
+.size32 .round {
+    border-radius: 16px;
+}
+
+.size64 {
+    height: 64px;
+    width: 64px;
+}
+.size64 .round {
+    border-radius: 32px;
+}
+.size128 {
+    height: 128px;
+    width: 128px;
+}
+.size128 .round {
+    border-radius: 64px;
+}
+
+
+.pixel{
+    image-rendering:pixelated;
+}

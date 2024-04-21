@@ -1,0 +1,48 @@
+.fit{
+    width:124px;
+    height:124px;
+}
+
+.turn90{
+    transform: rotate(90deg);
+}
+.turn180{
+    transform: rotate(180deg);
+}
+.turn270{
+    transform: rotate(-90deg);
+}
+
+
+.box-overlay {
+    --size: 124px;
+    width: var(--size);
+    height: var(--size);
+    /*position:static;*/
+    position: relative;
+}
+
+.box-overlay > div {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.top{
+    height: var(--size);
+    width:var(--size);
+    z-index: 10;
+}
+.tile-content{
+    height:100%;
+    width:100%;
+    padding:10px;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    align-content: center;
+    justify-content: center;
+    align-items: flex-start;
+}

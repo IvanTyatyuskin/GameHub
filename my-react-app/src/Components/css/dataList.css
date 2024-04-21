@@ -1,0 +1,67 @@
+/*.vertically, .horizontally {*/
+    /* Данные раунда */
+    /*flex-shrink: 1;*/
+    /* Auto layout */
+    /*display: flex;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: stretch;
+    padding: 10px;*/
+    /* Inside Auto Layout */
+    /*align-self: stretch;
+    flex-grow: 1;
+    margin: 0px;
+    color: black;
+    width:100%;
+}
+
+.sublist {
+    position: static;*/
+    /* Auto layout */
+    /*display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: 10px;
+    gap:10px;*/
+    /* Inside Auto Layout */
+    /*order: 0;
+    margin: 0px 0px;
+}
+
+.vertically {
+    flex-direction: column;
+}
+.horizontally{
+    flex-direction:row;
+}*/
+
+.infoList--r, .infoList--c {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 0px;
+    margin: 0;
+    /*width:100%;*/
+}
+.infoList--c{
+    flex-direction: column;
+}
+.infoList--r {
+    flex-direction: row;
+}
+
+.dataItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0px;
+    margin: 0;
+    width: 100%;
+    flex-direction: row;
+    gap:10px;
+}
+
+.semi-transparent {
+    opacity:0.5;
+}

@@ -1,0 +1,18 @@
+:root {
+    --header-height: 50px;
+}
+:root {
+    --color-header: white;
+    --color-backdrop: rgb(44, 46, 53);
+    --color-content-block: #E5E5E5;
+    --color-border: black;
+}
+:root {
+    --p-font-size-def: 16px;
+    --p-font-weight-def: 400;
+    --p-line-height: calc(var(--p-font-size-def)*1.2);
+    --h1-font-size-def: 24px;
+    --h1-font-weight-def: 700;
+    --h1-line-height: calc(var(--p-font-size-def)*1.2);
+}
+

@@ -1,0 +1,51 @@
+.logo {
+    background: white;
+    --h-size: 24px;
+    --color: #06f;
+    font-size: var(--h-size);
+    line-height: calc(var(--h-size)*1.0);
+    display: flex;
+    padding: 5px;
+    margin: 0;
+    align-items: center;
+    font-weight: 700;
+    border: 1px solid black;
+    border-radius: 10px;
+}
+.logo>div{
+    background:var(--color);
+    color:white;
+    border-radius: 5px;
+}
+
+.logo1{
+    flex-direction:column;
+    align-items:stretch;
+}
+.logo1 > div{
+    display: flex;
+    justify-content: center;
+    padding: 2px;
+}
+
+.logo2 {
+    flex-direction: row;
+    padding:2px;
+    gap: 4px;
+    border-radius:7px;
+}
+.logo2 > div {
+    padding: 2px 8px;
+}
+
+.logo3 {
+    flex-direction: column;
+    align-items: stretch;
+    font-size: 32px;
+    line-height: calc(32px * 1.2);
+}
+.logo3 > div {
+    display: flex;
+    justify-content: center;
+    padding: 2px;
+}
