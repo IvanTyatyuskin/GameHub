@@ -1,8 +1,6 @@
 import '../css/image.css'
 import './ListOfGamesItem.css'
 import testImg from '../../assets/react.svg'
-import { Link } from 'react-router-dom';
-import Diamant from '../../games/diamant/Diamant.jsx'
 
 
 export default function ListOfGamesItem({ ImageSrc, Name,
