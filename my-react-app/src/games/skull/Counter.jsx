@@ -4,6 +4,7 @@ import flower from '../../assets/flower.png'
 import skull from '../../assets/skull.png'
 import back from '../../assets/back.png'
 import './index.css'
+
 const socket = io.connect('http://localhost:3000');
 class Card {
   constructor(isSkull, isDown,initialImage,image, isDisabled) {
@@ -106,9 +107,12 @@ function Counter() {
   const [deck, setDeck] = useState([]);
   const [players, setPlayers] = useState([]);
   const [playerDeck, setPlayerDeck] = useState([]);
+  const [playedDeck, setPlayedDeck] = useState([]);
   const [showBets, setShowBets] = useState(false);
   const [isActive, setIsActive] = useState(true);
+  const [havePassed, setHavePassed] = useState(true);
   const [isFlipping, setIsFlipping] = useState(false);
+  const [gameMode, setGameMode] = useState("beforeBet");
   let fail=false;
   useEffect(() => {
     const initialDeck = [
@@ -144,6 +148,7 @@ count++
     const val= (Number(document.getElementById("userInput2").value));
     if (val>bet&&(val<=CardsDown())){
       setBet(val);
+      Pass();
     }
     else if(val>CardsDown()){
       alert("Недостаточно карт на столе")
@@ -159,6 +164,7 @@ count++
     if (val>0&&(val<=CardsDown())){
       setBet(val);
       setShowBets(!showBets);
+      Pass();
     }
     else if(val>CardsDown()){
       alert("Недостаточно карт на столе")
@@ -170,9 +176,11 @@ count++
   }
   function EndTurn(emit_name) {
     setIsActive(false);
-    socket.emit('EndTurn',{emit_name,deck,bet});
+    let downCount=CardsDown();
+    socket.emit('EndTurn',{emit_name,downCount,playedDeck,gameMode,bet,isActive,havePassed});
   }
   function Pass() {
+    setHavePassed(true);
    EndTurn("Pass");
  
   }
@@ -181,11 +189,12 @@ count++
   }
   const FlipCard = (ind) => () => {
     const newDeck = [...deck];
+    const newPlayedDeck = [...playedDeck];
     let prev=false;
     if (!newDeck[ind].IsDown&&isActive&&!isFlipping){
       newDeck[ind].IsDown=true;
       newDeck[ind].Image=back;
-
+      newPlayedDeck.push(newDeck[ind]);
     }
     else if (newDeck[ind].IsDown&&isActive&&isFlipping){
      
@@ -216,6 +225,8 @@ count++
       setVP(victoryPoints+1);
     }
     setDeck(newDeck);
+    setPlayerDeck(newPlayedDeck);
+    Pass()
     console.log(deck)
    };
   function DrawCard() {
@@ -327,6 +338,64 @@ if(isActive&&!isFlipping){
   } else {
     return (
       <>
+      <div className="TopPanel">
+
+<div className='Player' >
+<p className="DisplayText">{players[0].Name}</p>
+<p className="DisplayText"> ПО: {players[0].VP}</p>
+<button style={{display:"block"}} hidden={players[0].IsDisabled} className="Card" >
+<img name = 'img' src = {back} className="OptionImage" />
+<p  className="DisplayText">  {players[0].CardsDown}</p>
+</button>
+
+<img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
+</div>
+
+<div className='Player' >
+<p className="DisplayText">{players[1].Name}</p>
+<p className="DisplayText"> ПО: {players[1].VP}</p>
+<button style={{display:"block"}} hidden={players[1].IsDisabled} className="Card" >
+<img name = 'img' src = {back} className="OptionImage" />
+<p  className="DisplayText">  {players[1].CardsDown}</p>
+</button>
+
+<img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
+</div>
+
+<div className='Player' >
+<p className="DisplayText">{players[2].Name}</p>
+<p className="DisplayText"> ПО: {players[2].VP}</p>
+<button style={{display:"block"}} hidden={players[2].IsDisabled} className="Card" >
+<img name = 'img' src = {back} className="OptionImage" />
+<p  className="DisplayText">  {players[2].CardsDown}</p>
+</button>
+
+<img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
+</div>
+
+<div className='Player' >
+<p className="DisplayText">{players[3].Name}</p>
+<p className="DisplayText"> ПО: {players[3].VP}</p>
+<button style={{display:"block"}} hidden={players[3].IsDisabled} className="Card" >
+<img name = 'img' src = {back} className="OptionImage" />
+<p  className="DisplayText">  {players[3].CardsDown}</p>
+</button>
+
+<img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
+</div>
+
+<div className='Player' >
+<p className="DisplayText">{players[4].Name}</p>
+<p className="DisplayText"> ПО: {players[4].VP}</p>
+<button style={{display:"block"}} hidden={players[4].IsDisabled} className="Card" >
+<img name = 'img' src = {back} className="OptionImage" />
+<p  className="DisplayText">  {players[4].CardsDown}</p>
+</button>
+
+<img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
+</div>
+
+</div>
       <div className="BottomPanel">
      <button hidden={deck[0].IsDisabled} className="Card" onClick={FlipCard(0)}>
         <img name = 'img' src = {deck[0].Image} className="OptionImage" />
@@ -355,6 +424,64 @@ if(isActive&&!isFlipping){
 else{
   return(
     <>
+    <div className="TopPanel">
+
+<div className='Player' >
+<p className="DisplayText">{players[0].Name}</p>
+<p className="DisplayText"> ПО: {players[0].VP}</p>
+<button style={{display:"block"}} hidden={players[0].IsDisabled} className="Card" >
+<img name = 'img' src = {back} className="OptionImage" />
+<p  className="DisplayText">  {players[0].CardsDown}</p>
+</button>
+
+<img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
+</div>
+
+<div className='Player' >
+<p className="DisplayText">{players[1].Name}</p>
+<p className="DisplayText"> ПО: {players[1].VP}</p>
+<button style={{display:"block"}} hidden={players[1].IsDisabled} className="Card" >
+<img name = 'img' src = {back} className="OptionImage" />
+<p  className="DisplayText">  {players[1].CardsDown}</p>
+</button>
+
+<img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
+</div>
+
+<div className='Player' >
+<p className="DisplayText">{players[2].Name}</p>
+<p className="DisplayText"> ПО: {players[2].VP}</p>
+<button style={{display:"block"}} hidden={players[2].IsDisabled} className="Card" >
+<img name = 'img' src = {back} className="OptionImage" />
+<p  className="DisplayText">  {players[2].CardsDown}</p>
+</button>
+
+<img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
+</div>
+
+<div className='Player' >
+<p className="DisplayText">{players[3].Name}</p>
+<p className="DisplayText"> ПО: {players[3].VP}</p>
+<button style={{display:"block"}} hidden={players[3].IsDisabled} className="Card" >
+<img name = 'img' src = {back} className="OptionImage" />
+<p  className="DisplayText">  {players[3].CardsDown}</p>
+</button>
+
+<img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
+</div>
+
+<div className='Player' >
+<p className="DisplayText">{players[4].Name}</p>
+<p className="DisplayText"> ПО: {players[4].VP}</p>
+<button style={{display:"block"}} hidden={players[4].IsDisabled} className="Card" >
+<img name = 'img' src = {back} className="OptionImage" />
+<p  className="DisplayText">  {players[4].CardsDown}</p>
+</button>
+
+<img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
+</div>
+
+</div>
     <div className="BottomPanel">
        <button hidden={deck[0].IsDisabled} className="Card" onClick={FlipCard(0)}>
         <img name = 'img' src = {deck[0].Image} className="OptionImage" />
