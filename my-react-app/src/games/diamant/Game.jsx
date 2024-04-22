@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, useState } from "react";
 import Button from '../../Components/common/button'
 import '../../Components/css/game.css'
 import Ruby from './Images/ruby.png'
@@ -135,14 +135,17 @@ function stringWinnerAlirt(){
     let winner = determiningWinner();
     let relicPoints=0
     winner.getRelic().forEach(relic=>{
-    relicPoints+=relic.getPoints()
-     })
-    
-   return `Победитель: ${winner.getNickName()}
-    с количеством рубинов: ${winner.getallPoints()}
-    Реликвии: ${winner.getRelic().length}
-    Очки с реликвии: ${relicPoints}`;
-    r
+        relicPoints+=relic.getPoints()
+    })
+
+    const Winner = {
+        Nick: winner.getNickName(),
+        count: winner.getallPoints(),
+        relic: winner.getRelic().length,
+        relicPoints: relicPoints
+    }
+
+    return Winner;
 }
 function shuffle(array) {
     array.push(RelicDeck[roundNum-1])
@@ -370,6 +373,16 @@ class Game extends Component {
         
     }
 
+    winWindow() {
+        this.setState(()=>{
+            this.context.setModalActive(true);
+            this.context.setModalContent(stringWinnerAlirt());
+        })
+        //this.context.setModalActive(true);
+        //this.context.setModalContent(stringWinnerAlirt());
+        //alert(stringWinnerAlirt());
+    }
+
     handleContinue() {
         this.setState(prevState => {
             const startedSquares = [...prevState.startedSquares];
@@ -400,12 +413,7 @@ class Game extends Component {
             console.log('Раунд.'+roundNum);
              }
              else{
-                    
-             
-                
-                alert(stringWinnerAlirt());
-                
-     
+                this.winWindow();
             }
             currentMove=0;
             shuffle(Deck);
@@ -473,12 +481,8 @@ class Game extends Component {
             roundData = { round: roundNum };
                 }
                 else{
-                    
-                    
-                    
-                    alert(stringWinnerAlirt());
-                    
-         
+                    this.winWindow();
+                    //alert(stringWinnerAlirt());
                 }
            console.log('Раунд.'+roundNum);
            currentMove=0;
@@ -534,8 +538,10 @@ class Game extends Component {
             );
         }
         return (
-            <div>
-                {rows}
+            <div className="theAreaWithTheGame">
+                <div className="scroll">
+                    {rows}
+                </div>
                 <div className="hand">
                         <div className="theButtonPanel">
                             <Button background="rgb(90, 195, 176)" padding="10px" onClick={this.handleContinue}>
@@ -550,7 +556,6 @@ class Game extends Component {
                     <Button onClick={this.handleStart}>
                         START
                     </Button>
-                    
                 </div>
             </div>
         );

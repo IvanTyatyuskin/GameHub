@@ -4,10 +4,12 @@ import flower from '../../assets/flower.png'
 import skull from '../../assets/skull.png'
 import back from '../../assets/back.png'
 import './index.css'
+import SkullView from './SkullView';
+
 
 const socket = io.connect('http://localhost:3000');
 class Card {
-  constructor(isSkull, isDown,initialImage,image, isDisabled) {
+  constructor(isSkull, isDown, initialImage, image, isDisabled) {
     this.IsSkull = isSkull;
     this.IsDown = isDown;
     this.Image = image;
@@ -119,18 +121,18 @@ function Counter() {
       new Card(false, false, flower,flower,false),
       new Card(false, false, flower,flower,false),
       new Card(false, false, flower,flower,false),
-      new Card(true, false, skull,skull,false)
+      new Card(true, false, skull, skull, false)
     ];
 
     setDeck([...deck, ...initialDeck]);
   }, []);
   useEffect(() => {
     const initplayers = [
-      new Player("player1", 0, 0,flower,false),
-      new Player("player2", 0, 0,flower,false),
-      new Player("player3", 0, 0,flower,false),
-      new Player("player4", 0, 0,flower,false),
-      new Player("player5", 0, 0,flower,false),
+      new Player("player1", 0, 0, flower, false),
+      new Player("player2", 0, 0, flower, false),
+      new Player("player3", 0, 0, flower, false),
+      new Player("player4", 0, 0, flower, false),
+      new Player("player5", 0, 0, flower, false),
     ];
 
     setPlayers([...players, ...initplayers]);
@@ -249,258 +251,208 @@ count++
   }
   }
   if(deck.length>0&&players.length>0){
-if(isActive&&!isFlipping){
-  if (!showBets) {
-    return (
-      <>
-      <div className="TopPanel">
+    if(isActive&&!isFlipping){
+      if (!showBets) {
+        return (
+          <>        
+            <SkullView/>
+            <button hidden={deck[3].IsDisabled} className="Card"  onClick={FlipCard(3)}>
+              <img name = 'img' src = {deck[3].Image} className="OptionImage" />
+            </button>
+            
+            {/*
+            
+            <Header/>
+            
+            <div className="PlayingField">
+              {players.map(player => (
+                <PlayersTablet
+                PlayerName={player.Name}
+                VP={player.VP}
+                cardsDown={player.CardsDown}
+                openCards={["0", "1"]}/>
+              ))}
 
-        <div className='Player' >
-        <p className="DisplayText">{players[0].Name}</p>
-      <p className="DisplayText"> ПО: {players[0].VP}</p>
-      <button style={{display:"block"}} hidden={players[0].IsDisabled} className="Card" >
-        <img name = 'img' src = {back} className="OptionImage" />
-        <p  className="DisplayText">  {players[0].CardsDown}</p>
-        </button>
-       
-        <img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
-      </div>
 
-      <div className='Player' >
-        <p className="DisplayText">{players[1].Name}</p>
-      <p className="DisplayText"> ПО: {players[1].VP}</p>
-      <button style={{display:"block"}} hidden={players[1].IsDisabled} className="Card" >
-        <img name = 'img' src = {back} className="OptionImage" />
-        <p  className="DisplayText">  {players[1].CardsDown}</p>
-        </button>
-       
-        <img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
-      </div>
+            </div>
+            <BottomPanel/>
+            */}
+          </>
+        );
+      } else {
+        return (
+          <>
+          <div className="TopPanel">
 
-      <div className='Player' >
-        <p className="DisplayText">{players[2].Name}</p>
-      <p className="DisplayText"> ПО: {players[2].VP}</p>
-      <button style={{display:"block"}} hidden={players[2].IsDisabled} className="Card" >
-        <img name = 'img' src = {back} className="OptionImage" />
-        <p  className="DisplayText">  {players[2].CardsDown}</p>
-        </button>
-       
-        <img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
-      </div>
+    <div className='Player' >
+    <p className="DisplayText">{players[0].Name}</p>
+    <p className="DisplayText"> ПО: {players[0].VP}</p>
+    <button style={{display:"block"}} hidden={players[0].IsDisabled} className="Card" >
+    <img name = 'img' src = {back} className="OptionImage" />
+    <p  className="DisplayText">  {players[0].CardsDown}</p>
+    </button>
 
-      <div className='Player' >
-        <p className="DisplayText">{players[3].Name}</p>
-      <p className="DisplayText"> ПО: {players[3].VP}</p>
-      <button style={{display:"block"}} hidden={players[3].IsDisabled} className="Card" >
-        <img name = 'img' src = {back} className="OptionImage" />
-        <p  className="DisplayText">  {players[3].CardsDown}</p>
-        </button>
-       
-        <img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
-      </div>
+    <img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
+    </div>
 
-      <div className='Player' >
-        <p className="DisplayText">{players[4].Name}</p>
-      <p className="DisplayText"> ПО: {players[4].VP}</p>
-      <button style={{display:"block"}} hidden={players[4].IsDisabled} className="Card" >
-        <img name = 'img' src = {back} className="OptionImage" />
-        <p  className="DisplayText">  {players[4].CardsDown}</p>
-        </button>
-       
-        <img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
-      </div>
+    <div className='Player' >
+    <p className="DisplayText">{players[1].Name}</p>
+    <p className="DisplayText"> ПО: {players[1].VP}</p>
+    <button style={{display:"block"}} hidden={players[1].IsDisabled} className="Card" >
+    <img name = 'img' src = {back} className="OptionImage" />
+    <p  className="DisplayText">  {players[1].CardsDown}</p>
+    </button>
 
-      </div>
+    <img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
+    </div>
+
+    <div className='Player' >
+    <p className="DisplayText">{players[2].Name}</p>
+    <p className="DisplayText"> ПО: {players[2].VP}</p>
+    <button style={{display:"block"}} hidden={players[2].IsDisabled} className="Card" >
+    <img name = 'img' src = {back} className="OptionImage" />
+    <p  className="DisplayText">  {players[2].CardsDown}</p>
+    </button>
+
+    <img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
+    </div>
+
+    <div className='Player' >
+    <p className="DisplayText">{players[3].Name}</p>
+    <p className="DisplayText"> ПО: {players[3].VP}</p>
+    <button style={{display:"block"}} hidden={players[3].IsDisabled} className="Card" >
+    <img name = 'img' src = {back} className="OptionImage" />
+    <p  className="DisplayText">  {players[3].CardsDown}</p>
+    </button>
+
+    <img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
+    </div>
+
+    <div className='Player' >
+    <p className="DisplayText">{players[4].Name}</p>
+    <p className="DisplayText"> ПО: {players[4].VP}</p>
+    <button style={{display:"block"}} hidden={players[4].IsDisabled} className="Card" >
+    <img name = 'img' src = {back} className="OptionImage" />
+    <p  className="DisplayText">  {players[4].CardsDown}</p>
+    </button>
+
+    <img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
+    </div>
+
+    </div>
+          <div className="BottomPanel">
+        <button hidden={deck[0].IsDisabled} className="Card" onClick={FlipCard(0)}>
+            <img name = 'img' src = {deck[0].Image} className="OptionImage" />
+            </button>
+            <button hidden={deck[1].IsDisabled} className="Card" onClick={FlipCard(1)}>
+            <img name = 'img' src = {deck[1].Image} className="OptionImage" />
+            </button>
+            <button hidden={deck[2].IsDisabled} className="Card"  onClick={FlipCard(2)}>
+            <img name = 'img' src = {deck[2].Image} className="OptionImage" />
+            </button>
+            <button hidden={deck[3].IsDisabled} className="Card"  onClick={FlipCard(3)}>
+            <img name = 'img' src = {deck[3].Image} className="OptionImage" />
+            </button>
+            <button className="OptionButton" onClick={updateBet}>Поднять ставку</button>
+            <button className="OptionButton" onClick={updateIsFlipping}>Проверить ставку</button>
+            <input type="text" id="userInput2" placeholder="Ставка"></input>
+            <button className="OptionButton" onClick={Pass}>Спасовать</button>
+            <p className="DisplayText"> Ставка: {bet}</p>
+            <p className="DisplayText"> ПО: {victoryPoints}</p>
+            </div>
+          </>
+        );
+      }
+    }
+    else{
+      return(
+        <>
+        {/*
+            <SkullView2 
+            deck={deck} bet={bet} victoryPoints={victoryPoints} 
+            updateBet={updateBet} updateIsFlipping={updateIsFlipping} 
+            Pass={Pass} FlipCard={FlipCard}
+            />
+        
+        */}
+        <div className="TopPanel">
+
+    <div className='Player' >
+    <p className="DisplayText">{players[0].Name}</p>
+    <p className="DisplayText"> ПО: {players[0].VP}</p>
+    <button style={{display:"block"}} hidden={players[0].IsDisabled} className="Card" >
+    <img name = 'img' src = {back} className="OptionImage" />
+    <p  className="DisplayText">  {players[0].CardsDown}</p>
+    </button>
+
+    <img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
+    </div>
+
+    <div className='Player' >
+    <p className="DisplayText">{players[1].Name}</p>
+    <p className="DisplayText"> ПО: {players[1].VP}</p>
+    <button style={{display:"block"}} hidden={players[1].IsDisabled} className="Card" >
+    <img name = 'img' src = {back} className="OptionImage" />
+    <p  className="DisplayText">  {players[1].CardsDown}</p>
+    </button>
+
+    <img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
+    </div>
+
+    <div className='Player' >
+    <p className="DisplayText">{players[2].Name}</p>
+    <p className="DisplayText"> ПО: {players[2].VP}</p>
+    <button style={{display:"block"}} hidden={players[2].IsDisabled} className="Card" >
+    <img name = 'img' src = {back} className="OptionImage" />
+    <p  className="DisplayText">  {players[2].CardsDown}</p>
+    </button>
+
+    <img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
+    </div>
+
+    <div className='Player' >
+    <p className="DisplayText">{players[3].Name}</p>
+    <p className="DisplayText"> ПО: {players[3].VP}</p>
+    <button style={{display:"block"}} hidden={players[3].IsDisabled} className="Card" >
+    <img name = 'img' src = {back} className="OptionImage" />
+    <p  className="DisplayText">  {players[3].CardsDown}</p>
+    </button>
+
+    <img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
+    </div>
+
+    <div className='Player' >
+    <p className="DisplayText">{players[4].Name}</p>
+    <p className="DisplayText"> ПО: {players[4].VP}</p>
+    <button style={{display:"block"}} hidden={players[4].IsDisabled} className="Card" >
+    <img name = 'img' src = {back} className="OptionImage" />
+    <p  className="DisplayText">  {players[4].CardsDown}</p>
+    </button>
+
+    <img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
+    </div>
+
+    </div>
       <div className="BottomPanel">
-      <button  hidden={deck[0].IsDisabled} className="Card" onClick={FlipCard(0)}>
-        <img name = 'img' src = {deck[0].Image} className="OptionImage" />
-        </button>
-        <button hidden={deck[1].IsDisabled} className="Card" onClick={FlipCard(1)}>
-        <img name = 'img' src = {deck[1].Image} className="OptionImage" />
-        </button>
-        <button hidden={deck[2].IsDisabled} className="Card"  onClick={FlipCard(2)}>
-        <img name = 'img' src = {deck[2].Image} className="OptionImage" />
-        </button>
-        <button hidden={deck[3].IsDisabled} className="Card"  onClick={FlipCard(3)}>
-        <img name = 'img' src = {deck[3].Image} className="OptionImage" />
-        </button>
-  
-        <button className="OptionButton" onClick={updateShowBets}>
-        Сделать ставку
+        <button hidden={deck[0].IsDisabled} className="Card" onClick={FlipCard(0)}>
+          <img name = 'img' src = {deck[0].Image} className="OptionImage" />
           </button>
-          
-        <button className="OptionButton" onClick={Pass}>Спасовать</button>
-        <input type="text" id="userInput" placeholder="Ставка"></input>
-        <p className="DisplayText"> ПО: {victoryPoints}</p>
-        </div>
+          <button hidden={deck[1].IsDisabled} className="Card" onClick={FlipCard(1)}>
+          <img name = 'img' src = {deck[1].Image} className="OptionImage" />
+          </button>
+          <button hidden={deck[2].IsDisabled} className="Card"  onClick={FlipCard(2)}>
+          <img name = 'img' src = {deck[2].Image} className="OptionImage" />
+          </button>
+          <button hidden={deck[3].IsDisabled} className="Card"  onClick={FlipCard(3)}>
+          <img name = 'img' src = {deck[3].Image} className="OptionImage" />
+          </button>
+          <p className="DisplayText"> Ставка: {bet}</p>
+          <p className="DisplayText"> ПО: {victoryPoints}</p>
+      </div>
+    
       </>
-    );
-  } else {
-    return (
-      <>
-      <div className="TopPanel">
-
-<div className='Player' >
-<p className="DisplayText">{players[0].Name}</p>
-<p className="DisplayText"> ПО: {players[0].VP}</p>
-<button style={{display:"block"}} hidden={players[0].IsDisabled} className="Card" >
-<img name = 'img' src = {back} className="OptionImage" />
-<p  className="DisplayText">  {players[0].CardsDown}</p>
-</button>
-
-<img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
-</div>
-
-<div className='Player' >
-<p className="DisplayText">{players[1].Name}</p>
-<p className="DisplayText"> ПО: {players[1].VP}</p>
-<button style={{display:"block"}} hidden={players[1].IsDisabled} className="Card" >
-<img name = 'img' src = {back} className="OptionImage" />
-<p  className="DisplayText">  {players[1].CardsDown}</p>
-</button>
-
-<img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
-</div>
-
-<div className='Player' >
-<p className="DisplayText">{players[2].Name}</p>
-<p className="DisplayText"> ПО: {players[2].VP}</p>
-<button style={{display:"block"}} hidden={players[2].IsDisabled} className="Card" >
-<img name = 'img' src = {back} className="OptionImage" />
-<p  className="DisplayText">  {players[2].CardsDown}</p>
-</button>
-
-<img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
-</div>
-
-<div className='Player' >
-<p className="DisplayText">{players[3].Name}</p>
-<p className="DisplayText"> ПО: {players[3].VP}</p>
-<button style={{display:"block"}} hidden={players[3].IsDisabled} className="Card" >
-<img name = 'img' src = {back} className="OptionImage" />
-<p  className="DisplayText">  {players[3].CardsDown}</p>
-</button>
-
-<img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
-</div>
-
-<div className='Player' >
-<p className="DisplayText">{players[4].Name}</p>
-<p className="DisplayText"> ПО: {players[4].VP}</p>
-<button style={{display:"block"}} hidden={players[4].IsDisabled} className="Card" >
-<img name = 'img' src = {back} className="OptionImage" />
-<p  className="DisplayText">  {players[4].CardsDown}</p>
-</button>
-
-<img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
-</div>
-
-</div>
-      <div className="BottomPanel">
-     <button hidden={deck[0].IsDisabled} className="Card" onClick={FlipCard(0)}>
-        <img name = 'img' src = {deck[0].Image} className="OptionImage" />
-        </button>
-        <button hidden={deck[1].IsDisabled} className="Card" onClick={FlipCard(1)}>
-        <img name = 'img' src = {deck[1].Image} className="OptionImage" />
-        </button>
-        <button hidden={deck[2].IsDisabled} className="Card"  onClick={FlipCard(2)}>
-        <img name = 'img' src = {deck[2].Image} className="OptionImage" />
-        </button>
-        <button hidden={deck[3].IsDisabled} className="Card"  onClick={FlipCard(3)}>
-        <img name = 'img' src = {deck[3].Image} className="OptionImage" />
-        </button>
-        <button className="OptionButton" onClick={updateBet}>Поднять ставку</button>
-        <button className="OptionButton" onClick={updateIsFlipping}>Проверить ставку</button>
-        <input type="text" id="userInput2" placeholder="Ставка"></input>
-        <button className="OptionButton" onClick={Pass}>Спасовать</button>
-        <p className="DisplayText"> Ставка: {bet}</p>
-        <p className="DisplayText"> ПО: {victoryPoints}</p>
-        </div>
-      </>
-    );
-  }
-
-}
-else{
-  return(
-    <>
-    <div className="TopPanel">
-
-<div className='Player' >
-<p className="DisplayText">{players[0].Name}</p>
-<p className="DisplayText"> ПО: {players[0].VP}</p>
-<button style={{display:"block"}} hidden={players[0].IsDisabled} className="Card" >
-<img name = 'img' src = {back} className="OptionImage" />
-<p  className="DisplayText">  {players[0].CardsDown}</p>
-</button>
-
-<img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
-</div>
-
-<div className='Player' >
-<p className="DisplayText">{players[1].Name}</p>
-<p className="DisplayText"> ПО: {players[1].VP}</p>
-<button style={{display:"block"}} hidden={players[1].IsDisabled} className="Card" >
-<img name = 'img' src = {back} className="OptionImage" />
-<p  className="DisplayText">  {players[1].CardsDown}</p>
-</button>
-
-<img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
-</div>
-
-<div className='Player' >
-<p className="DisplayText">{players[2].Name}</p>
-<p className="DisplayText"> ПО: {players[2].VP}</p>
-<button style={{display:"block"}} hidden={players[2].IsDisabled} className="Card" >
-<img name = 'img' src = {back} className="OptionImage" />
-<p  className="DisplayText">  {players[2].CardsDown}</p>
-</button>
-
-<img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
-</div>
-
-<div className='Player' >
-<p className="DisplayText">{players[3].Name}</p>
-<p className="DisplayText"> ПО: {players[3].VP}</p>
-<button style={{display:"block"}} hidden={players[3].IsDisabled} className="Card" >
-<img name = 'img' src = {back} className="OptionImage" />
-<p  className="DisplayText">  {players[3].CardsDown}</p>
-</button>
-
-<img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
-</div>
-
-<div className='Player' >
-<p className="DisplayText">{players[4].Name}</p>
-<p className="DisplayText"> ПО: {players[4].VP}</p>
-<button style={{display:"block"}} hidden={players[4].IsDisabled} className="Card" >
-<img name = 'img' src = {back} className="OptionImage" />
-<p  className="DisplayText">  {players[4].CardsDown}</p>
-</button>
-
-<img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
-</div>
-
-</div>
-    <div className="BottomPanel">
-       <button hidden={deck[0].IsDisabled} className="Card" onClick={FlipCard(0)}>
-        <img name = 'img' src = {deck[0].Image} className="OptionImage" />
-        </button>
-        <button hidden={deck[1].IsDisabled} className="Card" onClick={FlipCard(1)}>
-        <img name = 'img' src = {deck[1].Image} className="OptionImage" />
-        </button>
-        <button hidden={deck[2].IsDisabled} className="Card"  onClick={FlipCard(2)}>
-        <img name = 'img' src = {deck[2].Image} className="OptionImage" />
-        </button>
-        <button hidden={deck[3].IsDisabled} className="Card"  onClick={FlipCard(3)}>
-        <img name = 'img' src = {deck[3].Image} className="OptionImage" />
-        </button>
-        <p className="DisplayText"> Ставка: {bet}</p>
-        <p className="DisplayText"> ПО: {victoryPoints}</p>
-        </div>
-    </>
-     );
-}
+      );
+    }
   }
 }
 
