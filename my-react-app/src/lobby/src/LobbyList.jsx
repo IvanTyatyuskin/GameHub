@@ -5,7 +5,9 @@ const socket = io.connect('http://localhost:3000');
 
 function LobbyList(props) {
 
-
+    let nickname=props.nickname;
+    let avatar=props.avatar;
+    let background=props.background;
 
     const PrivateChange = () => () => { 
         const isPrivateCheckbox = document.getElementById('is-private');
@@ -23,8 +25,17 @@ function LobbyList(props) {
         const lobbyName = lobbyNameInput.value;
         const isPrivate = isPrivateCheckbox.checked;
         const password = isPrivate ? document.getElementById('lobby-password').value : null;
+        
         socket.emit('create lobby', { nickname, avatar, background, lobbyName, isPrivate, password });
       
+    }
+    const JoinLobby = () => () => { 
+        const lobbyNameInput = document.getElementById('lobby-name');
+        const lobbyName = lobbyNameInput.value;
+        
+        
+      socket.emit('join lobby', { nickname, avatar, background, lobbyName });
+  
     }
     /*const socket = io();
     const lobbyForm = document.getElementById('lobby-form');
@@ -128,8 +139,8 @@ function LobbyList(props) {
           </div>
           <label id="is-private" onChange={PrivateChange() } className="DisplayText">Private lobby</label>
           <input type="checkbox" id="is-private"/>
-          <button type="submit" id="create-lobby" className="DisplayText">Create lobby</button>
-          <button type="submit" id="join-lobby" className="DisplayText">Join lobby</button>
+          <button type="submit" id="create-lobby" className="DisplayText" onClick={CreateLobby()}>Create lobby</button>
+          <button type="submit" id="join-lobby" className="DisplayText" onClick={JoinLobby()}>Join lobby</button>
           <button type="button" id="leave-lobby" className="DisplayText">Leave lobby</button>
         </form>
       
