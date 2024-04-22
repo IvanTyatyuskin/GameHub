@@ -11,7 +11,7 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
-
+app.use(express.static( '/public'));
 const maxAge = 20 * 365 * 24 * 60 * 60;
 
 app.get('/', (req, res) => {

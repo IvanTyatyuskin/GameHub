@@ -1,46 +1,32 @@
-<!DOCTYPE html>
-<html>
-  
-<head>
-  <link href="../style.css" rel="stylesheet" type="text/css">
-  <title><%= nickname %></title>
-</head>
-<body>
-  <h1 class="DisplayText">Welcome, <%= nickname %>!</h1>
-  <p class="DisplayText">Your avatar: <%= avatar %></p>
-  <p class="DisplayText">Your background: <%= background %></p>
+import { useState } from 'react'
+import io from 'socket.io-client';
+import './index.css'
+const socket = io.connect('http://localhost:3000');
 
-  <h2 class="DisplayText">Lobbies</h2>
-  <div id="lobbies"></div>
+function LobbyList(props) {
 
-  <h2 class="DisplayText">Create or join lobby</h2>
-  <form id="lobby-form">
-    <label for="lobby-name" class="DisplayText">Name</label>
-    <input type="text" id="lobby-name"  placeholder="Lobby name">
-    <div id="password-field" style="display: none;">
-      <label for="lobby-password"class="DisplayText"></label>>Password:</label>
-      <input type="password" id="lobby-password">
-    </div>
-    <label for="is-private" class="DisplayText">Private lobby</label>
-    <input type="checkbox" id="is-private">
-    <button type="submit" id="create-lobby" class="DisplayText">Create lobby</button>
-    <button type="submit" id="join-lobby" class="DisplayText">Join lobby</button>
-    <button type="button" id="leave-lobby" class="DisplayText">Leave lobby</button>
-  </form>
 
-  <div id="lobby-chat" style="display: none;">
-    <h2>Lobby Chat</h2>
-    <div id="chat-messages"></div>
-    <form id="chat-form">
-      <input type="text" id="chat-input" placeholder="Type your message...">
-      <button type="submit">Send</button>
-    </form>
-  </div>
 
-  <script src="/socket.io/socket.io.js"></script>
-  <script>
-    
-    const socket = io();
+    const PrivateChange = () => () => { 
+        const isPrivateCheckbox = document.getElementById('is-private');
+        const passwordField = document.getElementById('password-field');
+        if (isPrivateCheckbox.checked) {
+          passwordField.style.display = 'block';
+        } else {
+          passwordField.style.display = 'none';
+        } 
+    }
+
+    const CreateLobby = () => () => { 
+        const lobbyNameInput = document.getElementById('lobby-name');
+        const isPrivateCheckbox = document.getElementById('is-private');
+        const lobbyName = lobbyNameInput.value;
+        const isPrivate = isPrivateCheckbox.checked;
+        const password = isPrivate ? document.getElementById('lobby-password').value : null;
+        socket.emit('create lobby', { nickname, avatar, background, lobbyName, isPrivate, password });
+      
+    }
+    /*const socket = io();
     const lobbyForm = document.getElementById('lobby-form');
     const lobbyNameInput = document.getElementById('lobby-name');
     const isPrivateCheckbox = document.getElementById('is-private');
@@ -120,7 +106,44 @@
       const messageElement = document.createElement('div');
       messageElement.textContent = `${data.nickname}: ${data.message}`;
       chatMessages.appendChild(messageElement);
-    });
-  </script>
-</body>
-</html>
+    });*/
+
+    return(
+        <>
+       <div>
+        <h1 className="DisplayText">Welcome, {props.nickname}!</h1>
+        <p className="DisplayText">Your avatar: {props.avatar}</p>
+        <p className="DisplayText">Your background:  {props.background}</p>
+      
+        <h2 className="DisplayText">Lobbies</h2>
+        <div id="lobbies"></div>
+      
+        <h2 className="DisplayText">Create or join lobby</h2>
+        <form id="lobby-form">
+          <label htmlFor="lobby-name" className="DisplayText">Name</label>
+          <input type="text" id="lobby-name"  placeholder="Lobby name"/>
+          <div id="password-field" >
+            <label htmlFor="lobby-password"className="DisplayText">Password:</label>
+            <input type="password" id="lobby-password"/>
+          </div>
+          <label id="is-private" onChange={PrivateChange() } className="DisplayText">Private lobby</label>
+          <input type="checkbox" id="is-private"/>
+          <button type="submit" id="create-lobby" className="DisplayText">Create lobby</button>
+          <button type="submit" id="join-lobby" className="DisplayText">Join lobby</button>
+          <button type="button" id="leave-lobby" className="DisplayText">Leave lobby</button>
+        </form>
+      
+        <div id="lobby-chat" >
+          <h2>Lobby Chat</h2>
+          <div id="chat-messages"></div>
+          <form id="chat-form">
+            <input type="text" id="chat-input" placeholder="Type your message..."/>
+            <button type="submit">Send</button>
+          </form>
+          </div>
+          </div>
+          </>
+    );
+  } 
+  
+  export default LobbyList
