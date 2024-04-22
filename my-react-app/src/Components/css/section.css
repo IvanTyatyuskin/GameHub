@@ -33,6 +33,13 @@ section{
     align-items:center;
 }
 
+.horizontal{
+    display:flex;
+    flex-direction:row;
+    justify-content: stretch;
+    align-items: stretch;
+}
+
 .list{
     display:flex;
     flex-direction:column;
