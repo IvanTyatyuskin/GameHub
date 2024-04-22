@@ -1,0 +1,26 @@
+
+.chip{
+    --size: 100px;
+    --chip-color: #fff;
+    height:var(--size);
+    width: var(--size);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    /* offset-x | offset-y | blur-radius | spread-radius | color */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+    background-color: var(--chip-color);
+
+    transition: .15s ease-in;
+}
+.chip.clickable:hover {
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+      transform: translatey(-5px);
+}
+
+.chip img {
+    height: 100%;
+    width: 100%;
+}
