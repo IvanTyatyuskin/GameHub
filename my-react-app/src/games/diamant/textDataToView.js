@@ -1,4 +1,4 @@
-export const textData = [
+export const textDataToView = [
     {
         round: 'Раунд',
         time: 'Время',
@@ -11,6 +11,10 @@ export const textData = [
         continue: 'Продолжить',
         toReturn: 'Вернуться',
         score: 'Cчет',
-        rules: 'Правила'
+        rules: 'Правила',
+        winWindow_win: 'Победа',
+        winWindow_count: 'Очков',
+        winWindow_relic: 'Реликвий',
+        winWindow_relicPoints: 'Очки с реликвий'
     }
 ]

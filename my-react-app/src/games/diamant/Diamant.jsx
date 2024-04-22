@@ -5,14 +5,21 @@ import '../../Components/css/game.css'
 import DataList from '../../Components/common/DataList/DataList'
 import PlayersScore from './components/PlayersScore'
 import PlayersLootList from './components/PlayersLootList'
-import { textData } from '../../textData.js'
+import { textDataToView } from './textDataToView.js'
 import TrapsInThisRound from './components/TrapsInThisRound'
 import Game from './Game'
 import { useGameContext } from './GameContext';
+import { Modal } from '../../Components/common/Modal.jsx'
 
 export default function Diamant() {
-    const textContent = textData[0]
-    const { playersData, setPlayersData, roundD, setRoundData, traps, setTrapsInThisRound} = useGameContext();
+    const textContent = textDataToView[0]
+
+    const { playersData, setPlayersData, 
+        roundD, setRoundData, 
+        traps, setTrapsInThisRound,
+        modalContent, setModalContent,
+        modalActive, setModalActive
+    } = useGameContext();
     
     const [now, setNow] = useState(new Date())
 
@@ -26,6 +33,17 @@ export default function Diamant() {
         };
     }, []);
 
+    const WinPlayer = ({modalContent}) => {
+        if (!modalContent) return(<h1>Тут искать нечего</h1>)
+        return(
+            <>        
+                <h1>{textContent.winWindow_win} {modalContent.Nick}!</h1>
+                <p>{textContent.winWindow_count}: {modalContent.count}</p>
+                <p>{textContent.winWindow_relic}: {modalContent.relic}</p>
+                <p>{textContent.winWindow_relicPoints}: {modalContent.relicPoints}</p>
+            </>
+        )
+    }
     return (
         <>
             <header>
@@ -59,14 +77,14 @@ export default function Diamant() {
                        
                     </DataList>
                 </DataList>
-                <div className="theAreaWithTheGame">
-                    <Game />
-                   
-                </div>
+                <Game />
                 <DataList heading={textContent.score}>
                     <PlayersScore playerData={playersData} />
                 </DataList>
             </div>
+            <Modal active={modalActive} setActive={setModalActive}>
+                <WinPlayer modalContent={modalContent}/>
+            </Modal>
         </>
     )
 }

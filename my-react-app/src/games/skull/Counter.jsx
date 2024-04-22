@@ -4,16 +4,12 @@ import flower from '../../assets/flower.png'
 import skull from '../../assets/skull.png'
 import back from '../../assets/back.png'
 import './index.css'
-import {Chip} from './components/chip'
-import { PlayersTablet } from './components/playersTablet';
-import './components/playingField.css'
-import Header from '../../Components/Header';
-import { BottomPanel } from './components/BottomPanel';
+import SkullView from './SkullView';
 
 
 const socket = io.connect('http://localhost:3000');
 class Card {
-  constructor(isSkull, isDown,initialImage,image, isDisabled) {
+  constructor(isSkull, isDown, initialImage, image, isDisabled) {
     this.IsSkull = isSkull;
     this.IsDown = isDown;
     this.Image = image;
@@ -125,18 +121,18 @@ function Counter() {
       new Card(false, false, flower,flower,false),
       new Card(false, false, flower,flower,false),
       new Card(false, false, flower,flower,false),
-      new Card(true, false, skull,skull,false)
+      new Card(true, false, skull, skull, false)
     ];
 
     setDeck([...deck, ...initialDeck]);
   }, []);
   useEffect(() => {
     const initplayers = [
-      new Player("player1", 0, 0,flower,false),
-      new Player("player2", 0, 0,flower,false),
-      new Player("player3", 0, 0,flower,false),
-      new Player("player4", 0, 0,flower,false),
-      new Player("player5", 0, 0,flower,false),
+      new Player("player1", 0, 0, flower, false),
+      new Player("player2", 0, 0, flower, false),
+      new Player("player3", 0, 0, flower, false),
+      new Player("player4", 0, 0, flower, false),
+      new Player("player5", 0, 0, flower, false),
     ];
 
     setPlayers([...players, ...initplayers]);
@@ -258,24 +254,29 @@ count++
     if(isActive&&!isFlipping){
       if (!showBets) {
         return (
-          <>
-          <Header/>
+          <>        
+            <SkullView/>
+            <button hidden={deck[3].IsDisabled} className="Card"  onClick={FlipCard(3)}>
+              <img name = 'img' src = {deck[3].Image} className="OptionImage" />
+            </button>
+            
+            {/*
+            
+            <Header/>
+            
+            <div className="PlayingField">
+              {players.map(player => (
+                <PlayersTablet
+                PlayerName={player.Name}
+                VP={player.VP}
+                cardsDown={player.CardsDown}
+                openCards={["0", "1"]}/>
+              ))}
 
-          <div className="PlayingField">
-            {players.map(player => (
-              <PlayersTablet PlayerName={player.Name}
-              VP={player.VP}
-              cardsDown={player.CardsDown}
-              openCards={["0", "1"]}/>
-            ))}
-            {/*<PlayersTablet PlayerName={players[0].Name} 
-              VP={players[0].VP}
-              cardsDown={players[0].CardsDown}
-              openCards={["0", "1"]} 
-          />*/}
 
-          </div>
-          <BottomPanel/>
+            </div>
+            <BottomPanel/>
+            */}
           </>
         );
       } else {
@@ -362,11 +363,18 @@ count++
           </>
         );
       }
-
     }
     else{
       return(
         <>
+        {/*
+            <SkullView2 
+            deck={deck} bet={bet} victoryPoints={victoryPoints} 
+            updateBet={updateBet} updateIsFlipping={updateIsFlipping} 
+            Pass={Pass} FlipCard={FlipCard}
+            />
+        
+        */}
         <div className="TopPanel">
 
     <div className='Player' >
@@ -425,24 +433,25 @@ count++
     </div>
 
     </div>
-        <div className="BottomPanel">
-          <button hidden={deck[0].IsDisabled} className="Card" onClick={FlipCard(0)}>
-            <img name = 'img' src = {deck[0].Image} className="OptionImage" />
-            </button>
-            <button hidden={deck[1].IsDisabled} className="Card" onClick={FlipCard(1)}>
-            <img name = 'img' src = {deck[1].Image} className="OptionImage" />
-            </button>
-            <button hidden={deck[2].IsDisabled} className="Card"  onClick={FlipCard(2)}>
-            <img name = 'img' src = {deck[2].Image} className="OptionImage" />
-            </button>
-            <button hidden={deck[3].IsDisabled} className="Card"  onClick={FlipCard(3)}>
-            <img name = 'img' src = {deck[3].Image} className="OptionImage" />
-            </button>
-            <p className="DisplayText"> Ставка: {bet}</p>
-            <p className="DisplayText"> ПО: {victoryPoints}</p>
-            </div>
-        </>
-        );
+      <div className="BottomPanel">
+        <button hidden={deck[0].IsDisabled} className="Card" onClick={FlipCard(0)}>
+          <img name = 'img' src = {deck[0].Image} className="OptionImage" />
+          </button>
+          <button hidden={deck[1].IsDisabled} className="Card" onClick={FlipCard(1)}>
+          <img name = 'img' src = {deck[1].Image} className="OptionImage" />
+          </button>
+          <button hidden={deck[2].IsDisabled} className="Card"  onClick={FlipCard(2)}>
+          <img name = 'img' src = {deck[2].Image} className="OptionImage" />
+          </button>
+          <button hidden={deck[3].IsDisabled} className="Card"  onClick={FlipCard(3)}>
+          <img name = 'img' src = {deck[3].Image} className="OptionImage" />
+          </button>
+          <p className="DisplayText"> Ставка: {bet}</p>
+          <p className="DisplayText"> ПО: {victoryPoints}</p>
+      </div>
+    
+      </>
+      );
     }
   }
 }

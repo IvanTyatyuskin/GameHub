@@ -18,3 +18,13 @@ export const Chip = ({onClick, type}) => {
         </div>
     )
 }
+
+export const Chip2 = ({deck, onClick}) => {
+    return(
+        <div className={onClick? 'chip clickable':'chip'} 
+            hidden={deck.IsDisabled}
+            onClick={onClick} >
+            <img src={deck.Image} className='OptionImage' />
+        </div>
+    )
+}

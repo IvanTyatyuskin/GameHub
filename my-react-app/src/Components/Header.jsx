@@ -11,8 +11,16 @@ export default function Header() {
             <div className='header-content'>
                 <LogoComponent type='2'/>
                 <UserComponent Nickname='Nickname' ImageSrc={testImage} />
-
             </div>
         </header>
     )
+}
+
+export const HeaderForGame = ({}) => {
+    <header className='header-def'>
+    <div className='header-content'>
+        <LogoComponent type='2'/>
+        <UserComponent Nickname='Nickname' ImageSrc={testImage} />
+    </div>
+    </header>
 }

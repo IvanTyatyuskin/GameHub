@@ -10,7 +10,7 @@
     justify-content: space-between;
 }
 
-.BottomPanel1>:first-child{
+.BottomPanel1>.Cards{
     background-color: white;
     border-radius: 20px;
     padding: 10px;
@@ -20,7 +20,7 @@
     gap:10px;
 }
 
-.BottomPanel1>:last-child{
+.BottomPanel1>.Bid{
     background-color: white;
     border-radius: 20px;
     padding: 10px;
