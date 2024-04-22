@@ -16,7 +16,7 @@ import { GameContext } from './GameContext';
 const squareCount = 6;
 let roundNum=1;
 let currentMove=0;
-let Deck=[];
+let Deck=[]; 
 let RelicDeck=[];
 let allRubyOnMap=0;
 class Player {
@@ -263,12 +263,14 @@ class Square extends React.Component {
     
     render() {
         const style = {
-            width: "124px",
-            height: "124px",
+            width: "120px",
+            height: "120px",
             border: "1px solid black",
             backgroundSize: 'cover',
             color: 'red'
         };
+       
+        
         let imageSrc;
         if (this.props.isStarted) {
             switch (this.props.cardType) {

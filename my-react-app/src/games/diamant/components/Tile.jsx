@@ -23,7 +23,6 @@ const TileType = [
         index: '9'
     }
 ]
-
 const Tile = ({ id = '1', children }) => {
     const tile = TileType[id]
     return (
