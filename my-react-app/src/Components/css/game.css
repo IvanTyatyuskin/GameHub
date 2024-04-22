@@ -42,6 +42,43 @@
     /*margin: 20px 0px;*/
 }
 
+.scroll{
+    --scrollbarBgColor: rgba(0, 0, 0, .05);
+    --scrollbarThumbColor: rgba(0, 0, 0, .15);
+    --scrollbarThumbColorSecond: rgba(255, 255, 255, .7);
+    --scrollbarWidth: 16px;
+    --scrollbarBorder: 0 solid var(--scrollbarBgColor);
+    --scrollbarBorderRadius: calc(var(--scrollbarWidth) / 4);
+    
+    scroll-behavior: smooth;
+    overflow-y: auto;
+    overflow-x:hidden;
+    padding: 0 5px 0 0;
+    /*height: calc(100% - 100px);*/
+}
+.scroll {
+    scrollbar-width: var(--scrollbarWidth);
+    scrollbar-color: var(--scrollbarThumbColor) var(--scrollbarBgColor);
+  }
+.scroll::-webkit-scrollbar {
+    width: var(--scrollbarWidth);
+}
+.scroll::-webkit-scrollbar-track {
+    background: var(--scrollbarBgColor);
+    border-radius: var(--scrollbarBorderRadius);
+}
+.scroll::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbarThumbColor);
+    border-radius: var(--scrollbarBorderRadius);
+    border: var(--scrollbarBorder);
+    background-image: linear-gradient(
+        180deg,
+        var(--scrollbarThumbColor) 0%,
+        var(--scrollbarThumbColorSecond) 90%
+    );
+}
+
+
 @media (min-width: 578px) {
     .game{
         width:calc(128px * 1);

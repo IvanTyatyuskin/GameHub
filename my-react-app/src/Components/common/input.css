@@ -86,7 +86,11 @@ p {
 
 /* with floating label */
 .text-field_floating {
-position: relative;
+    position: relative;
+    display:flex;
+    height: fit-content;
+    padding: 0;
+    margin: 0;
 }
 
 .text-field_floating .text-field__input {
@@ -165,6 +169,7 @@ color: transparent;
 top: 0;
 transform: translateY(-50%) scale(0.75);
 }
+
 
 /* with floating label */
 .text-field_floating-3 {

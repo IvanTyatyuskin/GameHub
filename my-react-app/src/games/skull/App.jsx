@@ -14,15 +14,9 @@ function App()
   const [room, setRoom] = useState(''); 
 
   return (
-    <>
- 
-  
- <Counter ></Counter>
- 
- 
+  <>
+    <Counter ></Counter>
   </>
-  
-
   );
 }
 
