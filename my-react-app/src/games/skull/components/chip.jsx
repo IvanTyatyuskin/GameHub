@@ -13,7 +13,7 @@ const getImg = (type) =>{
 
 export const Chip = ({onClick, type}) => {
     return(
-        <div className={onClick? 'chip clickable':'chip'}>
+        <div className={onClick? 'chip clickable':'chip'} onClick={onClick}>
             <img src={getImg(type)} style={{display:"block"}}/>
         </div>
     )

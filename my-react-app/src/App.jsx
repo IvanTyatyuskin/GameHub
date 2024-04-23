@@ -4,6 +4,7 @@ import ListOfGames from './ListOfGames'
 import { GameProvider } from './games/diamant/GameContext.jsx';
 import Counter from './games/skull/Counter.jsx';
 import { RegistrationPage } from './registrationPage/RegistrationPage.jsx';
+import SearchLobbyPage from './lobbySearchPage/LobbySearchPage.jsx';
 //import {SearchLobbyPage} from './RoomSearch.jsx'
 
 function App() {
@@ -22,7 +23,7 @@ function App() {
     return(
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<RegistrationPage/>} />
+          <Route path="/" element={<SearchLobbyPage/>} />
         </Routes>
       </BrowserRouter>
     )
@@ -30,7 +31,7 @@ function App() {
 
   return (
     <>
-      {MainContent()}
+      {TestContent1()}
     </>
     
   );
