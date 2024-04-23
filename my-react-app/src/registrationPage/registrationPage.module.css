@@ -1,0 +1,110 @@
+.langbutton > p {
+    /*position: relative;
+    font-size: var(--p-medium-def-size);
+    font-family: var(--p-medium-def);
+    color: ;
+    text-align: center;*/
+    color: black;
+}
+
+.languageselection,
+.langbutton {
+    overflow: hidden;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+.langbutton {
+    cursor: pointer;
+    border: 1px solid black;
+    padding:  8px 14px;
+    background-color: transparent;
+    border-radius: 10px;
+    justify-content: center;
+}
+.languageselection {
+    justify-content: flex-start;
+    gap: 5px;
+    /*gap: var(--gap-11xs);*/
+}
+
+.textinputarea {
+    align-items: center;
+    width: 100%;
+
+    overflow: hidden;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.box{
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    gap: 10px;
+    height: 100%;
+    width: auto;
+
+    box-sizing: border-box;
+    border: 1px solid rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
+}
+
+.panelbuttons{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    gap: 10px;
+    align-self: stretch;
+}
+
+.panelbuttons>button{
+
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;        
+    padding: 14px 24px 14px 14px;
+    gap: 10px;
+
+    /* Inside Auto Layout */
+    flex: none;
+    order: 0;
+    flex-grow: 0;
+    margin: 0;
+    box-sizing: border-box;
+    border: 1px solid rgb(0, 0, 0);
+    border-radius: 8px;
+
+    background: rgb(255, 255, 255);
+}
+
+.panelbuttons>button>img{
+    width: 24px;
+    height: 24px;
+}
+
+.panelbuttons p {
+    color: black;
+}
+
+.info {
+    box-sizing: border-box;
+    flex-direction: column;
+    padding: 10px;
+    
+    width: 200px;
+    flex: 1;
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.5);
+    overflow-y: auto;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+  }

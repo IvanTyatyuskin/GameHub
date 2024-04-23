@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1, width=device-width" />
+
+    <link rel="stylesheet" href="./global.css" />
+    <link rel="stylesheet" href="./index.css" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap"
+    />
+  </head>
+  <body>
+    <div class="registerpage">
+      <div class="window">
+        <div class="workingarea">
+          <div class="header">
+            <div class="languageselection">
+              <button class="ruslang" id="lang_button">
+                <div class="rus">Rus</div>
+              </button>
+              <button class="ruslang" id="lang_button">
+                <div class="eng">Eng</div>
+              </button>
+            </div>
+            <div class="logo">
+              <button class="logo1">
+                <div class="game-wrapper">
+                  <b class="game">Game</b>
+                </div>
+                <div class="hub-wrapper">
+                  <b class="hub">hub</b>
+                </div>
+              </button>
+            </div>
+          </div>
+          <div class="body">
+            <div class="registerarea">
+              
+
+
+
+              <div class="userphoto-container">
+                <img id="userPhoto" class="userphoto-icon" loading="eager" alt="" src="./public/avatars/avatar1.png" />
+                
+              </div>
+
+
+              <div class="textinputarea">
+                <div class="textinputfield">
+                  <div class="fieldname">
+                    <div class="username">Имя пользователя</div>
+                  </div>
+                  <input
+                    class="fieldinput"
+                    name="inputname"
+                    maxlength="20"
+                    placeholder="Сгенерированное имя"
+                    type="text"
+                  />
+                </div>
+              </div>
+              <div class="panelbuttons">
+                <button class="buttoncancel" id="cancel_button">
+                  <img
+                    class="buttoncancelimage-icon"
+                    alt=""
+                    src="./public/buttoncancelimage@2x.png"
+                  />
+
+                  <div class="fieldname">
+                    <div class="text">Отмена</div>
+                  </div>
+                </button>
+                <button class="buttonaccept" id="accept_button">
+                  <img
+                    class="buttonacceptimage-icon"
+                    alt=""
+                    src="./public/buttonacceptimage@2x.png"
+                  />
+
+                  <div class="fieldname">
+                    <div class="text">Принять</div>
+                  </div>
+                </button>
+              </div>
+            </div>
+            <div class="description">
+              <div class="info">
+                <div class="textfield">
+                  <div class="text2">
+                    <p class="descriptiontext">
+                      Здесь будет располагаться описание...
+
+                    </p>
+                    
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+<!--     создание модального окна-->
+    <div id="avatarModal" class="modal">
+        <div class="modal-content">
+          <span class="close-button">×</span>
+          <h2>Выберите аватар и фон</h2>
+          <div class="avatar-options">
+            <!-- Аватары будут добавлены сюда JavaScript --> 
+          </div>
+          <div class="background-options">
+            <!-- Фоны будут добавлены сюда JavaScript -->
+          </div>
+          <button id="save-avatar-button">Сохранить</button>
+        </div>
+    </div>
+  </body>
+</html>
+
+<script type="text/javascript">
+  const texts = {
+  rus: {
+    username: 'Имя пользователя',
+    generatedName: 'Сгенерированное имя',
+    cancel: 'Отмена',
+    accept: 'Принять',
+    description: 'Здесь будет располагаться описание...'
+  },
+  eng: {
+    username: 'Username',
+    generatedName: 'Generated name',
+    cancel: 'Cancel',
+    accept: 'Accept',
+    description: 'A description will be placed here...'
+  }
+};
+
+
+const langButtons = document.querySelectorAll('.ruslang');
+
+langButtons.forEach(button => {
+  button.addEventListener('click', changeLanguage);
+});
+
+function changeLanguage(event) {
+  const lang = event.target.classList.contains('rus') ? 'rus' : 'eng';
+  changeTexts(lang);
+}
+
+
+function changeTexts(lang) {
+  document.querySelector('.username').textContent = texts[lang].username;
+  document.querySelector('.fieldinput').placeholder = texts[lang].generatedName;
+  document.querySelector('.buttoncancel .text').textContent = texts[lang].cancel;
+  document.querySelector('.buttonaccept .text').textContent = texts[lang].accept;
+  document.querySelectorAll('.descriptiontext').forEach(el => {
+    el.textContent = texts[lang].description;
+  });
+}
+
+
+
+
+
+
+
+// Получаем элементы
+const userPhoto = document.getElementById('userPhoto');
+const modal = document.getElementById("avatarModal");
+const changeAvatarButton = document.querySelector(".userphoto-icon");
+const closeButton = document.querySelector(".close-button");
+const saveButton = document.getElementById("save-avatar-button");
+const avatarOptionsContainer = document.querySelector(".avatar-options");
+const backgroundOptionsContainer = document.querySelector(".background-options");
+
+// Функция для создания элементов аватаров
+function createAvatarOption(avatarNumber) {
+  const img = document.createElement("img");
+  img.src = `./public/avatars/avatar${avatarNumber}.svg`;
+  img.alt = `Avatar ${avatarNumber}`;
+  img.classList.add("avatar-option");
+  img.addEventListener("click", () => {
+    userPhoto.src = img.src;
+  });
+  return img;
+}
+
+
+function createBackgroundOption(backgroundColor, optionNumber) {
+  const div = document.createElement("div");
+  div.classList.add("background-option", `background-option-${optionNumber}`);
+  div.style.backgroundColor = backgroundColor; // Устанавливаем цвет фона для элемента
+  div.addEventListener("click", () => {
+    userPhoto.style.backgroundColor = backgroundColor;
+  });
+  return div;
+}
+
+
+// добавление аватарок в модальное окно
+for (let i = 1; i <= 10; i++) {
+  avatarOptionsContainer.appendChild(createAvatarOption(i));
+}
+
+// добавление заливок
+const backgroundColors = ["#f44336", "#e91e63", "#9c27b0", "#9c27b0", "#673ab7", "#3f51b5", "#2196f3", "#03a9f4", "#00bcd4", 
+  "#009688", ];
+backgroundColors.forEach((color, index) => {
+  backgroundOptionsContainer.appendChild(createBackgroundOption(color, index + 1)); 
+}); 
+
+backgroundColors.forEach((color, index) => {
+  const className = `.background-option-${index + 1}`;
+  const style = document.createElement('style');
+  style.innerHTML = `${className} { background-color: ${color}; }`;
+  document.head.appendChild(style);
+});
+
+// открытие/закрытие модального окна
+changeAvatarButton.onclick = function() {
+  modal.style.display = "block";
+}
+
+closeButton.onclick = function() {
+  modal.style.display = "none";
+}
+
+window.onclick = function(event) {
+  if (event.target == modal) {
+    modal.style.display = "none"; 
+  }
+}
+
+// Сохранение изменений
+saveButton.onclick = function() {
+  // Здесь можно добавить код для сохранения выбранного аватара и фона 
+  // (например, отправка данных на сервер)
+  modal.style.display = "none";
+}
+
+
+</script>
+
+

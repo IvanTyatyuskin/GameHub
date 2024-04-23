@@ -26,16 +26,17 @@ p {
 }
 */
 /* text-field */
-.text-field {
+.text_field {
     margin-bottom: 1rem;
+    width: 100%;
 }
 
-.text-field__label {
+.text_field__label {
     display: block;
     margin-bottom: 0.25rem;
 }
 
-.text-field__input {
+.text_field__input {
     display: block;
     width: 100%;
     height: calc(2.25rem + 2px);
@@ -62,12 +63,12 @@ p {
     -webkit-appearance: none;
 }*/
 
-.text-field__input::placeholder {
+.text_field__input::placeholder {
     color: #212529;
     opacity: 0.4;
 }
 
-.text-field__input:focus {
+.text_field__input:focus {
     color: #212529;
     background-color: #fff;
     border-color: #bdbdbd;
@@ -75,8 +76,8 @@ p {
     box-shadow: 0 0 0 0.2rem rgba(158, 158, 158, 0.25);
 }
 
-.text-field__input:disabled,
-.text-field__input[readonly] {
+.text_field__input:disabled,
+.text_field__input[readonly] {
     background-color: #f5f5f5;
     opacity: 1;
 }
@@ -85,7 +86,7 @@ p {
 
 
 /* with floating label */
-.text-field_floating {
+.text_field_floating {
     position: relative;
     display:flex;
     height: fit-content;
@@ -93,13 +94,13 @@ p {
     margin: 0;
 }
 
-.text-field_floating .text-field__input {
+.text_field_floating .text_field__input {
 height: calc(3.5rem + 2px);
 line-height: 1.25;
 padding: 1rem 0.75rem;
 }
 
-.text-field_floating .text-field__label {
+.text_field_floating .text_field__label {
 position: absolute;
 top: 0;
 left: 0;
@@ -111,22 +112,22 @@ transform-origin: 0 0;
 transition: opacity .15s ease-in-out, transform .15s ease-in-out;
 }
 
-.text-field_floating .text-field__input::-moz-placeholder {
+.text_field_floating .text_field__input::-moz-placeholder {
 color: transparent;
 }
 
-.text-field_floating .text-field__input::placeholder {
+.text_field_floating .text_field__input::placeholder {
 color: transparent;
 }
 
-.text-field_floating .text-field__input:focus,
-.text-field_floating .text-field__input:not(:placeholder-shown){
+.text_field_floating .text_field__input:focus,
+.text_field_floating .text_field__input:not(:placeholder-shown){
 padding-top: 1.625rem;
 padding-bottom: .625rem;
 }
 
-.text-field_floating .text-field__input:focus ~ .text-field__label,
-.text-field_floating .text-field__input:not(:placeholder-shown) ~ .text-field__label{
+.text_field_floating .text_field__input:focus ~ .text_field__label,
+.text_field_floating .text_field__input:not(:placeholder-shown) ~ .text_field__label{
 opacity: .65;
 transform: scale(.85) translateY(-.75rem) translateX(.15rem);
 }
@@ -136,12 +137,12 @@ transform: scale(.85) translateY(-.75rem) translateX(.15rem);
 position: relative;
 }
 
-.text-field_floating-2 .text-field__input {
+.text-field_floating-2 .text_field__input {
 height: calc(2.5rem + 2px);
 padding: 0.5rem 0.75rem;
 }
 
-.text-field_floating-2 .text-field__label {
+.text-field_floating-2 .text_field__label {
 position: absolute;
 top: 50%;
 left: 0.3125rem;
@@ -156,16 +157,16 @@ padding-right: 0.5rem;
 transition: top 0.1s ease-in-out, scale 0.1s ease-in-out;
 }
 
-.text-field_floating-2 .text-field__input::-moz-placeholder {
+.text-field_floating-2 .text_field__input::-moz-placeholder {
 color: transparent;
 }
 
-.text-field_floating-2 .text-field__input::placeholder {
+.text-field_floating-2 .text_field__input::placeholder {
 color: transparent;
 }
 
-.text-field_floating-2 .text-field__input:focus ~ .text-field__label,
-.text-field_floating-2 .text-field__input:not(:placeholder-shown) ~ .text-field__label {
+.text-field_floating-2 .text_field__input:focus ~ .text_field__label,
+.text-field_floating-2 .text_field__input:not(:placeholder-shown) ~ .text_field__label {
 top: 0;
 transform: translateY(-50%) scale(0.75);
 }
@@ -176,7 +177,7 @@ transform: translateY(-50%) scale(0.75);
 position: relative;
 }
 
-.text-field_floating-3 .text-field__input {
+.text-field_floating-3 .text_field__input {
 border: none;
 border-bottom: 1px solid #bdbdbd;
 border-radius: 0;
@@ -188,14 +189,14 @@ padding: 1rem 0.75rem;
 background-color: #f5f5f5;
 }
 
-.text-field_floating-3 .text-field__input:focus {
+.text-field_floating-3 .text_field__input:focus {
 outline: 0;
 border-bottom: 1px solid #03a9f4;
 box-shadow: none;
 background-color: #eee;
 }
 
-.text-field_floating-3 .text-field__label {
+.text-field_floating-3 .text_field__label {
 position: absolute;
 top: 0;
 left: 0;
@@ -207,23 +208,61 @@ transform-origin: 0 0;
 transition: color .15s ease-in-out, transform .15s ease-in-out;
 }
 
-.text-field_floating-3 .text-field__input::-moz-placeholder {
+.text-field_floating-3 .text_field__input::-moz-placeholder {
 color: transparent;
 }
 
-.text-field_floating-3 .text-field__input::placeholder {
+.text-field_floating-3 .text_field__input::placeholder {
 color: transparent;
 }
 
-.text-field_floating-3 .text-field__input:focus,
-.text-field_floating-3 .text-field__input:not(:placeholder-shown) {
+.text-field_floating-3 .text_field__input:focus,
+.text-field_floating-3 .text_field__input:not(:placeholder-shown) {
 padding-top: 1.625rem;
 padding-bottom: .625rem;
 border-bottom: 1px solid #03a9f4;
 }
 
-.text-field_floating-3 .text-field__input:focus ~ .text-field__label,
-.text-field_floating-3 .text-field__input:not(:placeholder-shown) ~ .text-field__label {
+.text-field_floating-3 .text_field__input:focus ~ .text_field__label,
+.text-field_floating-3 .text_field__input:not(:placeholder-shown) ~ .text_field__label {
 transform: scale(.85) translateY(-.75rem) translateX(.15rem);
 color: #03a9f4;
+}
+
+/*Input3------------------------------------*/
+
+.username_V3 {
+    position: relative;
+    line-height: 120%;
+}
+
+.fieldinput_V3,
+.fieldname_V3 {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+.fieldinput_V3 {
+  border: 1px solid var(--color-darkgray);
+  outline: 0;
+  background-color: transparent;
+  align-self: stretch;
+  border-radius: var(--br-3xs);
+  overflow: hidden;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 18px 16px;
+  font-family: var(--p-medium-def);
+  font-size: var(--p-medium-def-size);
+  color: rgba(0, 0, 0, 0.3);
+}
+
+.fieldinput_V3 {
+  color: #333; /* Цвет текста при вводе */
+}
+
+.fieldinput_V3::placeholder {
+  color: #ccc; /* Цвет placeholder'а */
 }

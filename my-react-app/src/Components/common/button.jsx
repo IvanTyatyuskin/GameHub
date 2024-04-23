@@ -1,4 +1,5 @@
 import React from 'react';
+import styles from './button.module.css'
 
 
 const Button = ({ type = 'button', onClick, children, color, background, width, padding, className }) =>
@@ -13,5 +14,24 @@ const Button = ({ type = 'button', onClick, children, color, background, width, 
         </button>
     )
 }
+
+export const SimpleButton = ({children}) => {
+    return(
+        <button className={styles.SimpleButton}>
+            {children}
+        </button>
+    )
+}
+
+
+export const LanguageButton = ({children, text}) => {
+    return(
+        <button className={styles.langbutton}>
+            <p>{text}</p>
+        </button>
+    )
+}
+
+
 
 export default Button;

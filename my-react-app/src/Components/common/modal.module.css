@@ -18,7 +18,7 @@
     pointer-events: all;
 }
 
-.modal__content{
+.modal_content{
     padding:20px;
     border-radius:12px;
     background: white;
@@ -30,9 +30,9 @@
     transform:scale(0.5);
     transition:0.5s all;
 }
-.modal__content.active{
+.modal_content.active{
     transform:scale(1);
 }
-.modal__content ul, ol{
+.modal_content ul, ol{
     margin:20px;
 }
