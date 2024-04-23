@@ -1,0 +1,39 @@
+body {
+  margin: 0;
+  padding:0;
+  height:100%;
+  background-color: rgb(34,34,34);
+  line-height: normal;
+}
+
+:root {
+  /* fonts */
+  --p-medium-def: Inter;
+
+  /* font sizes */
+  --p-medium-def-size: 16px;
+  --font-size-13xl: 32px;
+
+  /* Colors */
+  --color-gray-100: rgba(0, 0, 0, 0.5);
+  --main-colors-5: #fff;
+  --color-darkgray: #a5a7b1;
+  --text-black: #000;
+  --main-colors-4: #0067ff;
+
+  /* Gaps */
+  --gap-3xs: 10px;
+  --gap-5xs: 8px;
+  --gap-11xs: 2px;
+
+  /* Paddings */
+  --padding-3xs: 10px;
+  --padding-sm: 14px;
+  --padding-5xl: 24px;
+  --padding-5xs: 8px;
+
+  /* Border radiuses */
+  --br-xl: 20px;
+  --br-3xs: 10px;
+  --br-5xs: 8px;
+}

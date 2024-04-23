@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import './input.css'
+import styles from './input.module.css'
 
 export function Inputs() {
     return (
@@ -22,8 +22,9 @@ export function Inputs() {
     )
 }
 
-export const InputText = ({ labelText='', name = 'username', id = 'username', 
-    placeholder = 'Username', value, setValue , disabled = false, readonly = false }) => {
+export const InputText = ({ labelText='', name = 'username', id = name, 
+    placeholder = 'Username', value, setValue , 
+    disabled = false, readonly = false }) => {
     
     if (!setValue){
         [value, setValue] = useState(value)
@@ -32,9 +33,9 @@ export const InputText = ({ labelText='', name = 'username', id = 'username',
         setValue(event.target.value)
     }
     return (
-        <div className="text-field">
-            <label className="text-field__label" htmlFor={name}>{labelText}</label>
-            <input className="text-field__input" type="text" name={name} id={id} placeholder={placeholder} value={value} onChange={handleChange} disabled={disabled} readOnly={readonly} />
+        <div className={styles.text_field}>
+            <label className={styles.text_field__label} htmlFor={name}>{labelText}</label>
+            <input className={styles.text_field__input} type="text" name={name} id={id} placeholder={placeholder} value={value} onChange={handleChange} disabled={disabled} readOnly={readonly} />
         </div>
     )
 }
@@ -53,9 +54,49 @@ export const InputText2 = ({ labelText,
         setValue(event.target.value)
     }
     return (
-        <div className="text-field text-field_floating">
-            <input className="text-field__input" type="text" name={name} id={id} value={value} placeholder={placeholder} onChange={handleChange}/>
-            <label className="text-field__label" htmlFor={name}>{labelText}</label>
+        <div className={styles.text_field + ' ' + styles.text_field_floating}>
+            <input className={styles.text_field__input} 
+                type="text" name={name} id={id} 
+                value={value} placeholder={placeholder} 
+                onChange={handleChange}
+                />
+            <label className={styles.text_field__label} 
+                htmlFor={name}>
+                {labelText}
+            </label>
+        </div>
+    )
+}
+
+export const Input3 = ({
+    labelText = "Имя пользователя", 
+    name = 'inputname', 
+    id = name,
+    placeholder = '',
+    value = '',
+    setValue,
+    maxlength = '50'
+}) => {
+    if (!setValue){
+        [value, setValue] = useState(value)
+    }
+    const handleChange = (event) => {
+        setValue(event.target.value)
+    }
+    return(
+        <div className={styles.textinputfield_V3}>
+            <div className={styles.fieldname_V3}>
+                <div className={styles.username_V3}>{labelText}</div>
+            </div>
+            <input
+                className={styles.fieldinput_V3}
+                name={name}
+                maxlength={maxlength}
+                placeholder={placeholder}
+                type="text"
+                onChange={handleChange}
+                maxLength={maxlength}
+            />
         </div>
     )
 }
