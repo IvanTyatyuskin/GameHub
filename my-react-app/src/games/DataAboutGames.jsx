@@ -1,5 +1,6 @@
 import Diamant from "./diamant/Diamant"
 import DiamantImg from "./diamant/Image.png"
+import SkullImg from "./skull/Image.png"
 
 export const Games = [
     {
@@ -50,7 +51,7 @@ export const Games = [
     {
         Name: "Skull",
         Description: "«Описание Skull»",
-        Image: DiamantImg,
+        Image: SkullImg,
         JSX: Diamant,
         Rule: "Правила Skull"
     }

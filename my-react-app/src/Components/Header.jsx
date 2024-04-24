@@ -1,7 +1,7 @@
 import React from 'react';
 //import '../css/general.css'
 import './css/header.css'
-import testImage from '../assets/react.svg'
+import testImage from '../assets/UserImage1.png'
 import UserComponent from './common/User';
 import LogoComponent, { LogoComponent2 } from './common/Logo';
 
@@ -24,3 +24,22 @@ export const HeaderForGame = ({}) => {
         </div>
     </header>
 }
+
+{/*
+<div class="div">
+    <button class="button">
+        <div class="logo">
+            <div class="game-wrapper">
+                <b class="game">Game</b>
+            </div>
+            <div class="hub-wrapper">
+                <b class="hub">hub</b>
+            </div>
+        </div>
+    </button>
+    <div class="div1">
+        <img class="image-icon" alt="" src={image_face} />
+        <div class="div2">Пользователь</div>
+    </div>
+</div>
+    */}
