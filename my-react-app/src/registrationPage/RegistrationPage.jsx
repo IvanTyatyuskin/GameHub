@@ -1,7 +1,7 @@
 import React from 'react'
 //import './global1.css'
 import './registrationPage.css'
-import img from '../assets/image@2x.png'
+import img from '../assets/UserImage2.png'
 import LogoComponent, { LogoComponent2 } from '../Components/common/Logo'
 import { Input3, InputText } from '../Components/common/Input'
 //import '../Components/css/section.css'

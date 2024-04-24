@@ -1,7 +1,7 @@
 import React from 'react';
 //import '../css/general.css'
 import './css/header.css'
-import testImage from '../assets/image@2x.png'
+import testImage from '../assets/UserImage1.png'
 import UserComponent from './common/User';
 import LogoComponent, { LogoComponent2 } from './common/Logo';
 
