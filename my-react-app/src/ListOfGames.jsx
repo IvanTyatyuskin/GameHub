@@ -15,7 +15,9 @@ export default function ListOfGames() {
             <Header />
             <div className='content-box height-fullscreen'>
                 <div className='content-single'>
-                    <InputText labelText='ID комнаты' placeholder='#0000' name='roomID'/>
+                    <div style={{width: '200px'}}>
+                        <InputText labelText='ID комнаты' placeholder='#0000' name='roomID'/>
+                    </div>
                     
                     {/*
                     <div class="text-field widht-200">
