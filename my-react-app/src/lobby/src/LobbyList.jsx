@@ -4,10 +4,12 @@ import io from 'socket.io-client';
 const socket = io.connect('http://localhost:3000');
 
 function LobbyList(props) {
-
-    let nickname=props.nickname;
-    let avatar=props.avatar;
-    let background=props.background;
+    //let nickname=props.nickname;
+    let nickname="piska";
+    //let avatar=props.avatar;
+    let avatar="1";
+    //let background=props.background;
+    let background="1";
     let currentLobby = null;
     const PrivateChange = () => () => { 
         const isPrivateCheckbox = document.getElementById('is-private');
@@ -20,6 +22,7 @@ function LobbyList(props) {
     }
 
     const CreateLobby = () => () => { 
+      console.log("pis pis");
         const lobbyNameInput = document.getElementById('lobby-name');
         const isPrivateCheckbox = document.getElementById('is-private');
         const lobbyName = lobbyNameInput.value;
@@ -27,7 +30,6 @@ function LobbyList(props) {
         const password = isPrivate ? document.getElementById('lobby-password').value : null;
         
         socket.emit('create lobby', { nickname, avatar, background, lobbyName, isPrivate, password });
-      
     }
     const JoinLobby = () => () => { 
         const lobbyNameInput = document.getElementById('lobby-name');
@@ -39,8 +41,8 @@ function LobbyList(props) {
     }
     const LeaveLobby = () => () => { 
         socket.emit('leave lobby');
-  
     }
+
     const ChatMessage = () => () => {
     const lobbyNameInput = document.getElementById('lobby-name');
     const chatInput = document.getElementById('chat-input');
@@ -51,6 +53,20 @@ function LobbyList(props) {
             chatInput.value = '';
         }
     }
+
+    socket.on('connect', () => {
+      console.log('Connected to server');
+    });
+    
+    socket.on('disconnect', () => {
+      console.log('Disconnected from server');
+    });
+
+
+    socket.on('connect', () => {
+      console.log('Connected to server');
+    });
+
 
     socket.on('lobby list', (lobbies) => {
       lobbiesDiv.innerHTML = '';
