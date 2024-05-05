@@ -27,19 +27,10 @@ function App() {
       </BrowserRouter>
     )
   }
-  function TestContent1(){
-    return(
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Counter/>} />
-        </Routes>
-      </BrowserRouter>
-    )
-  }
-
+  
   return (
     <>
-      {TestContent1()}
+      {MainContent()}
     </>
   );
 }

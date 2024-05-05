@@ -10,8 +10,10 @@ import Magma from './Images/magma.png'
 import Wood from './Images/wood.png'
 import Tile from "./components/Tile.jsx"
 import { GameContext } from './GameContext';
+import io from 'socket.io-client';
 
 
+const socket = io.connect('http://localhost:4000');
 
 const squareCount = 6;
 let roundNum=1;
