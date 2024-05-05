@@ -62,7 +62,6 @@ export const LobbyPage = ({
                     {PlayersData.map(player => (
                         <PlayerItem Img={player.img} Name={player.Name} host={player.host}/>
                     ))}
-
                     <button className={styles.ButtonAddPlayer}>
                         <p>Пригласить игрока</p>
                     </button>
