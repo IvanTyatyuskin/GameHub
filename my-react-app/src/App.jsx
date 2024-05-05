@@ -31,7 +31,7 @@ function App() {
     return(
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<SearchLobbyPage/>} />
+          <Route path="/" element={<Counter/>} />
         </Routes>
       </BrowserRouter>
     )
@@ -39,7 +39,7 @@ function App() {
 
   return (
     <>
-      {MainContent()}
+      {TestContent1()}
     </>
   );
 }

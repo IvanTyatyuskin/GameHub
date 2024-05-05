@@ -115,6 +115,26 @@ function Counter() {
   const [havePassed, setHavePassed] = useState(true);
   const [isFlipping, setIsFlipping] = useState(false);
   const [gameMode, setGameMode] = useState("beforeBet");
+  const [thisPlayer, setThisPlayer] = useState({
+    Cards: [{
+        type: '0',
+        onclick: ()=>{},
+        active:true
+    },{
+        type: '0',
+        onclick: ()=>{},
+        active:true
+    },{
+        type: '0',
+        onclick: ()=>{},
+        active:true
+    },{
+        type: '1',
+        onclick: ()=>{},
+        active:true
+    }],
+    winPoint: false
+})
   let fail=false;
   useEffect(() => {
     const initialDeck = [
@@ -255,7 +275,7 @@ count++
       if (!showBets) {
         return (
           <>        
-            <SkullView/>
+            <SkullView players = {players} waiting = {false}/>
             <button hidden={deck[3].IsDisabled} className="Card"  onClick={FlipCard(3)}>
               <img name = 'img' src = {deck[3].Image} className="OptionImage" />
             </button>
