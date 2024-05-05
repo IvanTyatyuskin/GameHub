@@ -5,7 +5,7 @@ import skull from '../../assets/skull.png'
 import back from '../../assets/back.png'
 import './index.css'
 import SkullView from './SkullView';
-
+import { CardView,ThisPlayerView,PlayersView } from './Classes'; 
 
 const socket = io.connect('http://localhost:3000');
 class Card {
@@ -17,37 +17,6 @@ class Card {
     this.IsDisabled=isDisabled;
   }
 
-  get IsSkull() {
-    return this._IsSkull;
-  }
-
-  set IsSkull(value) {
-    this._IsSkull = value;
-  }
-  get IsDown() {
-    return this._IsDown;
-  }
-  set IsDown(value) {
-    this._IsDown = value;
-  }
-  get Image() {
-    return this._Image;
-  }
-  set Image(value) {
-    this._Image = value;
-  }
-  get InitialImage() {
-    return this._InitialImage;
-  }
-  set InitialImage(value) {
-    this._InitialImage = value;
-  }
-  get IsDisabled() {
-    return this._IsDisabled;
-  }
-  set IsDisabled(value) {
-    this._IsDisabled = value;
-  }
 }
 
 class Player {
@@ -58,49 +27,7 @@ class Player {
     this.IsDisabled=isDisabled;
     this.Name=name;
   }
-  get Name() {
-    return this._Name;
-  }
-
-  set Name(value) {
-    this._Name = value;
-  }
-  get VP() {
-    return this._VP;
-  }
-
-  set VP(value) {
-    this._VP = value;
-  }
-  get CardsDown() {
-    return this._CardsDown;
-  }
-  set CardsDown(value) {
-    this._CardsDown = value;
-  }
-  get Image() {
-    return this._Image;
-  }
-  set Image(value) {
-    this._Image = value;
-  }
-  get IsDisabled() {
-    return this._IsDisabled;
-  }
-  set IsDisabled(value) {
-    this._IsDisabled = value;
-  }
-}
-function shuffle(array) {
-  let currentIndex = array.length, randomIndex;
-
-  while (currentIndex > 0) {
-    randomIndex = Math.floor(Math.random() * currentIndex);
-    currentIndex--;
-    [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
-  }
-
-  return array;
+  
 }
 
 function Counter() {
@@ -108,6 +35,7 @@ function Counter() {
   const [victoryPoints, setVP] = useState(0);
   const [deck, setDeck] = useState([]);
   const [players, setPlayers] = useState([]);
+  const [input, setInput] = useState("");
   const [playerDeck, setPlayerDeck] = useState([]);
   const [playedDeck, setPlayedDeck] = useState([]);
   const [showBets, setShowBets] = useState(false);
@@ -115,27 +43,19 @@ function Counter() {
   const [havePassed, setHavePassed] = useState(true);
   const [isFlipping, setIsFlipping] = useState(false);
   const [gameMode, setGameMode] = useState("beforeBet");
-  const [thisPlayer, setThisPlayer] = useState({
-    Cards: [{
-        type: '0',
-        onclick: ()=>{},
-        active:true
-    },{
-        type: '0',
-        onclick: ()=>{},
-        active:true
-    },{
-        type: '0',
-        onclick: ()=>{},
-        active:true
-    },{
-        type: '1',
-        onclick: ()=>{},
-        active:true
-    }],
-    winPoint: false
-})
+  const [thisPlayer, setThisPlayer] = useState(new ThisPlayerView())
+
   let fail=false;
+  const ThisPlayerToView = () => () => {
+  let cards=[];
+  for (let i = 0; i < deck.length; i++) { 
+    cards.push(new CardView(deck[i].IsSkull,FlipCard(i), deck[i].IsDown));
+  }
+  let view= new ThisPlayerView(0,cards,isActive,victoryPoints);
+  setThisPlayer([...thisPlayer,...view]);
+  console.log(thisPlayer);
+  }
+
   useEffect(() => {
     const initialDeck = [
       new Card(false, false, flower,flower,false),
@@ -143,9 +63,12 @@ function Counter() {
       new Card(false, false, flower,flower,false),
       new Card(true, false, skull, skull, false)
     ];
-
+  
     setDeck([...deck, ...initialDeck]);
+    ThisPlayerToView();
+   
   }, []);
+  
   useEffect(() => {
     const initplayers = [
       new Player("player1", 0, 0, flower, false),
@@ -157,6 +80,8 @@ function Counter() {
 
     setPlayers([...players, ...initplayers]);
   }, []);
+
+
 function CardsDown(){
   let count=0
   for (let i = 0; i < deck.length; i++) { 
@@ -167,7 +92,7 @@ count++
   return count;
 }
   function updateBet() {
-    const val= (Number(document.getElementById("userInput2").value));
+    const val= (Number(input));
     if (val>bet&&(val<=CardsDown())){
       setBet(val);
       Pass();
@@ -175,27 +100,14 @@ count++
     else if(val>CardsDown()){
       alert("Недостаточно карт на столе")
     }
-    else{
+    else if(val<bet){
       alert("Ставка меньше текущей")
-    }
-  }
-
-  function updateShowBets() {
-    const val=Number(document.getElementById("userInput").value)
-    
-    if (val>0&&(val<=CardsDown())){
-      setBet(val);
-      setShowBets(!showBets);
-      Pass();
-    }
-    else if(val>CardsDown()){
-      alert("Недостаточно карт на столе")
     }
     else{
       alert("Назначьте ставку")
     }
-    
   }
+
   function EndTurn(emit_name) {
     setIsActive(false);
     let downCount=CardsDown();
@@ -236,7 +148,8 @@ count++
 
       }
       console.log(bet);
-      
+      gg=h;
+      print(thisPlayer.ViewCards);
     }
     
     
@@ -275,7 +188,7 @@ count++
       if (!showBets) {
         return (
           <>        
-            <SkullView players = {players} waiting = {false}/>
+            <SkullView players = {players} thisPlayer={thisPlayer} waiting = {false}/>
             <button hidden={deck[3].IsDisabled} className="Card"  onClick={FlipCard(3)}>
               <img name = 'img' src = {deck[3].Image} className="OptionImage" />
             </button>

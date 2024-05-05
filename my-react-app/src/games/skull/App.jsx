@@ -1,6 +1,7 @@
 
 import OptionButton from "./OptionButton";
 import Counter from "./Counter";
+import SkullView from "./SkullView";
 import { useState } from 'react';
 import io from 'socket.io-client';
 
@@ -15,9 +16,9 @@ function App()
 
   return (
   <>
-    <Counter ></Counter>
+    <Counter/> 
   </>
   );
 }
-
+  
 export default App
