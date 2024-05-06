@@ -5,7 +5,7 @@ import skull from '../../assets/skull.png'
 import back from '../../assets/back.png'
 import './index.css'
 import SkullView from './SkullView';
-import { CardView,ThisPlayerView,PlayersView } from './Classes'; 
+import { CardView,ThisPlayerView,PlayerView } from './Classes'; 
 
 const socket = io.connect('http://localhost:3000');
 class Card {
@@ -20,12 +20,13 @@ class Card {
 }
 
 class Player {
-  constructor(name,vP, cardsDown,image, isDisabled) {
+  constructor(name,vP, cardsDown,image, isDisabled,isActive) {
     this.VP = vP;
     this.CardsDown = cardsDown;
     this.Image = image;
     this.IsDisabled=isDisabled;
     this.Name=name;
+    this.IsActive=isActive;
   }
   
 }
@@ -43,19 +44,30 @@ function Counter() {
   const [havePassed, setHavePassed] = useState(true);
   const [isFlipping, setIsFlipping] = useState(false);
   const [gameMode, setGameMode] = useState("beforeBet");
-  const [thisPlayer, setThisPlayer] = useState(new ThisPlayerView())
+  const [thisPlayer, setThisPlayer] = useState([]);
+  const [PlayersView, setPlayersView] = useState([]);
 
   let fail=false;
-  const ThisPlayerToView = () => () => {
+
+  const ThisPlayerToView = (deckValue) => () => {
   let cards=[];
-  for (let i = 0; i < deck.length; i++) { 
-    cards.push(new CardView(deck[i].IsSkull,FlipCard(i), deck[i].IsDown));
+  for (let i = 0; i < deckValue.length; i++) { 
+    cards.push(new CardView(deckValue[i].IsSkull,FlipCard(i), deckValue[i].IsDown,deckValue[i].IsDisabled));
   }
-  let view= new ThisPlayerView(0,cards,isActive,victoryPoints);
-  setThisPlayer([...thisPlayer,...view]);
-  console.log(thisPlayer);
+  let view= new ThisPlayerView(0,cards,isActive,victoryPoints,bet,updateBet,updateIsFlipping,Pass,setBet);
+ // setThisPlayer([...thisPlayer, ...view]);
+ return view;
   }
 
+  const PlayersToView = (playersValue) => () => {
+    let newPlayers=[];
+    for (let i = 0; i < playersValue.length; i++) { 
+      newPlayers.push(new PlayerView(i, "player "+String(i), skull, playersValue[i].VP, playersValue[i].CardsDown,playersValue[i].IsActive, null));
+    }
+
+   // setThisPlayer([...thisPlayer, ...view]);
+   return newPlayers;
+    }
   useEffect(() => {
     const initialDeck = [
       new Card(false, false, flower,flower,false),
@@ -65,20 +77,21 @@ function Counter() {
     ];
   
     setDeck([...deck, ...initialDeck]);
-    ThisPlayerToView();
+    setThisPlayer(ThisPlayerToView(initialDeck));
    
   }, []);
   
   useEffect(() => {
     const initplayers = [
-      new Player("player1", 0, 0, flower, false),
-      new Player("player2", 0, 0, flower, false),
-      new Player("player3", 0, 0, flower, false),
-      new Player("player4", 0, 0, flower, false),
-      new Player("player5", 0, 0, flower, false),
+      new Player("player1", 0, 0, flower, false, false),
+      new Player("player2", 0, 0, flower, false, false),
+      new Player("player3", 0, 0, flower, false, false),
+      new Player("player4", 0, 0, flower, false, false),
+      new Player("player5", 0, 0, flower, false, false),
     ];
 
     setPlayers([...players, ...initplayers]);
+    setPlayersView(PlayersToView(initplayers));
   }, []);
 
 
@@ -91,6 +104,7 @@ count++
   }
   return count;
 }
+
   function updateBet() {
     const val= (Number(input));
     if (val>bet&&(val<=CardsDown())){
@@ -121,20 +135,21 @@ count++
   function updateIsFlipping() {
     setIsFlipping(true);
   }
+
   const FlipCard = (ind) => () => {
     const newDeck = [...deck];
     const newPlayedDeck = [...playedDeck];
     let prev=false;
     if (!newDeck[ind].IsDown&&isActive&&!isFlipping){
       newDeck[ind].IsDown=true;
-      newDeck[ind].Image=back;
+      //newDeck[ind].Image=back;
       newPlayedDeck.push(newDeck[ind]);
     }
     else if (newDeck[ind].IsDown&&isActive&&isFlipping){
      
       newDeck[ind].IsDown=false;
       prev=true;
-      newDeck[ind].Image=newDeck[ind].InitialImage;
+    //  newDeck[ind].Image=newDeck[ind].InitialImage;
       if (!newDeck[ind].IsSkull){
         let n=bet-1;
         setBet(bet-1);
@@ -148,10 +163,7 @@ count++
 
       }
       console.log(bet);
-      gg=h;
-      print(thisPlayer.ViewCards);
     }
-    
     
     if(isFlipping&&bet==1&&prev==true&&fail==false){
       alert("Ставка сыграла");
@@ -163,26 +175,11 @@ count++
     setPlayerDeck(newPlayedDeck);
     Pass()
     console.log(deck)
+    setThisPlayer(ThisPlayerToView(newDeck));
+    console.log(thisPlayer);
    };
-  function DrawCard() {
-    if(deck.length>0){
-    const newDeck = [...deck];
-    const newPlayerDeck = [...playerDeck];
+     
 
-   /* if (newDeck.at(-1).IsSkull) {
-      alert("Вы вытянули череп");
-    } else {
-      alert("Вы вытянули цветок");
-    }*/
-
-    newPlayerDeck.push(newDeck.pop());
-    setDeck(newDeck);
-    setPlayerDeck(newPlayerDeck);
-  }
-  else{
-    alert("Колода пуста");
-  }
-  }
   if(deck.length>0&&players.length>0){
     if(isActive&&!isFlipping){
       if (!showBets) {
