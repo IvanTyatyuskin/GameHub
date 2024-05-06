@@ -1,13 +1,13 @@
-import React from 'react'
+
 //import './global1.css'
 import './registrationPage.css'
 import img from '../assets/UserImage2.png'
-import LogoComponent, { LogoComponent2 } from '../Components/common/Logo'
-import { Input3, InputText } from '../Components/common/Input'
+import LogoComponent  from '../Components/common/Logo'
+import { InputText } from '../Components/common/Input'
 //import '../Components/css/section.css'
 import styles_onlyWindow from './onlyWindow.module.css'
 import styles_registrationPage from './registrationPage.module.css'
-import { LanguageButton, SimpleButton } from '../Components/common/button'
+import { LanguageButton } from '../Components/common/button'
 
 export const OnlyWindow = ({children}) =>
 {
@@ -58,24 +58,7 @@ export const RegistrationPage = ({}) =>{
         </div>
         )
     }
-    function AvatarModal(){
-        return(<>
-            {/*создание модального окна*/}
-            <div id="avatarModal" className="modal">
-                <div className="modal-content">
-                    <span className="close-button">×</span>
-                    <h2>Выберите аватар и фон</h2>
-                    <div className="avatar-options">
-                        {/*<!-- Аватары будут добавлены сюда JavaScript -->*/} 
-                    </div>
-                    <div className="background-options">
-                        {/*<!-- Фоны будут добавлены сюда JavaScript -->*/}
-                    </div>
-                    <button id="save-avatar-button">Сохранить</button>
-                </div>
-            </div>
-        </>)
-    }
+   
     return(<>
     <OnlyWindow>
         <div className={styles_onlyWindow.header}>
@@ -108,24 +91,3 @@ export const RegistrationPage = ({}) =>{
     </>)
 }
 
-
-const _discription = [
-    {
-        slide:{
-            title: "Инфа 1",
-            info: "Здесь будет располагаться описание..."
-        }
-    },
-    {
-        slide:{
-            title: "Инфа 2",
-            info: "Здесь будет располагаться описание..."
-        }
-    },
-    {
-        slide:{
-            title: "Инфа 3",
-            info: "Здесь будет располагаться описание..."
-        }
-    }
-]
