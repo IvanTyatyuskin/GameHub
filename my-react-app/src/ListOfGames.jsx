@@ -46,6 +46,9 @@ export default function ListOfGames() {
                         {modalContent}
                     </Modal>
                     {/*<Inputs/>*/}
+
+                    <a href="/lobbylist" className="redirect-button">Перейти к созданию/подключению к лобби Diamant</a>
+
                 </div>
             </div>
 

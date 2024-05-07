@@ -4,10 +4,10 @@ import ListOfGames from './ListOfGames'
 import { GameProvider } from './games/diamant/GameContext.jsx';
 import Counter from './games/skull/Counter.jsx';
 import { RegistrationPage } from './registrationPage/RegistrationPage.jsx';
-import SearchLobbyPage from './lobbySearchPage/LobbySearchPage.jsx';
 import { LobbyPage } from './lobbyPage/LobbyPage.jsx';
 //import {SearchLobbyPage} from './RoomSearch.jsx'
-import LobbyList from './lobby/src/LobbyList.jsx';
+//import SearchLobbyPage from './lobbySearchPage/LobbySearchPage.jsx';
+import LobbyList from './lobby/src/LobbyList.jsx'
 import Login from './lobby/src/Login.jsx'
 
 function App() {
@@ -17,12 +17,11 @@ function App() {
         <Routes>
           <Route path="Diamant" element={ <GameProvider><Diamant/></GameProvider>} />
           <Route path="Skull" element={<Counter/>} />
-          <Route path="/" element={<ListOfGames/>} />
-          <Route path="RegistrationPage" element={<RegistrationPage/>} />
-          <Route path="SearchLobbyPage" element={<SearchLobbyPage/>} />
+          <Route path="ListOfGames" element={<ListOfGames/>} />
+          <Route path="/" element={<RegistrationPage/>} />
           <Route path="LobbyPage" element={<LobbyPage/>} />
           <Route path="login" element={<Login/>} />
-          <Route path="lobbylist" element={<LobbyList/>} />
+          <Route path="LobbyList" element={<LobbyList/>} />
         </Routes>
       </BrowserRouter>
     )
