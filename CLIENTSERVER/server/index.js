@@ -3,6 +3,8 @@ const app = express();
 const http = require('http');
 const cors = require('cors');
 const { Server } = require('socket.io');
+const Card  =  require('./DiamantClasses');
+const { Console } = require('console');
 
 app.use(cors());
 app.use(express.json());
@@ -86,6 +88,9 @@ io.on('connection', (socket) => {
     socket.join(lobby.name);
     socket.emit('join lobby', lobby);
     io.emit('lobby list', lobbies);
+
+
+ 
   });
 
   socket.on('leave lobby', (data) => {
@@ -132,6 +137,50 @@ io.on('connection', (socket) => {
     io.to(data.lobbyName).emit('chat message', `${data.nickname}: ${data.message}`);
   });
 
+
+///
+    // Получаем колоду карт
+    let Deck = []
+    let RelicDeck=[]
+    for (let i = 0; i < 5; i++) {
+     Deck.push(new Card('Treasure',i+1))
+ }
+ Deck.push(new Card('Treasure',5))
+ Deck.push(new Card('Treasure',7))
+ Deck.push(new Card('Treasure',7))
+ Deck.push(new Card('Treasure',9))
+ Deck.push(new Card('Treasure',9))
+ Deck.push(new Card('Treasure',11))
+ Deck.push(new Card('Treasure',11))
+ Deck.push(new Card('Treasure',13))
+ Deck.push(new Card('Treasure',14))
+ Deck.push(new Card('Treasure',15))
+ Deck.push(new Card('Treasure',17))
+ RelicDeck.push(new Card('relic',5))
+ RelicDeck.push(new Card('relic',7))
+ RelicDeck.push(new Card('relic',8))
+ RelicDeck.push(new Card('relic',10))
+ RelicDeck.push(new Card('relic',12))
+ for (let i = 0; i < 3; i++) {
+     Deck.push(new Card('Trap Spider',null))
+ }
+ for (let i = 0; i < 3; i++) {
+     Deck.push(new Card('Trap Snake',null))
+ }
+ for (let i = 0; i < 3; i++) {
+     Deck.push(new Card('Trap Stone',null))
+ }
+ for (let i = 0; i < 3; i++) {
+     Deck.push(new Card('Trap Wood',null))
+ }
+ for (let i = 0; i < 3; i++) {
+     Deck.push(new Card('Trap Magma',null))
+ }
+ //shuffle(Deck);
+ console.log(Deck)
+    // Отправляем данные игрока и колоду карт на клиент
+    socket.emit('start game', { Deck: Deck})
+    
   // Handle disconnection
   socket.on('disconnect', () => {
     console.log(`User disconnected ${socket.id}`);
@@ -139,3 +188,12 @@ io.on('connection', (socket) => {
 });
 
 server.listen(4000, () => console.log('Server is running on port 4000'));
+
+function shuffle(array) {
+  array.push(RelicDeck[roundNum-1])
+  console.log(RelicDeck[roundNum-1].points)
+  for (let i = array.length - 1; i > 0; i--) {
+      let j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+  }
+}

@@ -1,4 +1,4 @@
-import React, { Component, useState } from "react";
+import React, { Component, useState ,useEffect, useContext} from "react";
 import Button from '../../Components/common/button'
 import '../../Components/css/game.css'
 import Ruby from './Images/ruby.png'
@@ -11,14 +11,14 @@ import Wood from './Images/wood.png'
 import Tile from "./components/Tile.jsx"
 import { GameContext } from './GameContext';
 import io from 'socket.io-client';
+    
 
 
-const socket = io.connect('http://localhost:4000');
 
 const squareCount = 6;
 let roundNum=1;
 let currentMove=0;
-let Deck=[]; 
+export let Deck=[]; 
 let RelicDeck=[];
 let allRubyOnMap=0;
 class Player {
@@ -322,8 +322,10 @@ class Square extends React.Component {
 }
 
 class Game extends Component {
+    
     static contextType = GameContext;
     constructor(props) {
+
         super(props);
         this.state = {
             startedSquares: [],
@@ -335,46 +337,17 @@ class Game extends Component {
         this.handleExit = this.handleExit.bind(this);
         
     }
-
-    handleStart() {
-        for (let i = 0; i < 5; i++) {
-            Deck.push(new Card('Treasure',i+1))
-        }
-        Deck.push(new Card('Treasure',5))
-        Deck.push(new Card('Treasure',7))
-        Deck.push(new Card('Treasure',7))
-        Deck.push(new Card('Treasure',9))
-        Deck.push(new Card('Treasure',9))
-        Deck.push(new Card('Treasure',11))
-        Deck.push(new Card('Treasure',11))
-        Deck.push(new Card('Treasure',13))
-        Deck.push(new Card('Treasure',14))
-        Deck.push(new Card('Treasure',15))
-        Deck.push(new Card('Treasure',17))
-        RelicDeck.push(new Card('relic',5))
-        RelicDeck.push(new Card('relic',7))
-        RelicDeck.push(new Card('relic',8))
-        RelicDeck.push(new Card('relic',10))
-        RelicDeck.push(new Card('relic',12))
-        for (let i = 0; i < 3; i++) {
-            Deck.push(new Card('Trap Spider',null))
-        }
-        for (let i = 0; i < 3; i++) {
-            Deck.push(new Card('Trap Snake',null))
-        }
-        for (let i = 0; i < 3; i++) {
-            Deck.push(new Card('Trap Stone',null))
-        }
-        for (let i = 0; i < 3; i++) {
-            Deck.push(new Card('Trap Wood',null))
-        }
-        for (let i = 0; i < 3; i++) {
-            Deck.push(new Card('Trap Magma',null))
-        }
-        shuffle(Deck);
+    componentDidMount(){
         
-    }
+        const socket = io.connect('http://localhost:4000');
+            socket.on('start game', (data) => {
+            console.log(`Колода карт: ${JSON.stringify(data)}`);
+            Deck=(data.Deck.map(card => new Card(card.cardType, card.points)));
+            console.log(Deck);
 
+        });
+    }
+    
     winWindow() {
         this.setState(()=>{
             this.context.setModalActive(true);
@@ -565,3 +538,220 @@ class Game extends Component {
 }
 
 export default Game;
+
+
+/*function Game() {
+    const { playersData, setPlayersData, 
+        roundD, setRoundData, 
+        deck, setDeck,
+        traps, setTrapsInThisRound,
+        modalContent, setModalContent,
+        modalActive, setModalActive
+    } = useGameContext();
+    const [startedSquares, setStartedSquares] = useState([]);
+    const [squareValues, setSquareValues] = useState(Array(squareCount * squareCount).fill(null));
+    const [squareCardType, setSquareCardType] = useState([]);
+    const [squaresTileId, setSquaresTileId] = useState([]);
+
+    useEffect(() => {
+        const socket = io.connect('http://localhost:4000');
+            socket.on('start game', (data) => {
+            console.log(`Колода карт: ${JSON.stringify(data)}`);
+            setDeck(data.Deck.map(card => new Card(card.cardType, card.points)));
+            console.log(deck);
+
+        });
+    }, []);
+    //console.log(deck);
+    /*for (let i = 0; i > deck.length; i++) {
+        Deck.push(new Card(deck[i]))
+    }
+    Deck=deck
+    //console.log(Deck);
+    const winWindow = () => {
+        setModalActive(true);
+        setModalContent(stringWinnerAlirt());
+    }
+    const handleStart = ()=>{
+        console.log(deck);
+        Deck = deck;
+        console.log(Deck.length);
+    }
+    const handleContinue = () => {
+            const newstartedSquares = [...startedSquares];
+            const newsquareValues = [...squareValues];
+            const newsquareCardType = [...squareCardType];
+            const newsquaresTileId=[...squaresTileId];
+            if (newstartedSquares.length < squareCount * squareCount) {
+                newsquaresTileId.push(defineTileId(currentMove+1))
+                let cardType=Deck[currentMove].getСardType();
+                newsquareCardType.push(cardType);
+                newstartedSquares.push(true);
+                if(!Deck[currentMove].getСardType().includes("Trap"))
+                {
+                let points = Deck[currentMove].getPoints();
+                newsquareValues[newstartedSquares.length - 1] = PointCount(points);
+                updatePlayerInfo()
+                }
+                
+            }
+            currentMove++;
+            trapsInThisRound=GetTrapsInThisRound()
+            if(checkTrapDuplicates())
+        {
+             if(roundNum<5)
+             { 
+                roundNum++;
+             roundData = { round: roundNum };
+            console.log('Раунд.'+roundNum);
+             }
+             else{
+                winWindow();
+            }
+            currentMove=0;
+            shuffle(Deck);
+            allRubyOnMap=0;
+             ///Временно
+             let player = Players[0];
+             ////
+             player.setRoundPointsToZero();
+            updatePlayerInfo();
+            return {
+                startedSquares: [],
+                squareValues: Array(squareCount * squareCount).fill(null),
+                squareCardType: [],
+                squaresTileId:[],
+            };
+        }
+        setRoundData(roundData);
+        setPlayersData(playersDataJS);
+        setTrapsInThisRound(trapsInThisRound);
+            return { newstartedSquares, newsquareValues,newsquareCardType,newsquaresTileId};
+  
+    }
+
+    const handleExit = () => {
+        setState(prevState => {
+            const squareValues = Array(squareCount * squareCount).fill(null);
+            ///Временно
+            let player = Players[0];
+            player.setExit(true)
+            ///
+            let countPlayerExited=0
+            Players.forEach((player) => {
+                if (player.getExit()) {
+                    countPlayerExited++
+                }
+            });
+            
+            let pointsPerPlayer = Math.floor(allRubyOnMap / countPlayerExited);
+            let remainingPoints = allRubyOnMap;
+              
+            Players.forEach((player)=>{if(player.getExit())player.addRoundPoints(pointsPerPlayer)})
+            remainingPoints -= pointsPerPlayer * countPlayerExited;
+
+            for (let i = 0; i < currentMove; i++) {
+                if (Deck[i].getСardType().includes("relic")&&countPlayerExited==1) player.addRelic(Deck[i]);
+            }
+            console.log("Реликвии: "+player.getRelic())
+            allRubyOnMap = 0;
+            allRubyOnMap+=remainingPoints;
+            player.addAllPoints(player.getRoundPoints());
+            player.setExit(true);
+            updatePlayerInfo()
+            if(checkPlayersExited())
+            { 
+                for (let i = 0; i < currentMove; i++) {
+                    if (Deck[i].getСardType().includes("relic")){
+                        Deck.splice(i, 1);
+                        i--;
+                    };
+                }
+                player.setExit(false)
+                if(roundNum<5)
+                {
+               roundNum++;
+            roundData = { round: roundNum };
+                }
+                else{
+                    this.winWindow();
+                    //alert(stringWinnerAlirt());
+                }
+           console.log('Раунд.'+roundNum);
+           currentMove=0;
+           shuffle(Deck);
+           allRubyOnMap=0;
+           
+            player.setRoundPointsToZero();
+           updatePlayerInfo();
+           return {
+               startedSquares: [],
+               squareValues: Array(squareCount * squareCount).fill(null),
+               squareCardType: [],
+               squaresTileId:[],
+           };
+            }
+            return { startedSquares, squareValues,squareCardType,squaresTileId };
+        }, () => {
+            setRoundData(roundData);
+            setPlayersData(playersDataJS);
+        });
+    }
+
+    const renderSquare = (i) => {
+        return (
+            <Square
+                key={i}
+                isStarted={startedSquares[i]}
+                textButton={squareValues[i]}
+                cardType={squareCardType[i]}
+                tileId={squaresTileId[i]}
+            />
+        );
+    }
+    let squares = [];
+    for (let i = 0; i < squareCount * squareCount; i++) {
+        squares.push(renderSquare(i));
+    }
+    let rows = [];
+    for (let i = 0; i < squareCount; i++) {
+        let rowSquares = squares.slice(
+            i * squareCount,
+            i * squareCount + squareCount
+        );
+        if (i % 2 !== 0) {
+            rowSquares = rowSquares.reverse();
+        }
+        rows.push(
+            <div key={i}
+                className="board-row"
+                style={{ display: "flex" }}>
+                {rowSquares}
+            </div>
+        );
+    }
+    return (
+        <div className="theAreaWithTheGame">
+            <div className="scroll">
+                {rows}
+            </div>
+            <div className="hand">
+                    <div className="theButtonPanel">
+                        <Button background="rgb(90, 195, 176)" padding="10px" onClick={handleContinue}>
+                            Продолжить
+                        </Button>
+                        <Button padding="10px" background="rgb(234, 68, 90)" onClick={handleExit}>
+                            Выйти {allRubyOnMap}
+                        </Button>
+                    </div>
+            </div>
+            <div>
+                <Button onClick={handleStart}>
+                    START
+                </Button>
+            </div>
+        </div>
+    );
+}*/
+
+

@@ -11,11 +11,13 @@ import Game from './Game'
 import { useGameContext } from './GameContext';
 import { Modal } from '../../Components/common/Modal.jsx'
 
+import { GameProvider } from './GameContext.jsx';
 export default function Diamant() {
     const textContent = textDataToView[0]
 
     const { playersData, setPlayersData, 
         roundD, setRoundData, 
+        deck, setDeck,
         traps, setTrapsInThisRound,
         modalContent, setModalContent,
         modalActive, setModalActive
@@ -24,12 +26,15 @@ export default function Diamant() {
     const [now, setNow] = useState(new Date())
 
     useEffect(() => {
+       
+        
         const timer = setInterval(() => {
             setNow(new Date());
         }, 1000);
-
+    
         return () => {
             clearInterval(timer);
+            socket.disconnect(); // disconnect the socket
         };
     }, []);
 
@@ -77,7 +82,8 @@ export default function Diamant() {
                        
                     </DataList>
                 </DataList>
-                <Game />
+                
+                <GameProvider >{ <Game />}</GameProvider>
                 <DataList heading={textContent.score}>
                     <PlayersScore playerData={playersData} />
                 </DataList>
