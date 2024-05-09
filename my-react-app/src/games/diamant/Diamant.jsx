@@ -11,7 +11,6 @@ import Game from './Game'
 import { useGameContext } from './GameContext';
 import { Modal } from '../../Components/common/Modal.jsx'
 
-import { GameProvider } from './GameContext.jsx';
 export default function Diamant() {
     const textContent = textDataToView[0]
 
@@ -26,18 +25,14 @@ export default function Diamant() {
     const [now, setNow] = useState(new Date())
 
     useEffect(() => {
-       
-        
         const timer = setInterval(() => {
             setNow(new Date());
         }, 1000);
     
         return () => {
             clearInterval(timer);
-            socket.disconnect(); // disconnect the socket
         };
     }, []);
-
     const WinPlayer = ({modalContent}) => {
         if (!modalContent) return(<h1>Тут искать нечего</h1>)
         return(
@@ -73,6 +68,7 @@ export default function Diamant() {
             <div className="base">
                 <DataList heading={textContent.informationAboutTheRound}>
                     <DataList heading={textContent.loot} type='3'>
+                        
                         <PlayersLootList playersData={playersData} />
                     </DataList>
                     <DataList heading={textContent.traps}>
@@ -83,7 +79,7 @@ export default function Diamant() {
                     </DataList>
                 </DataList>
                 
-                <GameProvider >{ <Game />}</GameProvider>
+               { <Game />}
                 <DataList heading={textContent.score}>
                     <PlayersScore playerData={playersData} />
                 </DataList>

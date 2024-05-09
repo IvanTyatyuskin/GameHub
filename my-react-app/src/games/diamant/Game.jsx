@@ -1,4 +1,4 @@
-import React, { Component, useState ,useEffect, useContext} from "react";
+import React, { Component} from "react";
 import Button from '../../Components/common/button'
 import '../../Components/css/game.css'
 import Ruby from './Images/ruby.png'
@@ -9,9 +9,9 @@ import Snake from './Images/snake.png'
 import Magma from './Images/magma.png'
 import Wood from './Images/wood.png'
 import Tile from "./components/Tile.jsx"
-import { GameContext } from './GameContext';
+import { GameContext } from './GameContext.jsx';
 import io from 'socket.io-client';
-    
+import PropTypes from 'prop-types';
 
 
 
@@ -67,8 +67,8 @@ class Player {
         this.roundPoints=0;
     }
 }
-let Players = [new Player(1, 0, 0, [], 'Aero',false)/*,new Player(1, 0, 0, [], 'impulse',false)*/];
-
+let Players = [];
+//let Player0=null;
 export let playersDataJS = Players.map(player => {
         return {
             imageId: player.getPlayerId(),
@@ -151,7 +151,7 @@ function stringWinnerAlirt(){
 }
 function shuffle(array) {
     array.push(RelicDeck[roundNum-1])
-    console.log(RelicDeck[roundNum-1].points)
+    //console.log(RelicDeck[roundNum-1].points)
     for (let i = array.length - 1; i > 0; i--) {
         let j = Math.floor(Math.random() * (i + 1));
         [array[i], array[j]] = [array[j], array[i]];
@@ -186,9 +186,7 @@ function PointCount(points) {
 
     if (pointsPerPlayer === 0) {
         allRubyOnMap+=points;
-        return {
-            remainingPoints: points
-        };
+        return remainingPoints
     }
 
     Players.forEach((player)=>player.addRoundPoints(pointsPerPlayer))
@@ -320,7 +318,12 @@ class Square extends React.Component {
         );
     }
 }
-
+Square.propTypes = {
+    isStarted: PropTypes.bool.isRequired,
+    cardType: PropTypes.string.isRequired,
+    tileId: PropTypes.number.isRequired,
+    textButton: PropTypes.string.isRequired,
+};
 class Game extends Component {
     
     static contextType = GameContext;
@@ -337,15 +340,18 @@ class Game extends Component {
         this.handleExit = this.handleExit.bind(this);
         
     }
-    componentDidMount(){
-        
+    componentDidMount(){     
         const socket = io.connect('http://localhost:4000');
             socket.on('start game', (data) => {
             console.log(`Колода карт: ${JSON.stringify(data)}`);
             Deck=(data.Deck.map(card => new Card(card.cardType, card.points)));
-            console.log(Deck);
-
+            Players = data.Players.map(player => new Player(player.id, player.roundPoints, player.allPoints, player.relics, player.nickName, player.exit));
+            updatePlayerInfo();
+            console.log(playersDataJS);
+            this.context.setPlayersData(playersDataJS);
+            
         });
+        //socket.disconnect(); 
     }
     
     winWindow() {
@@ -378,6 +384,7 @@ class Game extends Component {
                 
             }
             currentMove++;
+            console.log(currentMove)
             trapsInThisRound=GetTrapsInThisRound()
             if(checkTrapDuplicates())
         {
@@ -413,7 +420,7 @@ class Game extends Component {
         });
     }
     handleExit() {
-        this.setState(prevState => {
+        this.setState(() => {
             const squareValues = Array(squareCount * squareCount).fill(null);
             ///Временно
             let player = Players[0];
@@ -447,7 +454,7 @@ class Game extends Component {
                     if (Deck[i].getСardType().includes("relic")){
                         Deck.splice(i, 1);
                         i--;
-                    };
+                    }
                 }
                 player.setExit(false)
                 if(roundNum<5)
@@ -467,13 +474,12 @@ class Game extends Component {
             player.setRoundPointsToZero();
            updatePlayerInfo();
            return {
-               startedSquares: [],
-               squareValues: Array(squareCount * squareCount).fill(null),
-               squareCardType: [],
-               squaresTileId:[],
+              
+               squareValues: Array(squareCount * squareCount).fill(null)
+          
            };
             }
-            return { startedSquares, squareValues,squareCardType,squaresTileId };
+            return {squareValues };
         }, () => {
             this.context.setRoundData(roundData);
             this.context.setPlayersData(playersDataJS);

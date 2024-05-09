@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext } from 'react';
-import {playersDataJS,roundData,trapsInThisRound,Deck} from './Game'
+import {playersDataJS,roundData,trapsInThisRound,Deck} from './Game.jsx'
 
 
 export const GameContext = createContext();

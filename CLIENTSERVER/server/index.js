@@ -3,8 +3,9 @@ const app = express();
 const http = require('http');
 const cors = require('cors');
 const { Server } = require('socket.io');
-const Card  =  require('./DiamantClasses');
+const {Card,Player}  =  require('./DiamantClasses');
 const { Console } = require('console');
+
 
 app.use(cors());
 app.use(express.json());
@@ -177,9 +178,13 @@ io.on('connection', (socket) => {
      Deck.push(new Card('Trap Magma',null))
  }
  //shuffle(Deck);
- console.log(Deck)
+
     // Отправляем данные игрока и колоду карт на клиент
-    socket.emit('start game', { Deck: Deck})
+    let DiamantPlayers = [new Player(1, 0, 0, [], 'Aero',false)/*,new Player(1, 0, 0, [], 'impulse',false)*/];
+    console.log(Deck)
+    console.log(DiamantPlayers)
+    
+    socket.emit('start game', {Players:DiamantPlayers, Deck: Deck})
     
   // Handle disconnection
   socket.on('disconnect', () => {
