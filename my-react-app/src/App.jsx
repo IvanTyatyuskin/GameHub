@@ -6,7 +6,7 @@ import Counter from './games/skull/Counter.jsx';
 import { RegistrationPage } from './registrationPage/RegistrationPage.jsx';
 import { LobbyPage } from './lobbyPage/LobbyPage.jsx';
 //import {SearchLobbyPage} from './RoomSearch.jsx'
-//import SearchLobbyPage from './lobbySearchPage/LobbySearchPage.jsx';
+import SearchLobbyPage from './lobbySearchPage/LobbySearchPage.jsx';
 import LobbyList from './lobby/src/LobbyList.jsx'
 import Login from './lobby/src/Login.jsx'
 
@@ -15,6 +15,8 @@ function App() {
     return(
       <BrowserRouter>
         <Routes>
+          {//<Route path="/" element={<Counter/>} />
+          }
           <Route path="Diamant" element={ <GameProvider><Diamant/></GameProvider>} />
           <Route path="Skull" element={<Counter/>} />
           <Route path="ListOfGames" element={<ListOfGames/>} />
@@ -22,6 +24,7 @@ function App() {
           <Route path="LobbyPage" element={<LobbyPage/>} />
           <Route path="login" element={<Login/>} />
           <Route path="LobbyList" element={<LobbyList/>} />
+          <Route path="SearchLobbyPage" element={<SearchLobbyPage/>} />
         </Routes>
       </BrowserRouter>
     )

@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import io from 'socket.io-client';
 import flower from '../../assets/flower.png'
 import skull from '../../assets/skull.png'
 import back from '../../assets/back.png'
 import './index.css'
-import SkullView from './SkullView';
+import {SkullView, SkullView2} from './SkullView';
 import { CardView,ThisPlayerView,PlayerView } from './Classes'; 
 
 const socket = io.connect('http://localhost:3000');
@@ -185,11 +185,13 @@ count++
       if (!showBets) {
         return (
           <>        
+            {/*
             <SkullView players = {players} thisPlayer={thisPlayer} waiting = {false}/>
             <button hidden={deck[3].IsDisabled} className="Card"  onClick={FlipCard(3)}>
               <img name = 'img' src = {deck[3].Image} className="OptionImage" />
             </button>
-            
+            */}
+            <SkullView2/>
             {/*
             
             <Header/>

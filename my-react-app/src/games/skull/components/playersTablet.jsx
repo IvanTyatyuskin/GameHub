@@ -2,6 +2,8 @@ import './playersTablet.css'
 import react from '../assets/react.svg'
 import '../../../Components/css/image.css'
 import { Chip } from './chip'
+import { PlayerView } from '../Classes.js'
+import React from 'react'
 
 
 export const PlayersTablet = ({
@@ -12,6 +14,16 @@ export const PlayersTablet = ({
         openCards=[],
         onclick
     }) => {
+    function ViewOpenCards(){
+        if (openCards.length > 0){
+            return(
+                openCards.map(chip=>(
+                    <Chip type={chip}/>
+                ))
+            )
+        }
+        return (<></>)
+    }
     return(
         <div className='playersTablet'>
             <div className='playerCard'>
@@ -26,42 +38,53 @@ export const PlayersTablet = ({
                 </div>
             </div>
             <div>
-                {openCards.map(chip=>(
-                    <Chip type={chip}/>
-                ))}
+                {ViewOpenCards()}
             </div>
         </div>
     )
 }
 
+/**
+ * param {PlayerView} playerView 
+ * 
+ */
 export const PlayersTablet2 = ({
-    PlayerImg = react, 
-    PlayerName = "Player", 
-    VP = "0", 
-    cardsDown="0",
-    openCards=[],
-    onclick
+    playerView, active
 }) => {
-return(
-    <div className='playersTablet'>
-        <div className='playerCard'>
-            <div>
-                <img src={PlayerImg} className='size64'/>
-                <p>{PlayerName}</p>
-                <p>{VP}</p>
+    function ViewOpenCards(Cards){
+        if (Cards.length > 0){
+            return(
+                Cards.map(chip=>(
+                    <Chip type={chip.Type}/>
+                ))
+            )
+        }
+        return (<></>)
+    }
+    function OnClickFun(){
+        if (!active){
+            return null;
+        }
+        return playerView.Onclick;
+    }
+    return(
+        <div className='playersTablet'>
+            <div className='playerCard'>
+                <div>
+                    <img src={playerView.Img} className='size64'/>
+                    <p>{playerView.Name}</p>
+                    <p>{playerView.VP}</p>
+                </div>
+                <div>
+                    <span id="count">{playerView.CardsDown}</span>
+                    <Chip onClick={OnClickFun()}/>
+                </div>
             </div>
             <div>
-                <span id="count">{cardsDown}</span>
-                <Chip onClick={onclick}/>
+                {ViewOpenCards(playerView.OpenCards)}
             </div>
         </div>
-        <div>
-            {openCards.map(chip=>(
-                <Chip type={chip}/>
-            ))}
-        </div>
-    </div>
-)
+    )
 }
 {/*<div className='Player' >
         <p className="DisplayText">{players[0].Name}</p>

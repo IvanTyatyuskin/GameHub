@@ -1,11 +1,25 @@
-import {PlayersTablet} from './components/playersTablet'
-import {BottomPanel} from './components/BottomPanel'
+import {PlayersTablet, PlayersTablet2} from './components/playersTablet'
+import {BottomPanel, BottomPanel2} from './components/BottomPanel'
 import './components/playingField.css'
-import { textDataToView } from './textDataToView'
+//import { textDataToView } from './textDataToView'
 import {Body} from '../../Components/Body'
+import {ThisPlayerView, PlayerView, CardView} from './Classes.js'
+import PropTypes, { array } from 'prop-types';
+import React, { useState } from 'react'
+import { TestDataPlayers, TestDataThisPlayer } from './textDataToView.js'
+import { act } from 'react'
+import { Modal } from '../../Components/common/Modal.jsx'
 
-const SkullView = ({players, thisPlayer, waiting = false}) =>{
+
+/**
+ * @param {ThisPlayerView} thisPlayerView 
+ * @param {PlayerView} playerView 
+ */
+export const SkullView = ({players, thisPlayer, waiting = false, 
+    thisPlayerView, playerView 
+}) =>{
     const indexDictionary = 0;
+    
     if (!players){
         players = [
             {
@@ -82,8 +96,70 @@ const SkullView = ({players, thisPlayer, waiting = false}) =>{
         </>
     )
 }
-export default SkullView;
 
+/**
+ * @param {ThisPlayerView} thisPlayerView 
+ */
+export const SkullView2 = ({
+    thisPlayerView = TestDataThisPlayer(), 
+    players = TestDataPlayers}) =>
+{    
+    const [modalActive, setModalActive] = useState(false);
+    const [modalContent, setModalContent] = useState(<h1>Заголовок</h1>);
+    /*
+    if (thisPlayerView.WinWindow){
+        setModalActive(true);
+        var sortable = players.slice(0);
+
+        sortable.sort(function(a,b){
+            return a.VP - b.VP;
+        })
+        setModalContent(
+            <>
+                <h1>Победил игрок {sortable[0]}</h1>
+                {sortable.map(player=>{
+                    return(
+                        <p>{player.Name} {player.VP}</p>
+                    )
+                })}
+            </>
+        )
+    }*/
+    //const indexDictionary = 0;
+
+    var active = false;
+    if (thisPlayerView.Phase === '3'){
+        active = true;
+        //if (players[thisPlayerView.Id].CardsDown === 0) thisPlayerHaveCards = false;
+    }
+    return (
+        <>
+            <Body>
+                <div className="PlayingField">
+                    {players.map(player => (
+                        <PlayersTablet2 playerView = {player} 
+                        active={active}/>
+                    ))}
+                </div>
+                <BottomPanel2
+                    thisPlayerView = {thisPlayerView}/>
+            </Body>
+            {/* 
+            <Modal active={modalActive} setActive={setModalActive}>
+                    {modalContent}
+            </Modal>*/}
+        </>
+    )
+}
+
+
+
+/*
+SkullView2.propTypes = {
+    thisPlayerView: ThisPlayerView,
+    players: PropTypes.array
+}
+*/
 /*
 export const SkullView2 = ({
     deck, bet, victoryPoints, 

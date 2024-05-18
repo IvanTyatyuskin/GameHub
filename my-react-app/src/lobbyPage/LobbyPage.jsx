@@ -6,11 +6,13 @@ import Button from '../Components/common/button'
 import img_playButton from './public/playbuttonimage@2x.png'
 import img_makeHost from './public/makehostimage@2x.png'
 import img_kickPlayer from './public/kickplayerimage@2x.png'
-import { TestData } from './TestData.js'
+import { TestData, TestChatLog } from './TestData.js'
+import { TextDataLobby } from './TextViewData.js'
 
 
 export const PlayerItem = ({Img={img_playButton}, Name='player', forHost = false, host = false}) =>{
-    var Options = ""
+  const DataContext = TextDataLobby[0]; 
+  var Options = ""
     if (forHost){
         Options =<>
             <button className={styles.SimpleButton + ' '+ styles.Icon}>
@@ -22,7 +24,7 @@ export const PlayerItem = ({Img={img_playButton}, Name='player', forHost = false
         </> 
     }
     if (host){
-        Options = <p>Хост</p>
+        Options = <p>{DataContext.Host}</p>
     }
     return(
         <div className={styles.Player}>
@@ -42,9 +44,11 @@ export const LobbyPage = ({
     roomName = "Название комнаты",
     GameName = "Название игры",
     roomId = "#1234",
-    PlayersData = TestData
+    PlayersData = TestData,
+    chatlog = TestChatLog,
+    indexDictionary = 0
 }) =>{
-
+  const TextContext = TextDataLobby[indexDictionary]
     const RoomData = () => {
         return(
             <div className={styles.RoomData}>
@@ -63,7 +67,7 @@ export const LobbyPage = ({
                         <PlayerItem Img={player.img} Name={player.Name} host={player.host}/>
                     ))}
                     <button className={styles.ButtonAddPlayer}>
-                        <p>Пригласить игрока</p>
+                        <p>{TextContext.InviteAPlayer}</p>
                     </button>
                 </div>
             </div>
@@ -74,17 +78,17 @@ export const LobbyPage = ({
         return(
             <div className={styles.ButtonPanel}>
                 <button className={styles.SimpleButton}>
-                    123
+                  {TextContext.Exit}
                 </button>
                 <button className={styles.SimpleButton}>
-                    123
+                  {TextContext.Settings}
                 </button>
-                <button className={styles.SimpleButton + " " + styles.Large}>
-                    123
+                <button className={styles.SimpleButton}>
+                  {TextContext.HowToPlay}
                 </button>
                 <button className={styles.SimpleButton + " " + styles.Large + ' ' + styles.WithIcon}>
-                    <img src={img_playButton} alt="" />
-                    123
+                  <img src={img_playButton} alt="" />
+                  {TextContext.Play}
                 </button>
             </div>
         )
@@ -99,12 +103,19 @@ export const LobbyPage = ({
                     <UsersPanel/>
                     <div className={styles.chatFrame}>
                         <div className={styles.chatLog}>
-                            <p>Игрок1: 123</p>
+                          <div>
+                            {
+                              chatlog.map(message => {
+                                return(
+                                <p>{message.User}: {message.Message}</p>
+                              )})
+                            }
+                          </div>
                         </div>
                         <div id="input" className={styles.InputWithButton}>
                             <input type='text'/>
                             <button>
-                                Отпаравить
+                                {TextContext.ToSend}
                             </button>
                         </div>
                     </div>
@@ -115,6 +126,7 @@ export const LobbyPage = ({
         </>
     )
 }
+{
 /*
       <div class="body">
         <div class="workingarea">
@@ -292,9 +304,9 @@ export const LobbyPage = ({
         </div>
       </div>
     
+*/}
 
-
-
+{/*
 
 <div id="settings-modal" class="modal">
   <div class="modal-content">
@@ -359,4 +371,4 @@ export const LobbyPage = ({
   </div>
 </div>
 
-*/
+*/}
