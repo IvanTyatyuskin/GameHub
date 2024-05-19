@@ -141,6 +141,7 @@ io.on('connection', (socket) => {
 
 ///
     // Получаем колоду карт
+    /*
     let Deck = []
     let RelicDeck=[]
     for (let i = 0; i < 5; i++) {
@@ -180,13 +181,89 @@ io.on('connection', (socket) => {
  //shuffle(Deck);
 
     // Отправляем данные игрока и колоду карт на клиент
-    let DiamantPlayers = [new Player(1, 0, 0, [], 'Aero',false)/*,new Player(1, 0, 0, [], 'impulse',false)*/];
+    let DiamantPlayers = [new Player(1, 0, 0, [], 'Aero',false)];
     console.log(Deck)
     console.log(DiamantPlayers)
     
     socket.emit('start game', {Players:DiamantPlayers, Deck: Deck})
-    
+    ///
+    socket.on('player_ready', (playerData) => {
+      // Обработка данных игрока и проверка, готовы ли все игроки
+      if (true) {
+          socket.emit('all_players_ready');
+      }
+  });
+*/
+
+  socket.on('player_ready', (playerData) => {
+    // Найти лобби игрока
+    let lobby = findLobbyOfPlayer(playerData, lobbies);
+
+    if (!lobby) {
+      return;
+    }
+
+    // Обновить статус игрока
+    let player = lobby.players.find(p => p.nickname === playerData.nickname);
+    if (player) {
+      player.isReady = true;
+    }
+
+   // Когда все игроки готовы, начинаем игру
+if (lobby.players.every(p => p.isReady)) {
+  // Собираем данные игроков и колоды
+  let Deck = []
+  let RelicDeck=[]
+  for (let i = 0; i < 5; i++) {
+   Deck.push(new Card('Treasure',i+1))
+}
+Deck.push(new Card('Treasure',5))
+Deck.push(new Card('Treasure',7))
+Deck.push(new Card('Treasure',7))
+Deck.push(new Card('Treasure',9))
+Deck.push(new Card('Treasure',9))
+Deck.push(new Card('Treasure',11))
+Deck.push(new Card('Treasure',11))
+Deck.push(new Card('Treasure',13))
+Deck.push(new Card('Treasure',14))
+Deck.push(new Card('Treasure',15))
+Deck.push(new Card('Treasure',17))
+RelicDeck.push(new Card('relic',5))
+RelicDeck.push(new Card('relic',7))
+RelicDeck.push(new Card('relic',8))
+RelicDeck.push(new Card('relic',10))
+RelicDeck.push(new Card('relic',12))
+for (let i = 0; i < 3; i++) {
+   Deck.push(new Card('Trap Spider',null))
+}
+for (let i = 0; i < 3; i++) {
+   Deck.push(new Card('Trap Snake',null))
+}
+for (let i = 0; i < 3; i++) {
+   Deck.push(new Card('Trap Stone',null))
+}
+for (let i = 0; i < 3; i++) {
+   Deck.push(new Card('Trap Wood',null))
+}
+for (let i = 0; i < 3; i++) {
+   Deck.push(new Card('Trap Magma',null))
+}
+var i=0
+const playersData = lobby.players.map(player => { return new Player(i++, 0, 0, [], player.nickname, false) });
+
+console.log(playersData)
+  // Отправляем событие 'start_game' с данными игроков
+
+  io.to(lobby.name).emit('start_game', {Players:playersData}, () => {
+    console.log('Client confirmed receipt of start_game event');
+    io.to(lobby.name).emit('start_Diamant', {Players:playersData, Deck: Deck});
+  });
+}
+
+  });
+
   // Handle disconnection
+  
   socket.on('disconnect', () => {
     console.log(`User disconnected ${socket.id}`);
   });
@@ -201,4 +278,21 @@ function shuffle(array) {
       let j = Math.floor(Math.random() * (i + 1));
       [array[i], array[j]] = [array[j], array[i]];
   }
+}
+
+function findLobbyOfPlayer(playerData, lobbies) {
+  // Объединяем публичные и приватные лобби в один массив
+  const allLobbies = [...lobbies.publicLobbies, ...lobbies.privateLobbies];
+
+  // Ищем лобби, в котором находится игрок
+  for (let lobby of allLobbies) {
+    const playerInLobby = lobby.players.find(p => p.nickname === playerData.nickname);
+    if (playerInLobby) {
+      console.log(lobby)
+      return lobby;
+    }
+  }
+
+  // Если игрок не найден в любом из лобби, возвращаем null
+  return null;
 }

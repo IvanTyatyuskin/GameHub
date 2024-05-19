@@ -12,7 +12,7 @@ import Tile from "./components/Tile.jsx"
 import { GameContext } from './GameContext.jsx';
 import io from 'socket.io-client';
 import PropTypes from 'prop-types';
-
+import { socket } from "../ConnectionJSX.jsx";
 
 
 const squareCount = 6;
@@ -334,22 +334,28 @@ class Game extends Component {
             startedSquares: [],
             squareValues: Array(squareCount * squareCount).fill(null),
             squareCardType:[],
-            squaresTileId:[]
+            squaresTileId:[],
+            isButtonPressed: false,
         };
         this.handleContinue = this.handleContinue.bind(this);
         this.handleExit = this.handleExit.bind(this);
+        this.handleReady=this.handleReady.bind(this);
         
     }
     componentDidMount(){     
-        const socket = io.connect('http://localhost:4000');
-            socket.on('start game', (data) => {
+        console.log("hey");
+            socket.on('start_Diamant', (data) => {
+         
             console.log(`Колода карт: ${JSON.stringify(data)}`);
             Deck=(data.Deck.map(card => new Card(card.cardType, card.points)));
             Players = data.Players.map(player => new Player(player.id, player.roundPoints, player.allPoints, player.relics, player.nickName, player.exit));
             updatePlayerInfo();
             console.log(playersDataJS);
             this.context.setPlayersData(playersDataJS);
-            
+           
+           /* socket.on('all_players_ready', (data) => {
+                this.handleContinue();
+            });*/
         });
         //socket.disconnect(); 
     }
@@ -363,7 +369,12 @@ class Game extends Component {
         //this.context.setModalContent(stringWinnerAlirt());
         //alert(stringWinnerAlirt());
     }
-
+    handleReady(){
+        const playerData = { /* данные игрока */ };
+        socket.emit('player_ready', playerData);
+        this.setState({ isButtonPressed: true });
+  
+    }
     handleContinue() {
         this.setState(prevState => {
             const startedSquares = [...prevState.startedSquares];
@@ -414,6 +425,8 @@ class Game extends Component {
         }
             return { startedSquares, squareValues,squareCardType,squaresTileId};
         }, () => {
+            socket.emit('playerUpdate', /*PlayerDATA */);
+
             this.context.setRoundData(roundData);
             this.context.setPlayersData(playersDataJS);
             this.context.setTrapsInThisRound(trapsInThisRound);
@@ -481,6 +494,7 @@ class Game extends Component {
             }
             return {squareValues };
         }, () => {
+            socket.emit('playerUpdate', /*PlayerDATA */);
             this.context.setRoundData(roundData);
             this.context.setPlayersData(playersDataJS);
         });
@@ -497,6 +511,7 @@ class Game extends Component {
         );
     }
     render() {
+        let buttonContColor = !this.state.isButtonPressed ? "rgb(90, 195, 176)" : 'grey' ;
         let squares = [];
         for (let i = 0; i < squareCount * squareCount; i++) {
             squares.push(this.renderSquare(i));
@@ -525,10 +540,10 @@ class Game extends Component {
                 </div>
                 <div className="hand">
                         <div className="theButtonPanel">
-                            <Button background="rgb(90, 195, 176)" padding="10px" onClick={this.handleContinue}>
+                            <Button background={buttonContColor} disabled={this.state.isButtonPressed}  padding="10px" onClick={this.handleContinue}>
                                 Продолжить
                             </Button>
-                            <Button padding="10px" background="rgb(234, 68, 90)" onClick={this.handleExit}>
+                            <Button padding="10px" background="rgb(234, 68, 90)" onClick={this.handleReady}>
                                 Выйти {allRubyOnMap}
                             </Button>
                         </div>

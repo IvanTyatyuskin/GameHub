@@ -9,6 +9,8 @@ import { LobbyPage } from './lobbyPage/LobbyPage.jsx';
 import SearchLobbyPage from './lobbySearchPage/LobbySearchPage.jsx';
 import LobbyList from './lobby/src/LobbyList.jsx'
 import Login from './lobby/src/Login.jsx'
+//TEST
+import LoginTEST from './games/TEST/Login.jsx';
 
 function App() {
   function MainContent(){
@@ -25,6 +27,7 @@ function App() {
           <Route path="login" element={<Login/>} />
           <Route path="LobbyList" element={<LobbyList/>} />
           <Route path="SearchLobbyPage" element={<SearchLobbyPage/>} />
+          <Route path="loginTEST" element={<LoginTEST/>} />
         </Routes>
       </BrowserRouter>
     )
