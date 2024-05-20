@@ -1,4 +1,4 @@
-import React, { Component} from "react";
+import React, { Component, useContext} from "react";
 import Button from '../../Components/common/button'
 import '../../Components/css/game.css'
 import Ruby from './Images/ruby.png'
@@ -12,8 +12,9 @@ import Tile from "./components/Tile.jsx"
 import { GameContext } from './GameContext.jsx';
 import io from 'socket.io-client';
 import PropTypes from 'prop-types';
-import { socket } from "../ConnectionJSX.jsx";
+import { SocketContext } from '../../SocketContext.js'
   
+
 
 const squareCount = 6;
 let roundNum=1;
@@ -339,25 +340,14 @@ class Game extends Component {
         };
         this.handleContinue = this.handleContinue.bind(this);
         this.handleExit = this.handleExit.bind(this);
-        this.handleReady=this.handleReady.bind(this);
-        
+        this.handleReadyLeave=this.handleReadyLeave.bind(this);
+        this.handleReadyMoveOn=this.handleReadyMoveOn.bind(this);
     }
-    componentDidMount(){     
-        console.log("hey");
-            socket.on('start_Diamant', (data) => {
-         
-            console.log(`Колода карт: ${JSON.stringify(data)}`);
-            Deck=(data.Deck.map(card => new Card(card.cardType, card.points)));
-            Players = data.Players.map(player => new Player(player.id, player.roundPoints, player.allPoints, player.relics, player.nickName, player.exit));
-            updatePlayerInfo();
-            console.log(playersDataJS);
-            this.context.setPlayersData(playersDataJS);
+    componentDidMount(){  
+ 
+       
            
-           /* socket.on('all_players_ready', (data) => {
-                this.handleContinue();
-            });*/
-        });
-        //socket.disconnect(); 
+       
     }
     
     winWindow() {
@@ -540,6 +530,21 @@ class Game extends Component {
         }
         return (
             <div className="theAreaWithTheGame">
+                 <SocketContext.Consumer>
+            {socket => {
+                console.log("hey");
+                socket.on('start_Diamant', (data) => {
+                    console.log("hey");
+                console.log(`Колода карт: ${JSON.stringify(data)}`);
+                Deck=(data.Deck.map(card => new Card(card.cardType, card.points)));
+                Players = data.Players.map(player => new Player(player.id, player.roundPoints, player.allPoints, player.relics, player.nickName, player.exit));
+                updatePlayerInfo();
+                console.log(playersDataJS);
+                this.context.setPlayersData(playersDataJS);
+               
+            });
+            }}
+        </SocketContext.Consumer>  
                 <div className="scroll">
                     {rows}
                 </div>

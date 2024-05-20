@@ -3,13 +3,20 @@ const app = express();
 const http = require('http');
 const cors = require('cors');
 const { Server } = require('socket.io');
+const cookieParser = require('cookie-parser');
 const {Card,Player}  =  require('./DiamantClasses');
-const { Console } = require('console');
-
 
 app.use(cors());
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use((req, res, next) => {
+  const socketID = req.cookies.socketID;
+  if (socketID) {
+    req.headers['X-Socket-ID'] = socketID;
+  }
+  next();
+})
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -19,224 +26,290 @@ const io = new Server(server, {
   },
 });
 
-let lobbies = { publicLobbies: [], privateLobbies: [] };
+const clientSockets = new Map();
+
+let lobbies = {};
+let users = [];
+let TicTacToeGames = [];
+
+function addUser(socketID, nickname, lobbyName, isCreator, actualSocketID) {
+  const existingUser = users.find((user) => user.socketID === socketID);
+
+  if (existingUser) {
+    return;
+  }
+
+  const user = {
+    socketID,
+    nickname,
+    lobbyName,
+    isCreator,
+    actualSocketID,
+  };
+  
+  users.push(user);
+}
+
+function addTicTacToeGame(Xplayer, Oplayer) {
+  const tictactoegame = {
+    cells: Array(9).fill(""),
+    winner: null,
+    isDraw: false,
+    currentTurn: "X",
+    Xplayer,
+    Oplayer,
+  }
+
+  TicTacToeGames.push(tictactoegame);
+}
 
 io.on('connection', (socket) => {
-  console.log(`User connected ${socket.id}`);
+  const socketID = (socket.handshake.query.socketID !== 'undefined')
+  ? socket.handshake.query.socketID
+  : socket.id;
 
-  socket.on('set-user-info', (userInfo) => {
-    console.log(`User info received: ${JSON.stringify(userInfo)}`);
-    socket.nickname = userInfo.nickname;
-  });
+  const existingUser = users.find((user) => user.socketID === socketID);
+  if (existingUser) {
+    existingUser.actualSocketID = socket.id;
+    console.log('actualSocketID for user', existingUser.nickname, 'changed to', existingUser.actualSocketID);
+  }
 
-  socket.on('get lobby list', () => {
-    io.emit('lobby list', lobbies);
-  });
+  addUser(socketID, '', '', false, socketID);
 
-  socket.on('create lobby', (data) => {
-    const lobby = {
-      name: data.lobbyName,
-      players: [{ nickname: data.nickname, avatar: data.avatar, background: data.background }],
-      isPrivate: data.isPrivate,
-      password: data.isPrivate ? data.password : null,
-    };
+  if (!socket.id) {
+    socket.id = socket.client.id;
+  }
+  clientSockets.set(socket.id, socket);
 
-    if (data.isPrivate) {
-      lobbies.privateLobbies.push(lobby);
-    } else {
-      lobbies.publicLobbies.push(lobby);
-    }
+  socket.on('get_lobbies_list', () => {
+    io.emit('lobbies_list', Object.values(lobbies));
+  })
 
-    socket.join(lobby.name);
-    socket.emit('join lobby', lobby);
-    io.emit('lobby list', lobbies);
-  });
+  socket.on('get_lobby_info', () => {
+    const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
+    const lobbyName = user.lobbyName;
+    lobby = lobbies[lobbyName];
+    io.emit('lobby_name', lobbyName);
+    io.emit('isCreator', user.isCreator);
+  })
 
-  socket.on('join lobby', (data) => {
-    let lobby;
+  socket.on('setNickname', (data) => {
+    const { nickname } = data;
+    const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
+    user.nickname = nickname;
+  })
 
-    if (data.isPrivate) {
-      lobby = lobbies.privateLobbies.find((lobby) => lobby.name === data.lobbyName);
-    } else {
-      lobby = lobbies.publicLobbies.find((lobby) => lobby.name === data.lobbyName);
-    }
-
-    if (!lobby) {
-      return;
-    }
-
-    if (lobby.isPrivate && lobby.password !== data.password) {
-      return;
-    }
-
-    // Leave current lobby if user is already in one
-    const currentLobby = Object.values(socket.rooms).find((room) => room !== socket.id);
-    if (currentLobby) {
-      socket.leave(currentLobby);
-      const currentLobbyIndex = lobbies.publicLobbies.findIndex((lobby) => lobby.name === currentLobby);
-      const playerIndex = lobbies.publicLobbies[currentLobbyIndex].players.findIndex(
-        (player) => player.nickname === data.nickname
-      );
-      if (playerIndex !== -1) {
-        lobbies.publicLobbies[currentLobbyIndex].players.splice(playerIndex, 1);
-      }
-      if (lobbies.publicLobbies[currentLobbyIndex].players.length === 0) {
-        lobbies.publicLobbies.splice(currentLobbyIndex, 1);
+  socket.on('tictactoe_start', () => {
+    const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
+    if (user && user.isCreator) {
+      const lobby = lobbies[user.lobbyName];
+      if (lobby) {
+        lobby.users.forEach((user) => {
+          io.to(user.actualSocketID).emit('tictactoe_started');
+        });
       }
     }
-
-    lobby.players.push({ nickname: data.nickname, avatar: data.avatar, background: data.background });
-    socket.join(lobby.name);
-    socket.emit('join lobby', lobby);
-    io.emit('lobby list', lobbies);
-
-
- 
   });
 
-  socket.on('leave lobby', (data) => {
-    let lobbyIndex;
-    let lobby;
-    let playerIndex;
-
-    // Ищем лобби в publicLobbies
-    lobbyIndex = lobbies.publicLobbies.findIndex((l) => l.name === data.lobbyName);
-    lobby = lobbies.publicLobbies[lobbyIndex];
-    playerIndex = lobby?.players?.findIndex((player) => player.nickname === data.nickname);
-
-    if (lobby && playerIndex !== -1) {
-      lobby.players.splice(playerIndex, 1);
-    }
-
-    // Удаляем лобби из массива, только если в нем не осталось игроков
-    if (lobby && lobby.players.length === 0) {
-      lobbies.publicLobbies.splice(lobbyIndex, 1);
-    }
-
-    // Если лобби не найдено в publicLobbies, ищем в privateLobbies
-    if (lobbyIndex === -1) {
-      lobbyIndex = lobbies.privateLobbies.findIndex((l) => l.name === data.lobbyName);
-      lobby = lobbies.privateLobbies[lobbyIndex];
-      playerIndex = lobby?.players?.findIndex((player) => player.nickname === data.nickname);
-
-      if (lobby && playerIndex !== -1) {
-        lobby.players.splice(playerIndex, 1);
+  socket.on('Diamant_start', () => {
+    
+    const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
+    if (user && user.isCreator) {
+     
+      const lobby = lobbies[user.lobbyName];
+      if (lobby) {
+        
+        console.log("sd")
+        // Собираем данные игроков и колоды
+        let Deck = [];
+        let RelicDeck = [];
+        for (let i = 0; i < 5; i++) {
+         Deck.push(new Card('Treasure',i+1))
       }
-
-      // Удаляем лобби из массива, только если в нем не осталось игроков
-      if (lobby && lobby.players.length === 0) {
-        lobbies.privateLobbies.splice(lobbyIndex, 1);
+      Deck.push(new Card('Treasure',5))
+      Deck.push(new Card('Treasure',7))
+      Deck.push(new Card('Treasure',7))
+      Deck.push(new Card('Treasure',9))
+      Deck.push(new Card('Treasure',9))
+      Deck.push(new Card('Treasure',11))
+      Deck.push(new Card('Treasure',11))
+      Deck.push(new Card('Treasure',13))
+      Deck.push(new Card('Treasure',14))
+      Deck.push(new Card('Treasure',15))
+      Deck.push(new Card('Treasure',17))
+      RelicDeck.push(new Card('relic',5))
+      RelicDeck.push(new Card('relic',7))
+      RelicDeck.push(new Card('relic',8))
+      RelicDeck.push(new Card('relic',10))
+      RelicDeck.push(new Card('relic',12))
+      for (let i = 0; i < 3; i++) {
+         Deck.push(new Card('Trap Spider',null))
+      }
+      for (let i = 0; i < 3; i++) {
+         Deck.push(new Card('Trap Snake',null))
+      }
+      for (let i = 0; i < 3; i++) {
+         Deck.push(new Card('Trap Stone',null))
+      }
+      for (let i = 0; i < 3; i++) {
+         Deck.push(new Card('Trap Wood',null))
+      }
+      for (let i = 0; i < 3; i++) {
+         Deck.push(new Card('Trap Magma',null))
+      }
+        var i = 0;
+        const playersData = lobby.users.map(player => { return new Player(i++, 0, 0, [], player.nickname, false) });
+        console.log(playersData)
+        lobby.users.forEach((user) => {
+          console.log("heyee")
+          io.to(user.actualSocketID).emit('Diamant_started', () => {
+            console.log('Client confirmed receipt of start_game event');
+            io.to(user.actualSocketID).emit('start_Diamant', {Players:playersData, Deck: Deck});
+          });
+        });
       }
     }
-
-    socket.leave(data.lobbyName);
-    io.emit('lobby list', lobbies);
-    socket.emit('leave lobby');
   });
-
-  socket.on('chat message', (data) => {
-    io.to(data.lobbyName).emit('chat message', `${data.nickname}: ${data.message}`);
-  });
-///DiamantSTART
-  socket.on('player_ready', (playerData) => {
-    // Найти лобби игрока
-    let lobby = findLobbyOfPlayer(playerData, lobbies);
-
-    if (!lobby) {
-      return;
-    }
-
-    // Обновить статус игрока
-    let player = lobby.players.find(p => p.nickname === playerData.nickname);
-    if (player) {
-      player.isReady = true;
-    }
-
-   // Когда все игроки готовы, начинаем игру
-if (lobby.players.every(p => p.isReady)) {
-  // Собираем данные игроков и колоды
-  let Deck = []
-  let RelicDeck=[]
-  for (let i = 0; i < 5; i++) {
-   Deck.push(new Card('Treasure',i+1))
-}
-Deck.push(new Card('Treasure',5))
-Deck.push(new Card('Treasure',7))
-Deck.push(new Card('Treasure',7))
-Deck.push(new Card('Treasure',9))
-Deck.push(new Card('Treasure',9))
-Deck.push(new Card('Treasure',11))
-Deck.push(new Card('Treasure',11))
-Deck.push(new Card('Treasure',13))
-Deck.push(new Card('Treasure',14))
-Deck.push(new Card('Treasure',15))
-Deck.push(new Card('Treasure',17))
-RelicDeck.push(new Card('relic',5))
-RelicDeck.push(new Card('relic',7))
-RelicDeck.push(new Card('relic',8))
-RelicDeck.push(new Card('relic',10))
-RelicDeck.push(new Card('relic',12))
-for (let i = 0; i < 3; i++) {
-   Deck.push(new Card('Trap Spider',null))
-}
-for (let i = 0; i < 3; i++) {
-   Deck.push(new Card('Trap Snake',null))
-}
-for (let i = 0; i < 3; i++) {
-   Deck.push(new Card('Trap Stone',null))
-}
-for (let i = 0; i < 3; i++) {
-   Deck.push(new Card('Trap Wood',null))
-}
-for (let i = 0; i < 3; i++) {
-   Deck.push(new Card('Trap Magma',null))
-}
-var i=0
-const playersData = lobby.players.map(player => { return new Player(i++, 0, 0, [], player.nickname, false) });
-
-console.log(playersData)
-  // Отправляем событие 'start_game' с данными игроков
-
-  io.to(lobby.name).emit('start_game', {Players:playersData}, () => {
-    console.log('Client confirmed receipt of start_game event');
-    io.to(lobby.name).emit('start_Diamant', {Players:playersData, Deck: Deck, ClientPlayer:cPlayer});
-  });
-}
-
-  });
-///
-socket.on('player_ready_Diamant', (data) => {})
-  // Handle disconnection
   
+  
+  
+  socket.on('create_lobby', ({ roomName, isLocked, maxCount }) => {
+    const newLobby = { roomName, isLocked, currentCount: 1, maxCount, users: [] };
+    lobbies[roomName] = newLobby;
+    const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
+    user.isCreator = true;
+    user.lobbyName = roomName;
+    lobbies[roomName].users.push(user);
+    console.log('Lobby: ', roomName, ' created by ', user.nickname);
+    console.log(lobbies[roomName]);
+  });
+
+  socket.on('join_lobby', ({ roomName }) => {
+    const lobby = lobbies[roomName];
+    const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
+    user.lobbyName = roomName;
+    lobby.users.push(user);
+    lobby.currentCount++;
+    console.log('User: ', user.nickname, 'joined to lobby', roomName);
+    console.log(lobby)
+  });
+
+  //TicTacToe------------------------------------------------------------------------------
+  function checkWinner(board) {
+    const winningCombinations = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8],
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8],
+      [0, 4, 8],
+      [2, 4, 6]
+    ];
+  
+    for (let combination of winningCombinations) {
+      const [a, b, c] = combination;
+  
+      if (board[a] !== '' && board[a] === board[b] && board[b] === board[c]) {
+        return board[a];
+      }
+    }
+  
+    return null;
+  }
+
+  socket.on('start_tictactoe_game', () => {
+    const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
+    if(user.isCreator) {
+      const lobby = lobbies[user.lobbyName];
+      if (lobby) {
+        Xuser = lobby.users[0];
+        Ouser = lobby.users[1];
+        const Xplayer = Xuser.socketID;
+        const Oplayer = Ouser.socketID;
+
+        io.to(Xuser.actualSocketID).emit('set_symbol', "X");
+        io.to(Ouser.actualSocketID).emit('set_symbol', "O");
+
+        addTicTacToeGame(Xplayer, Oplayer);
+      }
+    }
+  });
+
+  socket.on('make_move', ({ num }) => {
+    const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
+    const game = TicTacToeGames.find(
+      (tictactoegame) =>
+        tictactoegame.Xplayer === user.socketID || tictactoegame.Oplayer === user.socketID
+    );
+
+    if (game.cells[num] !== "" || game.winner || game.isDraw) {
+      console.log("Invalid move");
+      return;
+    }
+
+    game.cells[num] = game.currentTurn;
+    if (checkWinner(game.cells) === "X") {
+      game.winner = game.Xplayer;
+      console.log('Winner is: X');
+    } else if (checkWinner(game.cells) === "O") {
+      game.winner = game.Oplayer;
+      console.log('Winner is: O');
+    } else if (game.cells.every((cell) => cell !== "")) {
+      game.isDraw = true;
+      console.log("It's a draw");
+    } else {
+      game.currentTurn = game.currentTurn === "X" ? "O" : "X";
+    }
+
+    const Cells = game.cells;
+    const Winner = game.winner;
+    const IsDraw = game.isDraw;
+    const CurrentTurn = game.currentTurn;
+
+    io.emit('update_game', { Cells, Winner, IsDraw, CurrentTurn });
+  });
+
+  socket.on('reset_game', () => {
+    const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
+    const game = TicTacToeGames.find(
+      (tictactoegame) =>
+        tictactoegame.Xplayer === user.socketID || tictactoegame.Oplayer === user.socketID
+    );
+
+    game.cells = Array(9).fill("");
+    game.winner = null;
+    game.isDraw = false;
+    game.currentTurn = "X";
+
+    io.emit('reset_game');
+  });
+
+
+
   socket.on('disconnect', () => {
-    console.log(`User disconnected ${socket.id}`);
+    console.log('User disconnected: ', socket.id);
+    clientSockets.delete(socket.id);
+    const user = users[socket.id];
+
+    if (user) {
+      const lobby = lobbies[user.roomName];
+      if (lobby) {
+        lobby.currentCount--;
+        const index = lobby.users.indexOf(socket.id);
+        if (index !== -1) {
+          lobby.users.splice(index, 1);
+        }
+
+        if (user.isCreator && lobby.currentCount === 0) {
+          delete lobbies[user.roomName];
+        }
+
+        delete users[socket.id];
+        io.emit('lobbies_list', Object.values(lobbies));
+      }
+    }
   });
 });
 
 server.listen(4000, () => console.log('Server is running on port 4000'));
-
-function shuffle(array) {
-  array.push(RelicDeck[roundNum-1])
-  console.log(RelicDeck[roundNum-1].points)
-  for (let i = array.length - 1; i > 0; i--) {
-      let j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
-  }
-}
-
-function findLobbyOfPlayer(playerData, lobbies) {
-  // Объединяем публичные и приватные лобби в один массив
-  const allLobbies = [...lobbies.publicLobbies, ...lobbies.privateLobbies];
-
-  // Ищем лобби, в котором находится игрок
-  for (let lobby of allLobbies) {
-    const playerInLobby = lobby.players.find(p => p.nickname === playerData.nickname);
-    if (playerInLobby) {
-      console.log(lobby)
-      return lobby;
-    }
-  }
-
-  // Если игрок не найден в любом из лобби, возвращаем null
-  return null;
-}

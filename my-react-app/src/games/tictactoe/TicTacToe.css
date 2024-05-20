@@ -1,0 +1,56 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  table td {
+    border: 1px solid grey;
+    width: 100px;
+    height: 100px;
+  }
+  
+  .cell {
+    width: 100px;
+    height: 100px;
+    text-align: center;
+    font-size: 36px;
+    cursor: pointer;
+  }
+  
+  .cell-X {
+    background-color: #e93737d7;
+    color: #ffffff;
+  }
+  
+  .cell-O {
+    background-color: #2deb2dc0;
+    color: #ffffff;
+  }
+  
+  .winner {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    font-size: 24px;
+    display: none;
+  }
+  
+  .winner.show {
+    display: block;
+  }
+  
+  .reset-button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 18px;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: #ffffff;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .reset-button:hover {
+    background-color: #0056b3;
+  }

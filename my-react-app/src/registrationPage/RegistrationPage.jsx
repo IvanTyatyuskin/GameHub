@@ -7,6 +7,8 @@ import { InputText } from '../Components/common/Input'
 import styles_onlyWindow from './onlyWindow.module.css'
 import styles_registrationPage from './registrationPage.module.css'
 import { LanguageButton } from '../Components/common/button'
+import React, { useContext } from 'react'
+import { SocketContext } from '../SocketContext'
 
 export const OnlyWindow = ({children}) =>
 {
@@ -20,6 +22,11 @@ export const OnlyWindow = ({children}) =>
 }
 
 export const RegistrationPage = ({}) =>{
+
+  const socket = useContext(SocketContext);
+
+  console.log(socket);
+
   function LanguageSelection() {
     return(
       <div className={styles_registrationPage.languageselection}>
@@ -69,8 +76,13 @@ export const RegistrationPage = ({}) =>{
     document.cookie = `avatar=${avatar}; max-age=3600; path=/`; // Сохраняем никнейм в Cookie
     document.cookie = `background=${background}; max-age=3600; path=/`; // Сохраняем никнейм в Cookie
 
-    // Здесь можно добавить код для редиректа на другую страницу
-    window.location.href = '/ListOfGames'; // Пример редиректа на '/new-page'
+    if (socket) {
+      socket.emit('setNickname', { nickname });
+    } else {
+      console.error('Socket is not connected');
+    }
+
+    window.location.href = '/ListOfGames'; 
   };
 
   const handleCancel = () => {
