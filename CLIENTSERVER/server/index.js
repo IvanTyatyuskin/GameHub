@@ -137,64 +137,7 @@ io.on('connection', (socket) => {
   socket.on('chat message', (data) => {
     io.to(data.lobbyName).emit('chat message', `${data.nickname}: ${data.message}`);
   });
-
-
-///
-    // Получаем колоду карт
-    /*
-    let Deck = []
-    let RelicDeck=[]
-    for (let i = 0; i < 5; i++) {
-     Deck.push(new Card('Treasure',i+1))
- }
- Deck.push(new Card('Treasure',5))
- Deck.push(new Card('Treasure',7))
- Deck.push(new Card('Treasure',7))
- Deck.push(new Card('Treasure',9))
- Deck.push(new Card('Treasure',9))
- Deck.push(new Card('Treasure',11))
- Deck.push(new Card('Treasure',11))
- Deck.push(new Card('Treasure',13))
- Deck.push(new Card('Treasure',14))
- Deck.push(new Card('Treasure',15))
- Deck.push(new Card('Treasure',17))
- RelicDeck.push(new Card('relic',5))
- RelicDeck.push(new Card('relic',7))
- RelicDeck.push(new Card('relic',8))
- RelicDeck.push(new Card('relic',10))
- RelicDeck.push(new Card('relic',12))
- for (let i = 0; i < 3; i++) {
-     Deck.push(new Card('Trap Spider',null))
- }
- for (let i = 0; i < 3; i++) {
-     Deck.push(new Card('Trap Snake',null))
- }
- for (let i = 0; i < 3; i++) {
-     Deck.push(new Card('Trap Stone',null))
- }
- for (let i = 0; i < 3; i++) {
-     Deck.push(new Card('Trap Wood',null))
- }
- for (let i = 0; i < 3; i++) {
-     Deck.push(new Card('Trap Magma',null))
- }
- //shuffle(Deck);
-
-    // Отправляем данные игрока и колоду карт на клиент
-    let DiamantPlayers = [new Player(1, 0, 0, [], 'Aero',false)];
-    console.log(Deck)
-    console.log(DiamantPlayers)
-    
-    socket.emit('start game', {Players:DiamantPlayers, Deck: Deck})
-    ///
-    socket.on('player_ready', (playerData) => {
-      // Обработка данных игрока и проверка, готовы ли все игроки
-      if (true) {
-          socket.emit('all_players_ready');
-      }
-  });
-*/
-
+///DiamantSTART
   socket.on('player_ready', (playerData) => {
     // Найти лобби игрока
     let lobby = findLobbyOfPlayer(playerData, lobbies);
@@ -256,12 +199,13 @@ console.log(playersData)
 
   io.to(lobby.name).emit('start_game', {Players:playersData}, () => {
     console.log('Client confirmed receipt of start_game event');
-    io.to(lobby.name).emit('start_Diamant', {Players:playersData, Deck: Deck});
+    io.to(lobby.name).emit('start_Diamant', {Players:playersData, Deck: Deck, ClientPlayer:cPlayer});
   });
 }
 
   });
-
+///
+socket.on('player_ready_Diamant', (data) => {})
   // Handle disconnection
   
   socket.on('disconnect', () => {
