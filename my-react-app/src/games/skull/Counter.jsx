@@ -26,7 +26,7 @@ function Counter() {
   let playedDeck=[]
   const [isActive, setIsActive] = useState(true);
   const [havePassed, setHavePassed] = useState(false);
-  const [gameMode, setGameMode] = useState("0");
+  const [gameMode, setGameMode] = useState("setup");
   const [thisPlayer, setThisPlayer] = useState([]);
   const [PlayersView, setPlayersView] = useState([]);
  
@@ -52,10 +52,10 @@ function Counter() {
     }
   useEffect(() => {
     const initialDeck = [
-      new Card(false, false, flower,flower,false),
-      new Card(false, false, flower,flower,false),
-      new Card(false, false, flower,flower,false),
-      new Card(true, false, skull, skull, false)
+      new Card(false, false, false),
+      new Card(false, false, false),
+      new Card(false, false, false),
+      new Card(true, false,  false)
     ]; 
     socket.emit('AddSkullPlayer');
     setDeck([...deck, ...initialDeck]);
@@ -155,14 +155,14 @@ count++
       alert("Назначьте ставку")
     }
   }
-
+/*
   function EndTurn() {
     setIsActive(false);
     let downCount=CardsDown();
     let active=false;
     socket.emit('EndTurn',{id,downCount,playedDeck,gameMode,bet,active,havePassed});
     console.log("EndTurn");
-  }
+  }*/
   function Pass() {
     setHavePassed(true);
     setIsActive(false);
@@ -180,7 +180,7 @@ count++
   const FlipCard = (ind) => () => {
     const newDeck = [...deck];
     const newPlayedDeck = [...playedDeck];
-    if (!newDeck[ind].IsDown&&isActive&&!gameMode=="flippingChips"){
+    if (!newDeck[ind].IsDown&&isActive){
       newDeck[ind].IsDown=true;
       //newDeck[ind].Image=back;
       newPlayedDeck.push(newDeck[ind]);
@@ -213,11 +213,11 @@ count++
       setVP(victoryPoints+1);
     }*/
     setDeck(newDeck);
-   playedDeck= newPlayedDeck;
+    playedDeck= newPlayedDeck;
     let downCount=CardsDown();
     let active=false;
-    let pass=true;
-    socket.emit('EndTurn',{id,downCount,newPlayedDeck,gameMode,bet,active,pass});
+    let pass=false;
+    socket.emit('EndTurn',{id,downCount,playedDeck,gameMode,bet,active,pass});
     console.log(deck)
     setThisPlayer(ThisPlayerToView(newDeck,isActive,victoryPoints,gameMode));
     console.log(thisPlayer);
@@ -241,7 +241,7 @@ count++
             */
             
            }
-          <button className='OptionButton'  onClick={() => EndTurn()}>
+          <button className='OptionButton'  onClick={ FlipCard(0)}>
             Test
            </button>
             <SkullView2 players = {PlayersView} thisPlayerView={thisPlayer}/>

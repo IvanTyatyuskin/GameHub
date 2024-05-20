@@ -149,7 +149,7 @@ io.on('connection', (socket) => {
     let Deck = []
     let RelicDeck=[]
     for (let i = 0; i < 5; i++) {
-     Deck.push(new Card('Treasure',i+1))
+     Deck.push(new Card('Treasure',i+1)) 
  }
  Deck.push(new Card('Treasure',5))
  Deck.push(new Card('Treasure',7))
@@ -223,12 +223,13 @@ io.on('connection', (socket) => {
     {
       SkullPlayers[i].IsActive=data.active;
       SkullPlayers[i].CardsDown=data.downCount;
-      SkullPlayersData[i].PlayedCards=data.playedDeck;
+      SkullPlayersData[i].PlayedCards=data.playedDeck; 
      // GameMode=data.gameMode
-      //Bet=data.bet
-      SkullPlayers[i].HavePassed=data.havePassed;
+      //Bet=data.bet  
+      SkullPlayers[i].HavePassed=data.pass;
       console.log(`Updated player ${data.id}`);
-    }
+      
+    } 
 
     if (!SkullPlayers[i].HavePassed){
       ActivePlayers++;
@@ -264,23 +265,25 @@ if(ActivePlayers==1)
       }
     }
   }
-  else
-  {
+  
     if(data.gameMode=="setup")
     {
-      if(SkullPlayersData.PlayedCards)
-    {
-    for (let i = 0; i < SkullPlayersData.PlayedCards.length; i++) 
+      
+    for (let i = 0; i < SkullPlayersData.length; i++) 
       {
-        if(SkullPlayersData[i].PlayedCards.length>0)
-          {
+        
+        if(SkullPlayersData[i].PlayedCards?.length>0) 
+        {
+                
             PlayersSetuped++;
-          }
+
+        }
       }
-    }
-    }
+    
+
       
   }
+  console.log(PlayersSetuped);
   if(data.gameMode=="setup" && SkullPlayers.length==PlayersSetuped)  
     {
     for (let i = 0; i < SkullPlayers.length; i++) 
@@ -291,7 +294,8 @@ if(ActivePlayers==1)
 
 
     io.sockets.in('Skull').emit('SkullPLayersUpdate', SkullPlayers);
-    console.log(SkullPlayers);
+    console.log(SkullPlayers);  
+    console.log(SkullPlayersData[0].PlayedCards);
   });
 
   socket.on('OpenChip', (data) => {
