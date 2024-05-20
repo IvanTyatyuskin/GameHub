@@ -31,12 +31,12 @@ function Counter() {
   const [PlayersView, setPlayersView] = useState([]);
  
 
-  const ThisPlayerToView = (deckValue) => () => {
+  const ThisPlayerToView = (deckValue,active,vp,gameMode) => () => {
   let cards=[];
   for (let i = 0; i < deckValue.length; i++) { 
     cards.push(new CardView(deckValue[i].IsSkull,FlipCard(i), deckValue[i].IsDown,deckValue[i].IsDisabled));
   }
-  let view= new ThisPlayerView(0,cards,isActive,victoryPoints,bet,updateBet,Pass,input,setInput,false,"");
+  let view= new ThisPlayerView(0,cards,active,vp,bet,updateBet,Pass,input,setInput,false,gameMode);
  // setThisPlayer([...thisPlayer, ...view]);
  return view;
   }
@@ -59,7 +59,7 @@ function Counter() {
     ]; 
     socket.emit('AddSkullPlayer');
     setDeck([...deck, ...initialDeck]);
-    setThisPlayer(ThisPlayerToView(initialDeck));
+    setThisPlayer(ThisPlayerToView(initialDeck,false,0,'setup'));
    
   }, []);
   
@@ -82,18 +82,20 @@ function Counter() {
     setPlayers([...players, ...data]);
     console.log(players);
     setPlayersView(PlayersToView(data));  
-
+    let ind=0
     for (let i = 0; i < players.length; i++) 
     {
+     
       if(players[i].Id==id) 
         {
           setVP(players[i].VP);
           setIsActive(players[i].IsActive);
           setGameMode(players[i].GameMode);
+          ind=i;
         }
         players[i].onClick=() =>openChip(i);
     }
-    setThisPlayer(ThisPlayerToView(deck));
+    setThisPlayer(ThisPlayerToView(deck,players[ind].IsActive,players[ind].VP,players[ind].GameMode));
   });
 
   socket.on('SkullGetPlayerId', (data) => {
@@ -105,18 +107,18 @@ function Counter() {
     const newDeck = [...deck];
     newDeck[Math.floor(Math.random()*(3+1))].IsDisabled=true;
     setDeck(newDeck);
-    setThisPlayer(ThisPlayerToView(newDeck));
+    setThisPlayer(ThisPlayerToView(newDeck,isActive,victoryPoints,gameMode));
   }); 
 
   socket.on('Reset', () => {
-    let initialDeck = [];
+    let newDeck = [];
     for (let i = 0; i < deck.length; i++) 
       {
-        initialDeck.push(deck[i]);
-        initialDeck[i].IsDown=false;
+        newDeck.push(deck[i]);
+        newDeck[i].IsDown=false;
       }
-    setDeck([...deck, ...initialDeck]);
-    setThisPlayer(ThisPlayerToView(initialDeck));
+    setDeck([...deck, ...newDeck]);
+    setThisPlayer(ThisPlayerToView(newDeck,isActive,victoryPoints,gameMode));
   });  
 
 function CardsDown(){
@@ -134,7 +136,7 @@ count++
     if (val>bet&&(val<=CardsDown())){
       if(bet==0)
       {
-        setGameMode('Betting');
+        setGameMode('betting');
       }
       setBet(val);
       setIsActive(false);
@@ -217,7 +219,7 @@ count++
     let pass=true;
     socket.emit('EndTurn',{id,downCount,newPlayedDeck,gameMode,bet,active,pass});
     console.log(deck)
-    setThisPlayer(ThisPlayerToView(newDeck));
+    setThisPlayer(ThisPlayerToView(newDeck,isActive,victoryPoints,gameMode));
     console.log(thisPlayer);
    };
    const openChip = (ind) => () => {
@@ -242,7 +244,7 @@ count++
           <button className='OptionButton'  onClick={() => EndTurn()}>
             Test
            </button>
-            <SkullView2 players = {PlayersView} thisPlayer={thisPlayer}/>
+            <SkullView2 players = {PlayersView} thisPlayerView={thisPlayer}/>
            
             {/*
             
