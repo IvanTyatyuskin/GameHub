@@ -24,7 +24,7 @@ function App() {
           <Route path="TicTacToe" element={<TicTacToe/>} />
           <Route path="ListOfGames" element={<ListOfGames/>} />
           <Route path="/" element={<RegistrationPage/>} />
-          <Route path="LobbyPage" element={<LobbyPage/>} />
+          <Route path="lobbyPage/:gameName" element={<LobbyPage/>} />
           <Route path="login" element={<Login/>} />
           <Route path="lobbylist" element={<SearchLobbyPage/>} />
           <Route path="lobbyListSkull" element={<LobbyListSkullPage/>} />
