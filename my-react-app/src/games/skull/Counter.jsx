@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import io from 'socket.io-client';
-import flower from '../../assets/flower.png'
 import skull from '../../assets/skull.png'
 import './index.css'
 import { SkullView2} from './SkullView';
@@ -24,7 +23,7 @@ function Counter() {
   const [players, setPlayers] = useState([]);
   const [input, setInput] = useState("");
   let playedDeck=[]
-  const [isActive, setIsActive] = useState(true);
+  const [isActive, setIsActive] = useState(false);
   const [havePassed, setHavePassed] = useState(false);
   const [gameMode, setGameMode] = useState("setup");
   const [thisPlayer, setThisPlayer] = useState([]);
@@ -62,40 +61,27 @@ function Counter() {
     setThisPlayer(ThisPlayerToView(initialDeck,false,0,'setup'));
    
   }, []);
-  
-  useEffect(() => {
-   /* const initplayers = [
-      new Player("player1", 0, 0, flower, false, false),
-      new Player("player2", 0, 0, flower, false, false),
-      new Player("player3", 0, 0, flower, false, false),
-      new Player("player4", 0, 0, flower, false, false),
-      new Player("player5", 0, 0, flower, false, false),
-    ];
-
-    setPlayers([...players, ...initplayers]);
-    setPlayersView(PlayersToView(initplayers));*/
-  }, []);
 
   socket.on('SkullPLayersUpdate', (data) => {
     console.log('SkullPLayersUpdate');
-
-    setPlayers([...players, ...data]);
-    console.log(players);
-    setPlayersView(PlayersToView(data));  
+    console.log(data);
+    
     let ind=0
-    for (let i = 0; i < players.length; i++) 
+    for (let i = 0; i < data.length; i++) 
     {
      
-      if(players[i].Id==id) 
+      if(data[i].Id==id) 
         {
-          setVP(players[i].VP);
-          setIsActive(players[i].IsActive);
-          setGameMode(players[i].GameMode);
+          setVP(data[i].VP);
+          setIsActive(data[i].IsActive);
+          setGameMode(data[i].GameMode);
           ind=i;
         }
-        players[i].onClick=() =>openChip(i);
+        data[i].onClick=() =>openChip(i);
     }
-    setThisPlayer(ThisPlayerToView(deck,players[ind].IsActive,players[ind].VP,players[ind].GameMode));
+    setPlayers([...players, ...data]);
+    setPlayersView(PlayersToView(data)); 
+    setThisPlayer(ThisPlayerToView(deck,data[ind].IsActive,data[ind].VP,data[ind].GameMode));
   });
 
   socket.on('SkullGetPlayerId', (data) => {
@@ -163,7 +149,7 @@ count++
     socket.emit('EndTurn',{id,downCount,playedDeck,gameMode,bet,active,havePassed});
     console.log("EndTurn");
   }*/
-  function Pass() {
+  const Pass = () => () => {
     setHavePassed(true);
     setIsActive(false);
     let downCount=CardsDown();
@@ -180,38 +166,12 @@ count++
   const FlipCard = (ind) => () => {
     const newDeck = [...deck];
     const newPlayedDeck = [...playedDeck];
-    if (!newDeck[ind].IsDown&&isActive){
+    if (!newDeck[ind].IsDown&&isActive)
+      {
       newDeck[ind].IsDown=true;
       //newDeck[ind].Image=back;
       newPlayedDeck.push(newDeck[ind]);
-    }
-   /* else if (newDeck[ind].IsDown&&isActive&&gameMode=="flippingChips"){
-     
-      newDeck[ind].IsDown=false;
-      prev=true;
-    //  newDeck[ind].Image=newDeck[ind].InitialImage;
-      if (!newDeck[ind].IsSkull){
-        let n=bet-1;
-        setBet(bet-1);
-      
-      }
-      else{
-        alert("Поиграно"); 
-        console.log(Math.floor(Math.random()*(3+1)));
-        newDeck[Math.floor(Math.random()*(3+1))].IsDisabled=true;
-        fail=true;
-
-      }
-      console.log(bet);
-    }
-    
-    
-    if(isFlipping&&bet==1&&prev==true&&fail==false){
-      alert("Ставка сыграла");
-      setIsFlipping(false);
-      setShowBets(false);
-      setVP(victoryPoints+1);
-    }*/
+  
     setDeck(newDeck);
     playedDeck= newPlayedDeck;
     let downCount=CardsDown();
@@ -221,7 +181,9 @@ count++
     console.log(deck)
     setThisPlayer(ThisPlayerToView(newDeck,isActive,victoryPoints,gameMode));
     console.log(thisPlayer);
+  }
    };
+
    const openChip = (ind) => () => {
     let id=players[ind].id;
     socket.emit('OpenChip',{id});
@@ -241,8 +203,11 @@ count++
             */
             
            }
-          <button className='OptionButton'  onClick={ FlipCard(0)}>
-            Test
+            <button className='OptionButton'  onClick={ FlipCard(0)}>
+            Play
+           </button>
+          <button className='OptionButton'  onClick={ Pass()}>
+            Pass
            </button>
             <SkullView2 players = {PlayersView} thisPlayerView={thisPlayer}/>
            
