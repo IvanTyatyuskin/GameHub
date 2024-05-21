@@ -223,12 +223,12 @@ io.on('connection', (socket) => {
   if(SkullPlayers[i].Id==data.id)    
     {
       SkullPlayers[i].IsActive=data.active;
-      SkullPlayers[i].CardsDown=data.downCount;
+      SkullPlayers[i].CardsDown=data.downCount;  
       SkullPlayersData[i].PlayedCards=data.playedDeck; 
       SkullPlayers[i].HavePassed=data.pass;  
       console.log(`Updated player ${data.id}`);
       
-    } 
+    }        
 
     if (!SkullPlayers[i].HavePassed){
       ActivePlayers++;
@@ -307,18 +307,19 @@ if(ActivePlayers==1)
 
     io.sockets.in('Skull').emit('SkullPLayersUpdate', SkullPlayers);
     console.log(SkullPlayers);  
-    console.log(SkullPlayersData[0].PlayedCards);   
+    console.log(SkullPlayersData);   
   });
 
   socket.on('OpenChip', (data) => {
-   
-    let i=FindSkullPlayerById(data);
+    console.log(data.targetId);         
+    let i=FindSkullPlayerById(data.targetId);       
+    console.log(SkullPlayersData[i].PlayedCards);
     if(SkullPlayersData[i].PlayedCards[PlayedCards.length-1].IsSkull)
-      {
+      {  
         io.sockets.socket(SkullPlayers[i].id).emit('BetFail'); 
         MoveToNextRound();
         SkullPlayers[i].IsActive=true;
-      }
+      }          
       else
       {
         bet=bet-1;
@@ -327,14 +328,14 @@ if(ActivePlayers==1)
         if(bet==0)
         {
           SkullPlayers[ind].VP++;
-          if(SkullPlayers[ind].VP==2)
+          if(SkullPlayers[ind].VP==2)   
             {
               for (let j = 0; j < SkullPlayers.length; j++) 
               {
                 SkullPlayers[j].WinWindow=true;
               }
             }
-            else
+            else           
             {
               MoveToNextRound();
             }
@@ -344,10 +345,11 @@ if(ActivePlayers==1)
 
         }
       }
+      console.log(SkullPlayers);    
   io.sockets.in('Skull').emit('SkullPLayersUpdate', SkullPlayers);
   });
 
-});
+});  
 function FindSkullPlayerById(id)
 {
   for (let i = 0; i < SkullPlayers.length; i++) {
@@ -372,8 +374,8 @@ function MoveToNextRound()
   {  
     SkullPlayers[i].OpenCards=[];
     SkullPlayers[i].GameMode='play';
-
-  }
+  
+  }  
   GameMode='play';
   io.sockets.in('Skull').emit('Reset');
   

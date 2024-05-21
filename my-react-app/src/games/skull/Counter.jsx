@@ -16,13 +16,14 @@ class Card {
 }
 
 let id=0
+let playedDeck=[]
 function Counter() {
   const [bet, setBet] = useState(0);
   const [victoryPoints, setVP] = useState(0);
   const [deck, setDeck] = useState([]);
   const [players, setPlayers] = useState([]);
   const [input, setInput] = useState("");
-  let playedDeck=[]
+ 
   const [isActive, setIsActive] = useState(false);
  // const [havePassed, setHavePassed] = useState(false);
   const [gameMode, setGameMode] = useState("setup");
@@ -79,7 +80,7 @@ function Counter() {
         }
         data[i].onClick=() =>openChip(i);
     }
-    setPlayers([...players, ...data]);
+    setPlayers(data);
     setPlayersView(PlayersToView(data)); 
     setThisPlayer(ThisPlayerToView(deck,data[ind].IsActive,data[ind].VP,data[ind].GameMode));
   });
@@ -166,15 +167,13 @@ const updateBet = () => () => {
 */
   const FlipCard = (ind) => () => {
     const newDeck = [...deck];
-    const newPlayedDeck = [...playedDeck];
     if (!newDeck[ind].IsDown&&isActive)
       {
       newDeck[ind].IsDown=true;
       //newDeck[ind].Image=back;
-      newPlayedDeck.push(newDeck[ind]);
+      playedDeck.push(newDeck[ind]);
   
     setDeck(newDeck);
-    playedDeck= newPlayedDeck;
     let downCount=CardsDown();
     let active=false;
     let pass=false;
@@ -186,8 +185,8 @@ const updateBet = () => () => {
    };
 
    const openChip = (ind) => () => {
-    let id=players[ind].id;
-    socket.emit('OpenChip',{id});
+    let targetId=players[ind].Id;
+    socket.emit('OpenChip',{targetId});
    }
    
 
@@ -212,6 +211,9 @@ const updateBet = () => () => {
            </button>
            <button className='OptionButton'  onClick={ updateBet()}>
             Bet
+           </button>
+           <button className='OptionButton'  onClick={ openChip(1)}>
+            OpenChip
            </button>
             <SkullView2 players = {PlayersView} thisPlayerView={thisPlayer}/>
            
