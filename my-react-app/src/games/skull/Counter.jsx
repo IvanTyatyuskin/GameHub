@@ -24,7 +24,7 @@ function Counter() {
   const [input, setInput] = useState("");
   let playedDeck=[]
   const [isActive, setIsActive] = useState(false);
-  const [havePassed, setHavePassed] = useState(false);
+ // const [havePassed, setHavePassed] = useState(false);
   const [gameMode, setGameMode] = useState("setup");
   const [thisPlayer, setThisPlayer] = useState([]);
   const [PlayersView, setPlayersView] = useState([]);
@@ -117,24 +117,25 @@ count++
   return count;
 }
 
-  function updateBet() {
-    const val= (Number(input));
-    if (val>bet&&(val<=CardsDown())){
+const updateBet = () => () => {
+    //const val= (Number(input));
+    const Bet= 1;
+    if (Bet>bet&&(Bet<=CardsDown())){
       if(bet==0)
       {
-        setGameMode('betting');
+        //setGameMode('betting');
       }
-      setBet(val);
+      setBet(Bet);
       setIsActive(false);
-    let mode='Betting';
     let downCount=CardsDown();
     let active=false;
-    socket.emit('EndTurn',{id,downCount,playedDeck,mode,val,active,havePassed});
+    let pass=false;
+    socket.emit('EndTurn',{id,downCount,playedDeck,gameMode,Bet,active,pass});
     }
-    else if(val>CardsDown()){
+    else if(Bet>CardsDown()){
       alert("Недостаточно карт на столе")
     }
-    else if(val<bet){
+    else if(Bet<bet){
       alert("Ставка меньше текущей")
     }
     else{
@@ -150,7 +151,7 @@ count++
     console.log("EndTurn");
   }*/
   const Pass = () => () => {
-    setHavePassed(true);
+   // setHavePassed(true);
     setIsActive(false);
     let downCount=CardsDown();
     let active=false;
@@ -208,6 +209,9 @@ count++
            </button>
           <button className='OptionButton'  onClick={ Pass()}>
             Pass
+           </button>
+           <button className='OptionButton'  onClick={ updateBet()}>
+            Bet
            </button>
             <SkullView2 players = {PlayersView} thisPlayerView={thisPlayer}/>
            
