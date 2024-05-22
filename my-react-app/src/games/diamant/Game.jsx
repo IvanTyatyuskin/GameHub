@@ -1,4 +1,5 @@
-import React, { Component, useContext} from "react";
+import React, { useState, useEffect, useContext } from 'react';
+//import React, { Component, useContext} from "react";
 import Button from '../../Components/common/button'
 import '../../Components/css/game.css'
 import Ruby from './Images/ruby.png'
@@ -12,8 +13,8 @@ import Tile from "./components/Tile.jsx"
 import { GameContext } from './GameContext.jsx';
 import io from 'socket.io-client';
 import PropTypes from 'prop-types';
-import { SocketContext } from '../../SocketContext.js'
-  
+import { SocketContext } from '../../SocketContext'
+
 
 
 const squareCount = 6;
@@ -319,13 +320,9 @@ class Square extends React.Component {
         );
     }
 }
-Square.propTypes = {
-    isStarted: PropTypes.bool.isRequired,
-    cardType: PropTypes.string.isRequired,
-    tileId: PropTypes.number.isRequired,
-    textButton: PropTypes.string.isRequired,
-};
-class Game extends Component {
+
+
+/*class Game extends Component {
     
     static contextType = GameContext;
     constructor(props) {
@@ -340,15 +337,10 @@ class Game extends Component {
         };
         this.handleContinue = this.handleContinue.bind(this);
         this.handleExit = this.handleExit.bind(this);
-        this.handleReadyLeave=this.handleReadyLeave.bind(this);
-        this.handleReadyMoveOn=this.handleReadyMoveOn.bind(this);
+        //this.handleReadyLeave=this.handleReadyLeave.bind(this);
+        //this.handleReadyMoveOn=this.handleReadyMoveOn.bind(this);
     }
-    componentDidMount(){  
- 
-       
-           
-       
-    }
+    
     
     winWindow() {
         this.setState(()=>{
@@ -359,17 +351,7 @@ class Game extends Component {
         //this.context.setModalContent(stringWinnerAlirt());
         //alert(stringWinnerAlirt());
     }
-    handleReadyLeave(){
-        const move = "Leave";
-        socket.emit('player_ready_Diamant', move);
-        this.setState({ isButtonPressed: true });
   
-    }
-    handleReadyMoveOn(){
-        const move = "MoveOn";
-        socket.emit('player_ready_Diamant', move);
-        this.setState({ isButtonPressed: true });
-    }
     handleContinue() {
         this.setState(prevState => {
             const startedSquares = [...prevState.startedSquares];
@@ -420,7 +402,7 @@ class Game extends Component {
         }
             return { startedSquares, squareValues,squareCardType,squaresTileId};
         }, () => {
-            socket.emit('playerUpdate', /*PlayerDATA */);
+      
 
             this.context.setRoundData(roundData);
             this.context.setPlayersData(playersDataJS);
@@ -489,7 +471,7 @@ class Game extends Component {
             }
             return {squareValues };
         }, () => {
-            socket.emit('playerUpdate', /*PlayerDATA */);
+            socket.emit('playerUpdate',);
             this.context.setRoundData(roundData);
             this.context.setPlayersData(playersDataJS);
         });
@@ -506,7 +488,8 @@ class Game extends Component {
         );
     }
     render() {
-        let buttonContColor = !this.state.isButtonPressed ? "rgb(90, 195, 176)" : 'grey' ;
+        let buttonMoveOnContColor = !this.state.isButtonPressed ? "rgb(90, 195, 176)" : 'grey' ;
+        let buttonLeaveContColor = !this.state.isButtonPressed ? "rgb(178, 34, 34)" : 'grey' ;
         let squares = [];
         for (let i = 0; i < squareCount * squareCount; i++) {
             squares.push(this.renderSquare(i));
@@ -530,44 +513,283 @@ class Game extends Component {
         }
         return (
             <div className="theAreaWithTheGame">
-                 <SocketContext.Consumer>
-            {socket => {
-                console.log("hey");
-                socket.on('start_Diamant', (data) => {
-                    console.log("hey");
-                console.log(`Колода карт: ${JSON.stringify(data)}`);
-                Deck=(data.Deck.map(card => new Card(card.cardType, card.points)));
-                Players = data.Players.map(player => new Player(player.id, player.roundPoints, player.allPoints, player.relics, player.nickName, player.exit));
+                <SocketContext.Consumer>
+                {socket => {
+                    socket.on('start_Diamant', (data) => {
+                        console.log("hey");
+                        console.log(`Колода карт: ${JSON.stringify(data)}`);
+                        Deck=(data.Deck.map(card => new Card(card.cardType, card.points)));
+                        Players = data.Players.map(player => new Player(player.id, player.roundPoints, player.allPoints, player.relics, player.nickName, player.exit));
+                        updatePlayerInfo();
+                        console.log(playersDataJS);
+                        this.context.setPlayersData(playersDataJS);
+                    });
+        
+                    return (
+                        <React.Fragment>
+                            <div className="scroll">
+                                {rows}
+                            </div>
+                            <div className="hand">
+                                <div className="theButtonPanel">
+                                    <Button background={buttonMoveOnContColor} disabled={this.state.isButtonPressed}  padding="10px" onClick={() => {
+                                        const move = "MoveOn";
+                                        socket.emit('player_ready_Diamant', move);
+                                        this.setState({ isButtonPressed: true });
+                                        socket.on('all_players_ready_Diamant',()=>{this.handleContinue();console.log("Move")})
+                                    }}>
+                                        Продолжить
+                                    </Button>
+                                    <Button padding="10px" background={buttonLeaveContColor} onClick={() => {
+                                        const move = "Leave";
+                                        socket.emit('player_ready_Diamant', move);
+                                        this.setState({ isButtonPressed: true });
+                                    }}>
+                                        Выйти {allRubyOnMap}
+                                    </Button>
+                                </div>
+                            </div>
+                            <div>
+                                <Button onClick={this.handleStart}>
+                                    START
+                                </Button>
+                            </div>
+                        </React.Fragment>
+                    );
+                }}
+                </SocketContext.Consumer>
+            </div>
+        );
+        
+    }
+}
+*/
+export default Game;
+
+function Game() {
+    const socket = useContext(SocketContext);
+    
+    const game = useContext(GameContext);
+
+    const [startedSquares, setStartedSquares] = useState([]);
+    const [squareValues, setSquareValues] = useState([]);
+    const [squareCardType, setSquareCardType] = useState([]);
+    const [squaresTileId, setSquaresTileId] = useState([]);
+    const [isButtonPressed, setIsButtonPressed] = useState(false);
+   
+    useEffect(() => {
+        socket.emit("Diamant_begin");
+        socket.on('start_Diamant', (data) => {
+            console.log("hey");
+            console.log(`Колода карт: ${JSON.stringify(data)}`);
+            Deck=(data.Deck.map(card => new Card(card.cardType, card.points)));
+            Players = data.Players.map(player => new Player(player.id, player.roundPoints, player.allPoints, player.relics, player.nickName, player.exit));
+            updatePlayerInfo();
+            console.log(playersDataJS);
+            game.setPlayersData(playersDataJS);
+            return () => {
+                socket.off('start_Diamant');
+            };
+        });
+    }, []);
+    const winWindow = () => {
+        game.setModalActive(true);
+        game.setModalContent(stringWinnerAlirt());
+    };
+    
+    const handleReadyLeave = () => {
+        const move = "Leave";
+        socket.emit('player_ready_Diamant', move);
+        setIsButtonPressed(true);
+    };
+
+    useEffect(() => {
+        const handleAllPlayersReady = () => {
+            handleContinue();
+            console.log("Move");
+        };
+    
+        socket.on('all_players_ready_Diamant', handleAllPlayersReady);
+    
+        return () => {
+            socket.off('all_players_ready_Diamant', handleAllPlayersReady);
+        };
+    }, []);
+    
+    const handleReadyMoveOn = () => {
+        const move = "MoveOn";
+        socket.emit('player_ready_Diamant', move);
+        setIsButtonPressed(true);
+    };
+    useEffect(() => {
+        setStartedSquares(Deck.map((card, index) => index < currentMove));
+        setSquareValues(Deck.map(card => card.getСardType().includes("Trap") ? null : PointCount(card.getPoints())));
+        setSquareCardType(Deck.map(card => card.getСardType()));
+        setSquaresTileId(Deck.map((card, index) => defineTileId(index + 1)));
+    },[game])
+    const handleContinue = () => {
+        if (startedSquares.length < squareCount * squareCount) {
+            setSquaresTileId(prevSquaresTileId => [...prevSquaresTileId, defineTileId(currentMove+1)]);
+            let cardType = Deck[currentMove].getСardType();
+            setSquareCardType(prevSquareCardType => [...prevSquareCardType, cardType]);
+            setStartedSquares(prevStartedSquares => [...prevStartedSquares, true]);
+            if(!Deck[currentMove].getСardType().includes("Trap")) {
+                let points = Deck[currentMove].getPoints();
+                console.log(PointCount(points))
+                setSquareValues(prevSquareValues => {
+                    const newSquareValues = [...prevSquareValues];
+                    newSquareValues[startedSquares.length - 1] = PointCount(points);
+                    return newSquareValues;
+                });
                 updatePlayerInfo();
-                console.log(playersDataJS);
-                this.context.setPlayersData(playersDataJS);
-               
-            });
-            }}
-        </SocketContext.Consumer>  
-                <div className="scroll">
-                    {rows}
-                </div>
-                <div className="hand">
-                        <div className="theButtonPanel">
-                            <Button background={buttonContColor} disabled={this.state.isButtonPressed}  padding="10px" onClick={this.handleReadyMoveOn}>
-                                Продолжить
-                            </Button>
-                            <Button padding="10px" background={buttonContColor} onClick={this.handleReadyLeave}>
-                                Выйти {allRubyOnMap}
-                            </Button>
-                        </div>
-                </div>
-                <div>
-                    <Button onClick={this.handleStart}>
-                        START
+            }
+        }
+        currentMove++;
+        console.log(currentMove);
+        trapsInThisRound = GetTrapsInThisRound();
+        if(checkTrapDuplicates()) {
+            if(roundNum < 5) { 
+                roundNum++;
+                roundData = { round: roundNum };
+                console.log('Раунд.' + roundNum);
+            } else {
+                winWindow(); 
+            }
+            currentMove = 0;
+            shuffle(Deck);
+            allRubyOnMap = 0;
+            let player = Players[0];
+            player.setRoundPointsToZero();
+            updatePlayerInfo();
+            setStartedSquares([]);
+            setSquareValues([]);
+            setSquareCardType([]);
+            setSquaresTileId([]);
+        }
+    
+        game.setRoundData(roundData);
+        game.setPlayersData(playersDataJS);
+        game.setTrapsInThisRound(trapsInThisRound);
+    };
+    
+    
+    /*const handleExit = () => {
+        setSquareValues([]), () => {
+            socket.emit('playerUpdate', );
+            game.setRoundData(roundData);
+            game.setPlayersData(playersDataJS);}
+        ///Временно
+        let player = Players[0];
+        player.setExit(true);
+        ///
+        let countPlayerExited=0;
+        Players.forEach((player) => {
+            if (player.getExit()) {
+                countPlayerExited++;
+            }
+        });
+        let pointsPerPlayer = Math.floor(allRubyOnMap / countPlayerExited);
+        let remainingPoints = allRubyOnMap;
+        Players.forEach((player) => {
+            if(player.getExit()) player.addRoundPoints(pointsPerPlayer);
+        });
+        remainingPoints -= pointsPerPlayer * countPlayerExited;
+        for (let i = 0; i < currentMove; i++) {
+            if (Deck[i].getСardType().includes("relic") && countPlayerExited==1) player.addRelic(Deck[i]);
+        }
+        console.log("Реликвии: "+player.getRelic());
+        allRubyOnMap = 0;
+        allRubyOnMap += remainingPoints;
+        player.addAllPoints(player.getRoundPoints());
+        player.setExit(true);
+        updatePlayerInfo();
+        if(checkPlayersExited()) { 
+            for (let i = 0; i < currentMove; i++) {
+                if (Deck[i].getСardType().includes("relic")) {
+                    Deck.splice(i, 1);
+                    i--;
+                }
+            }
+            player.setExit(false);
+            if(roundNum<5) {
+                roundNum++;
+                roundData = { round: roundNum };
+            } else {
+                winWindow();
+                //alert(stringWinnerAlirt());
+            }
+            console.log('Раунд.'+roundNum);
+            currentMove=0;
+            shuffle(Deck);
+            allRubyOnMap=0;
+            player.setRoundPointsToZero();
+            updatePlayerInfo();
+            return {
+                squareValues: []
+            };
+        }
+        return { squareValues };
+    
+    }*/
+    
+const renderSquare = (i) => {
+        return (
+            <Square
+                key={i}
+                isStarted={startedSquares[i]}
+                textButton={squareValues[i]}
+                cardType={squareCardType[i]}
+                tileId={squaresTileId[i]}
+            />
+        );
+    };
+
+    
+    const buttonMoveOnContColor = !isButtonPressed ? "rgb(90, 195, 176)" : 'grey' ;
+    const buttonLeaveContColor = !isButtonPressed ? "rgb(178, 34, 34)" : 'grey' ;
+    let squares = [];
+    for (let i = 0; i < squareCount * squareCount; i++) {
+        
+        squares.push(renderSquare(i));
+    }
+    let rows = [];
+    for (let i = 0; i < squareCount; i++) {
+        let rowSquares = squares.slice(
+            i * squareCount,
+            i * squareCount + squareCount
+        );
+        if (i % 2 !== 0) {
+            rowSquares = rowSquares.reverse();
+        }
+        rows.push(
+            <div key={i}
+                className="board-row"
+                style={{ display: "flex" }}>
+                {rowSquares}
+            </div>
+        );
+        
+    }
+    return (
+        <div className="theAreaWithTheGame">
+            <div className="scroll">
+                {rows}
+            </div>
+            <div className="hand">
+                <div className="theButtonPanel">
+                    <Button background={buttonMoveOnContColor} disabled={isButtonPressed} padding="10px" onClick={handleReadyMoveOn}>
+                        Продолжить
+                    </Button>
+                    <Button padding="10px" background={buttonLeaveContColor} onClick={handleReadyLeave}>
+                        Выйти {allRubyOnMap}
                     </Button>
                 </div>
             </div>
-        );
-    }
+            <div>
+                <Button>
+                    START
+                </Button>
+            </div>
+        </div>
+    );
 }
-
-export default Game;
-
-

@@ -32,7 +32,7 @@ let lobbies = {};
 let users = [];
 let TicTacToeGames = [];
 
-function addUser(socketID, nickname, lobbyName, isCreator, actualSocketID) {
+function addUser(socketID, nickname, lobbyName, isCreator, actualSocketID,isReady) {
   const existingUser = users.find((user) => user.socketID === socketID);
 
   if (existingUser) {
@@ -45,6 +45,7 @@ function addUser(socketID, nickname, lobbyName, isCreator, actualSocketID) {
     lobbyName,
     isCreator,
     actualSocketID,
+    isReady
   };
   
   users.push(user);
@@ -74,7 +75,7 @@ io.on('connection', (socket) => {
     console.log('actualSocketID for user', existingUser.nickname, 'changed to', existingUser.actualSocketID);
   }
 
-  addUser(socketID, '', '', false, socketID);
+  addUser(socketID, '', '', false, socketID,false);
 
   if (!socket.id) {
     socket.id = socket.client.id;
@@ -110,8 +111,25 @@ io.on('connection', (socket) => {
       }
     }
   });
-
+  socket.on('HEY_de',()=>{console.log("Pepe")});
   socket.on('Diamant_start', () => {
+    
+    const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
+    if (user && user.isCreator) {
+     
+      const lobby = lobbies[user.lobbyName];
+      if (lobby) {
+      
+        lobby.users.forEach((user) => {
+          
+          io.to(user.actualSocketID).emit('Diamant_started', () => {
+            console.log('Client confirmed receipt of start_game event');
+          });
+        });
+      }
+    }
+  });
+  socket.on('Diamant_begin', () => {
     
     const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
     if (user && user.isCreator) {
@@ -161,16 +179,29 @@ io.on('connection', (socket) => {
         const playersData = lobby.users.map(player => { return new Player(i++, 0, 0, [], player.nickname, false) });
         console.log(playersData)
         lobby.users.forEach((user) => {
-          console.log("heyee")
-          io.to(user.actualSocketID).emit('Diamant_started', () => {
-            console.log('Client confirmed receipt of start_game event');
-            io.to(user.actualSocketID).emit('start_Diamant', {Players:playersData, Deck: Deck});
-          });
+          io.to(user.actualSocketID).emit('start_Diamant', {Players:playersData, Deck: Deck});
         });
       }
     }
   });
+  socket.on('player_ready_Diamant', () => {
+    const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
+    if (user) {
+      user.isReady = true; 
   
+      const lobby = lobbies[user.lobbyName];
+      if (lobby) {
+        const allPlayersReady = lobby.users.every((user) => user.isReady); 
+  
+        if (allPlayersReady) {
+          lobby.users.forEach((user) => {
+            io.to(user.actualSocketID).emit('all_players_ready_Diamant'); 
+            user.isReady = false; 
+          });
+        }
+      }
+    }
+  });
   
   
   socket.on('create_lobby', ({ roomName, isLocked, maxCount }) => {
