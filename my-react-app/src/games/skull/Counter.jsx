@@ -31,12 +31,12 @@ function Counter() {
   const [PlayersView, setPlayersView] = useState([]);
  
 
-  const ThisPlayerToView = (deckValue,active,vp,gameMode) => () => {
+  const ThisPlayerToView = (deckValue,active,vp,gameMode,Bet) => () => {
   let cards=[];
   for (let i = 0; i < deckValue.length; i++) { 
     cards.push(new CardView(deckValue[i].IsSkull,FlipCard(i), deckValue[i].IsDown,deckValue[i].IsDisabled));
   }
-  let view= new ThisPlayerView(0,cards,active,vp,bet,updateBet,Pass,input,setInput,false,gameMode);
+  let view= new ThisPlayerView(0,cards,active,vp,Bet,updateBet,Pass,input,setInput,false,gameMode);
  // setThisPlayer([...thisPlayer, ...view]);
  return view;
   }
@@ -59,7 +59,7 @@ function Counter() {
     ]; 
     socket.emit('AddSkullPlayer');
     setDeck([...deck, ...initialDeck]);
-    setThisPlayer(ThisPlayerToView(initialDeck,false,0,'setup'));
+    setThisPlayer(ThisPlayerToView(initialDeck,false,0,'setup', 0));
    
   }, []);
 
@@ -76,13 +76,14 @@ function Counter() {
           setVP(data[i].VP);
           setIsActive(data[i].IsActive);
           setGameMode(data[i].GameMode);
+          setBet(data[i].Bet);
           ind=i;
         }
         data[i].onClick=() =>openChip(i);
     }
     setPlayers(data);
     setPlayersView(PlayersToView(data)); 
-    setThisPlayer(ThisPlayerToView(deck,data[ind].IsActive,data[ind].VP,data[ind].GameMode));
+    setThisPlayer(ThisPlayerToView(deck,data[ind].IsActive,data[ind].VP,data[ind].GameMode,data[ind].Bet));
   });
 
   socket.on('SkullGetPlayerId', (data) => {
@@ -91,10 +92,13 @@ function Counter() {
   });  
 
   socket.on('BetFail', () => {
+if(deck.length>0)
+  {
     const newDeck = [...deck];
     newDeck[Math.floor(Math.random()*(3+1))].IsDisabled=true;
     setDeck(newDeck);
-    setThisPlayer(ThisPlayerToView(newDeck,isActive,victoryPoints,gameMode));
+    setThisPlayer(ThisPlayerToView(newDeck,isActive,victoryPoints,gameMode,bet));
+  }
   }); 
 
   socket.on('Reset', () => {
@@ -104,8 +108,8 @@ function Counter() {
         newDeck.push(deck[i]);
         newDeck[i].IsDown=false;
       }
-    setDeck([...deck, ...newDeck]);
-    setThisPlayer(ThisPlayerToView(newDeck,isActive,victoryPoints,gameMode));
+    setDeck(newDeck);
+    setThisPlayer(ThisPlayerToView(newDeck,isActive,victoryPoints,gameMode,bet));
   });  
 
 function CardsDown(){
@@ -120,7 +124,7 @@ count++
 
 const updateBet = () => () => {
     //const val= (Number(input));
-    const Bet= 1;
+    const Bet= 2;
     if (Bet>bet&&(Bet<=CardsDown())){
       if(bet==0)
       {
@@ -157,7 +161,8 @@ const updateBet = () => () => {
     let downCount=CardsDown();
     let active=false;
     let pass=true;
-    socket.emit('EndTurn',{id,downCount,playedDeck,gameMode,bet,active,pass});
+    let Bet=bet;
+    socket.emit('EndTurn',{id,downCount,playedDeck,gameMode,Bet,active,pass});
  
   }
   /*
@@ -173,20 +178,25 @@ const updateBet = () => () => {
       //newDeck[ind].Image=back;
       playedDeck.push(newDeck[ind]);
   
-    setDeck(newDeck);
+    setDeck(newDeck);     
     let downCount=CardsDown();
     let active=false;
     let pass=false;
-    socket.emit('EndTurn',{id,downCount,playedDeck,gameMode,bet,active,pass});
+    let Bet=bet;
+    socket.emit('EndTurn',{id,downCount,playedDeck,gameMode,Bet,active,pass});
     console.log(deck)
-    setThisPlayer(ThisPlayerToView(newDeck,isActive,victoryPoints,gameMode));
+    setThisPlayer(ThisPlayerToView(newDeck,isActive,victoryPoints,gameMode,Bet));
     console.log(thisPlayer);
   }
    };
 
    const openChip = (ind) => () => {
-    let targetId=players[ind].Id;
-    socket.emit('OpenChip',{targetId});
+   // if(gameMode=='flippingChips')
+    //{
+        let targetId=players[ind].Id;
+        socket.emit('OpenChip',{targetId});
+    //}
+    
    }
    
 
@@ -203,7 +213,7 @@ const updateBet = () => () => {
             */
             
            }
-            <button className='OptionButton'  onClick={ FlipCard(0)}>
+            <button className='OptionButton'  onClick={ FlipCard(3)}>
             Play
            </button>
           <button className='OptionButton'  onClick={ Pass()}>

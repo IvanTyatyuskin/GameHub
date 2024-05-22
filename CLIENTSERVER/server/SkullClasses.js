@@ -8,7 +8,7 @@ class SkullCard {
   }
   
   class SkullPlayer {
-    constructor(id,name,vP, cardsDown,bet,image,isActive,havePassed,openCards,gameMode,onClick) {
+    constructor(id,name,vP, cardsDown,bet,image,isActive,havePassed,openCards,gameMode,onClick,winWindow) {
     this.Id=id;
     this.Name=name;
     this.VP = vP;
@@ -20,6 +20,7 @@ class SkullCard {
     this.OpenCards=openCards;
     this.GameMode=gameMode;
     this.onClick=onClick;
+    this.WinWindow=winWindow;
     }
     
   }

@@ -200,7 +200,7 @@ io.on('connection', (socket) => {
   socket.on('AddSkullPlayer', () => {     
 
     console.log(socket.id);
-      SkullPlayers.push(new SkullPlayer(socket.id,'player',0,0,0,null,false,false,[],'setup'));
+      SkullPlayers.push(new SkullPlayer(socket.id,'player',0,0,0,null,false,false,[],'setup',null,false));
       SkullPlayersData.push(new SkullPlayerData(socket.id,[]));
       if(SkullPlayers.length==1){
         SkullPlayers[0].IsActive=true; 
@@ -215,8 +215,8 @@ io.on('connection', (socket) => {
   socket.on('EndTurn', (data) => {   
     console.log(`End Turn`);
     console.log(data);
-    let ActivePlayers=0;
-    GameMode=data.gameMode;
+    let ActivePlayers=0; 
+    GameMode=data.gameMode;     
     Bet=data.Bet;  
     console.log(GameMode);  
     for (let i = 0; i < SkullPlayers.length; i++) {
@@ -225,7 +225,7 @@ io.on('connection', (socket) => {
       SkullPlayers[i].IsActive=data.active;
       SkullPlayers[i].CardsDown=data.downCount;  
       SkullPlayersData[i].PlayedCards=data.playedDeck; 
-      SkullPlayers[i].HavePassed=data.pass;  
+      SkullPlayers[i].HavePassed=data.pass;     
       console.log(`Updated player ${data.id}`);
       
     }        
@@ -253,8 +253,8 @@ while(SkullPlayers[CurrPlayerInd].HavePassed==true)
   
 if(ActivePlayers==1) 
   {
-   
-    SkullPlayers[CurrPlayerInd].GameMode="flippingChips";
+             
+    SkullPlayers[CurrPlayerInd].GameMode="flippingChips";  
     GameMode="flippingChips";
     SkullPlayers[CurrPlayerInd].OpenCards=SkullPlayersData[CurrPlayerInd].PlayedCards;
 
@@ -265,19 +265,18 @@ if(ActivePlayers==1)
       {
        
       if(SkullPlayersData[CurrPlayerInd].PlayedCards[i].IsSkull)
-      {
-       
-        io.sockets.socket(SkullPlayers[CurrPlayerInd].id).emit('BetFail'); 
-
+      {          
+        io.to(SkullPlayers[CurrPlayerInd].Id).emit('BetFail'); 
+        SkullPlayers[CurrPlayerInd].IsActive=false;   
         MoveToNextPlayer();
         SkullPlayers[CurrPlayerInd].IsActive=true;
         MoveToNextRound();
       }
-      }
+      }   
     }
   }      
    
-    if(GameMode=="setup")
+    if(GameMode=="setup")  
     {
         
     for (let i = 0; i < SkullPlayersData.length; i++) 
@@ -285,7 +284,7 @@ if(ActivePlayers==1)
         
         if(SkullPlayersData[i].PlayedCards?.length>0) 
         {
-                
+                      
             PlayersSetuped++;
 
         }
@@ -308,49 +307,62 @@ if(ActivePlayers==1)
     io.sockets.in('Skull').emit('SkullPLayersUpdate', SkullPlayers);
     console.log(SkullPlayers);  
     console.log(SkullPlayersData);   
+    
   });
 
   socket.on('OpenChip', (data) => {
-    console.log(data.targetId);         
-    let i=FindSkullPlayerById(data.targetId);       
-    console.log(SkullPlayersData[i].PlayedCards);
-    if(SkullPlayersData[i].PlayedCards[PlayedCards.length-1].IsSkull)
+    console.log(data.targetId);  
+           
+    let i=FindSkullPlayerById(data.targetId);   
+    let j=FindSkullPlayerById(socket.id);     
+    
+    if(SkullPlayersData[i].PlayedCards[SkullPlayersData[i].PlayedCards.length-1].IsSkull)
       {  
-        io.sockets.socket(SkullPlayers[i].id).emit('BetFail'); 
-        MoveToNextRound();
+        io.to(socket.id).emit('BetFail'); 
+        SkullPlayers[j].IsActive=false;
+        console.log(SkullPlayers[j]);    
         SkullPlayers[i].IsActive=true;
+        MoveToNextRound(); 
       }          
-      else
+      else   
       {
-        bet=bet-1;
-        let ind=FindSkullPlayerById(socket.id);
-        SkullPlayers[ind].IsActive=true;
-        if(bet==0)
+       
+        Bet=Bet-1;
+        SkullPlayers[j].IsActive=true;
+        if(Bet==0)
         {
-          SkullPlayers[ind].VP++;
-          if(SkullPlayers[ind].VP==2)   
+          SkullPlayers[j].VP++;
+         
+          if(SkullPlayers[j].VP==2)   
             {
-              for (let j = 0; j < SkullPlayers.length; j++) 
+              for (let k = 0; k < SkullPlayers.length; k++) 
               {
-                SkullPlayers[j].WinWindow=true;
+                SkullPlayers[k].WinWindow=true;
               }
-            }
+            }     
             else           
             {
+
               MoveToNextRound();
             }
+            
         }
         else
         {
-
+          
+          for (let k = 0; k < SkullPlayers.length; k++) 
+            {
+              SkullPlayers[k].Bet=Bet;
+            }
         }
+
       }
-      console.log(SkullPlayers);    
+      console.log(SkullPlayers);   
   io.sockets.in('Skull').emit('SkullPLayersUpdate', SkullPlayers);
   });
 
 });  
-function FindSkullPlayerById(id)
+function FindSkullPlayerById(id)   
 {
   for (let i = 0; i < SkullPlayers.length; i++) {
       
@@ -374,8 +386,12 @@ function MoveToNextRound()
   {  
     SkullPlayers[i].OpenCards=[];
     SkullPlayers[i].GameMode='play';
-  
-  }  
+    SkullPlayers[i].Bet=0;
+    SkullPlayers[i].CardsDown=0;
+    SkullPlayers[i].HavePassed=false;
+    SkullPlayersData[i].PlayedCards=[];
+  } 
+  Bet=0; 
   GameMode='play';
   io.sockets.in('Skull').emit('Reset');
   
