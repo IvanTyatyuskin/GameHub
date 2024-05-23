@@ -21,6 +21,7 @@ export const OnlyWindow = ({children}) =>
 }
 
 export const RegistrationPage = ({}) =>{
+<<<<<<< Updated upstream
     function LanguageSelection() {
         return(
             <div className={styles_registrationPage.languageselection}>
@@ -82,6 +83,105 @@ export const RegistrationPage = ({}) =>{
             <LogoComponent/>
             {LanguageSelection()}
             <p></p>
+=======
+  const socket = useContext(SocketContext);
+
+  const cookies = document.cookie.split(';').reduce((acc, cookie) => {
+    const [name, value] = cookie.trim().split('=');
+    acc[name] = decodeURIComponent(value);
+    return acc;
+  }, {});
+
+  console.log(socket);
+
+  const _nickname = cookies.nickname || ''; //получить из cookie
+  const _avatar = cookies.avatar ||  0;
+  const _background = cookies.background || 0;
+
+  //нужно добавть в cookie значение библиотеки языка (Rus||Eng)
+
+
+  const [getInput, setInput] = useState(_nickname);
+  const [getAvatar, setAvatar] = useState(_avatar);
+  const [getBackground, setBackground] = useState(_background);
+
+  function LanguageSelection() {
+    return(
+      <div className={styles_registrationPage.languageselection}>
+        <LanguageButton text='Rus' onclick={()=>{
+          //код
+        }}/>
+        <LanguageButton text='Eng'/>
+      </div>
+    )
+  }
+
+  function TextInputArea() {
+    return(
+      <div className={styles_registrationPage.textinputarea}>
+        <InputText
+          labelText = "Имя пользователя"
+          name = 'inputname'
+          maxlength="20"
+          placeholder="Сгенерированное имя"
+          id="inputName" // Добавляем ID для удобного обращения
+          value={getInput}
+          setValue={setInput}
+        />
+      </div>
+    )
+  }
+
+  const handleAccept = () => {
+    const nickname = getInput;
+    //document.getElementById('inputName').value; // Получаем значение никнейма
+    //const avatar = 0;
+    //const background = 0;
+    document.cookie = `nickname=${nickname}; max-age=3600; path=/`; // Сохраняем никнейм в Cookie
+    document.cookie = `avatar=${getAvatar}; max-age=3600; path=/`; // Сохраняем никнейм в Cookie
+    document.cookie = `background=${getBackground}; max-age=3600; path=/`; // Сохраняем никнейм в Cookie
+
+    if (socket) {
+      socket.emit('setNickname', { nickname });
+    } else {
+      console.error('Socket is not connected');
+    }
+
+    window.location.href = '/ListOfGames'; 
+  };
+
+  const handleCancel = () => {
+    //document.getElementById('inputName').value = ''; // Очищаем поле для текста
+    //setInput('');
+    window.location.href = '/ListOfGames'; 
+  };
+
+  return(<>
+    <OnlyWindow>
+      <div className={styles_onlyWindow.header}>
+        <LogoComponent/>
+        {LanguageSelection()}
+        <p></p>
+      </div>
+      <div className={styles_onlyWindow.body}>
+        <div className={styles_registrationPage.box}>
+          <div className="userphoto-container">
+            <img id="userPhoto" className="userphoto-icon" /*loading="eager"*/ alt="" src={img} />
+          </div>
+          {TextInputArea()}
+          <div className={styles_registrationPage.panelbuttons}>
+            {cookies.nickname? 
+              <button id="cancel_button" onClick={handleCancel}>
+                <img alt="" src={img}/>
+                <p>Отмена</p>
+              </button>: null
+            }
+            <button id="accept_button" onClick={handleAccept}>
+              <img alt="" src={img}/>
+              <p>Принять</p>
+            </button>
+          </div>
+>>>>>>> Stashed changes
         </div>
         <div className={styles_onlyWindow.body}>
             <div className={styles_registrationPage.box}>

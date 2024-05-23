@@ -44,25 +44,33 @@ export const InputText2 = ({ labelText,
     name = 'username', 
     id = name,
     placeholder = '',
-    value = '',
-    setValue
+    value: propValue,
+    setValue: propSetValue
 }) => {
-    if (!setValue){
-        [value, setValue] = useState(value)
-    }
+    const [value, setValue] = useState(propValue || '');
+
     const handleChange = (event) => {
-        setValue(event.target.value)
+        if (propSetValue){
+            propSetValue(event.target.value);
+        } else{
+            setValue(event.target.value);
+        }
     }
     return (
         <div className={styles.text_field + ' ' + styles.text_field_floating}>
-            <input className={styles.text_field__input} 
-                type="text" name={name} id={id} 
-                value={value} placeholder={placeholder} 
+            <input 
+                className={styles.text_field__input} 
+                type="text" 
+                name={name} 
+                id={id} 
+                value={propSetValue ? propValue : value} 
+                placeholder={placeholder} 
                 onChange={handleChange}
                 />
-            <label className={styles.text_field__label} 
+            <label 
+                className={styles.text_field__label} 
                 htmlFor={name}>
-                {labelText}
+                    {labelText}
             </label>
         </div>
     )
