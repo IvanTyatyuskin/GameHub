@@ -44,13 +44,16 @@ export const PlayersTablet = ({
     )
 }
 
+
 /**
- * param {PlayerView} playerView 
  * 
+ * @param {PlayerView} playerView 
+ * @returns 
  */
 export const PlayersTablet2 = ({
     playerView, active
 }) => {
+    console.table(playerView)
     function ViewOpenCards(Cards){
         if (Cards.length > 0){
             return(
@@ -69,7 +72,7 @@ export const PlayersTablet2 = ({
     }
     return(
         <div className='playersTablet'>
-            <div className='playerCard'>
+            <div className={playerView.IsActive?'playerCard active':'playerCard'}>
                 <div>
                     <img src={playerView.Img} className='size64'/>
                     <p>{playerView.Name}</p>

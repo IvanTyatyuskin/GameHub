@@ -44,7 +44,7 @@ function Counter() {
   const PlayersToView = (playersValue) => () => {
     let newPlayers=[];
     for (let i = 0; i < playersValue.length; i++) { 
-      newPlayers.push(new PlayerView(i, "player "+String(i), skull, playersValue[i].VP, playersValue[i].CardsDown,playersValue[i].IsActive, null));
+      newPlayers.push(new PlayerView(i, "player "+String(i), skull, playersValue[i].VP, playersValue[i].CardsDown,playersValue[i].OpenCards, playersValue[i].IsActive, null));
     }
 
    // setThisPlayer([...thisPlayer, ...view]);

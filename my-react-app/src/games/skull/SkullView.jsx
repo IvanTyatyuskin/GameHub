@@ -128,9 +128,8 @@ export const SkullView2 = ({
     //const indexDictionary = 0;
 
     var active = false;
-    if (thisPlayerView.Phase === '3'){
+    if (thisPlayerView.Phase === 'flippingChips'){
         active = true;
-        //if (players[thisPlayerView.Id].CardsDown === 0) thisPlayerHaveCards = false;
     }
     return (
         <>

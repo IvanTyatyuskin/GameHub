@@ -19,7 +19,7 @@ export class ThisPlayerView {
   
  export class PlayerView {
     constructor(id, name, img, vP, cardsDown, 
-        openCards, isActive,onclick) {
+        openCards, isActive, onclick) {
       this.Id = id;
       this.Name = name;
       this.Img = img;

@@ -90,26 +90,26 @@ export const BottomPanel2 = ({
 
     switch (thisPlayerView.Phase){
         /*only the choice of chips*/
-        case '0':{
+        case 'setup':{
             HandIsActive = true;
             break;
         }
         /*You can place a bet*/
-        case '1':{
+        case 'play':{
             HandIsActive = true;
             BetIsVisible = true;
             //BetIsActive = true;
             break;
         }
         /*the betting phase*/
-        case '2':{
+        case 'betting':{
             BetIsVisible = true;
             //BetIsActive = true;
             PassIsVisible = true;
             break;
         }
         /*opening chips*/
-        case '3':{
+        case 'flippingChips':{
             CounterIsVisible = true;
             break;
         }
