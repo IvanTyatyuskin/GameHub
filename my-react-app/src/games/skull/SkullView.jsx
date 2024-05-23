@@ -131,13 +131,18 @@ export const SkullView2 = ({
     if (thisPlayerView.Phase === 'flippingChips'){
         active = true;
     }
+    function IfThisPlayer(player){
+        if (thisPlayerView.Id === player.Id)
+            return true;
+        return false;
+    }
     return (
         <>
             <Body>
                 <div className="PlayingField">
                     {players.map(player => (
                         <PlayersTablet2 playerView = {player} 
-                        active={active}/>
+                        active={active} thisPlayer={IfThisPlayer(player)}/>
                     ))}
                 </div>
                 <BottomPanel2
