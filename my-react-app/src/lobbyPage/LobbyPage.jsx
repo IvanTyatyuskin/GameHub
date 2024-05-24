@@ -11,8 +11,8 @@ import io from 'socket.io-client';
 import React, { useState, useEffect, useContext } from 'react'
 import { SocketContext } from '../SocketContext'
 import { useNavigate } from 'react-router-dom'
-import UserImage1 from '../assets/UserImage1.png'
-import UserImage2 from '../assets/UserImage2.png'
+import { useParams } from 'react-router-dom';
+import { TextDataLobby } from './TextViewData.js'
 
 
 export const PlayerItem = ({Img={img_playButton}, Name='player', forHost = false, host = false}) =>{
@@ -49,6 +49,7 @@ export const LobbyPage = ({
     roomId = "#1234 - система идентификаторов комнат будет добавлена позже",
     PlayersData = TestData,
 }) =>{
+    const TextContext = TextDataLobby[0];
     const socket = useContext(SocketContext);
     const [lobbyName, setLobbyName] = useState('Popka');
     const [isCreator, setIsCreator] = useState(false);
@@ -124,7 +125,7 @@ export const LobbyPage = ({
                         <PlayerItem Img={player.img} Name={player.Name} host={player.host}/>
                     ))}
                     <button className={styles.ButtonAddPlayer}>
-                        <p>Пригласить игрока</p>
+                        <p>{TextContext.InviteAPlayer}</p>
                     </button>
                 </div>
             </div>
@@ -135,19 +136,19 @@ export const LobbyPage = ({
         return(
             <div className={styles.ButtonPanel}>
                 <button className={styles.SimpleButton}>
-                    123
+                    {TextContext.Exit}
                 </button>
                 <button className={styles.SimpleButton}>
-                    123
+                    {TextContext.Settings}
                 </button>
                 <button className={styles.SimpleButton + " " + styles.Large}>
-                    123
+                    {TextContext.HowToPlay}
                 </button>
                 {isCreator ? (
                     <button className={styles.SimpleButton + " " + styles.Large + ' ' + styles.WithIcon}
                     onClick={handleStartClick}>
                         <img src={img_playButton} alt="" />
-                        Старт
+                        {TextContext.Play}
                     </button>
                 ) : null}
             </div>

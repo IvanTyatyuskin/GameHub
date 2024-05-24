@@ -32,7 +32,9 @@ let lobbies = {};
 let users = [];
 let TicTacToeGames = [];
 
-function addUser(socketID, nickname, lobbyName, isCreator, actualSocketID) {
+
+//function addUser(socketID, nickname, lobbyName, isCreator, actualSocketID) {
+function addUser(socketID, nickname, lobbyName, isCreator, actualSocketID,isReady,diamantAction) {
   const existingUser = users.find((user) => user.socketID === socketID);
 
   if (existingUser) {
@@ -45,6 +47,8 @@ function addUser(socketID, nickname, lobbyName, isCreator, actualSocketID) {
     lobbyName,
     isCreator,
     actualSocketID,
+    isReady,
+    diamantAction
   };
   
   users.push(user);
@@ -74,7 +78,8 @@ io.on('connection', (socket) => {
     console.log('actualSocketID for user', existingUser.nickname, 'changed to', existingUser.actualSocketID);
   }
 
-  addUser(socketID, '', '', false, socketID);
+
+  addUser(socketID, '', '', false, socketID,false,null);
 
   if (!socket.id) {
     socket.id = socket.client.id;
@@ -128,8 +133,152 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('create_lobby', ({ roomName, isLocked, maxCount, game }) => {
-    const newLobby = { roomName, isLocked, currentCount: 1, maxCount, game, users: [], chatHistory: [] };
+
+  ///////////////////
+  socket.on('Diamant_start', () => {
+    
+    const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
+    if (user && user.isCreator) {
+     
+      const lobby = lobbies[user.lobbyName];
+      if (lobby) {
+      
+        lobby.users.forEach((user) => {
+          
+          io.to(user.actualSocketID).emit('Diamant_started', () => {
+            console.log('Client confirmed receipt of start_game event');
+          });
+        });
+      }
+    }
+  });
+  socket.on('Diamant_begin', () => {
+    
+    const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
+    if (user && user.isCreator) {
+     
+      const lobby = lobbies[user.lobbyName];
+      if (lobby) {
+        
+        console.log("sd")
+        // Собираем данные игроков и колоды
+        let Deck = [];
+        let RelicDeck = [];
+        for (let i = 0; i < 5; i++) {
+         Deck.push(new Card('Treasure',i+1))
+      }
+      Deck.push(new Card('Treasure',5))
+      Deck.push(new Card('Treasure',7))
+      Deck.push(new Card('Treasure',7))
+      Deck.push(new Card('Treasure',9))
+      Deck.push(new Card('Treasure',9))
+      Deck.push(new Card('Treasure',11))
+      Deck.push(new Card('Treasure',11))
+      Deck.push(new Card('Treasure',13))
+      Deck.push(new Card('Treasure',14))
+      Deck.push(new Card('Treasure',15))
+      Deck.push(new Card('Treasure',17))
+      RelicDeck.push(new Card('relic',5))
+      RelicDeck.push(new Card('relic',7))
+      RelicDeck.push(new Card('relic',8))
+      RelicDeck.push(new Card('relic',10))
+      RelicDeck.push(new Card('relic',12))
+      for (let i = 0; i < 3; i++) {
+         Deck.push(new Card('Trap Spider',null))
+      }
+      for (let i = 0; i < 3; i++) {
+         Deck.push(new Card('Trap Snake',null))
+      }
+      for (let i = 0; i < 3; i++) {
+         Deck.push(new Card('Trap Stone',null))
+      }
+      for (let i = 0; i < 3; i++) {
+         Deck.push(new Card('Trap Wood',null))
+      }
+      for (let i = 0; i < 3; i++) {
+         Deck.push(new Card('Trap Magma',null))
+      }
+        var i = 0;
+        const playersData = lobby.users.map(player => { return new Player(player.socketID,i++, 0, 0, [], player.nickname, false) });
+        console.log(playersData)
+        lobby.users.forEach((user) => {
+          const currentUserData = playersData.find(player => player.socketID === user.socketID);
+          io.to(user.actualSocketID).emit('start_Diamant', {Players:playersData, Deck: Deck,User:currentUserData});
+        });
+      }
+    }
+  });
+  socket.on('player_ready_Diamant', (data) => {
+    const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
+    if (user) {
+      user.isReady = true; 
+      user.action = data || null; // Store the action if provided
+    
+      const lobby = lobbies[user.lobbyName];
+      if (lobby) {
+        const allPlayersReady = lobby.users.every((user) => user.isReady);
+  
+        if (allPlayersReady) {
+          const actionsSet = new Set();
+  
+         
+          lobby.users.forEach((user) => {
+            if (user.action) {
+              actionsSet.add(user.action);
+            }
+          });
+  
+          const uniqueActions = Array.from(actionsSet); 
+          console.log(uniqueActions);
+          lobby.users.forEach((user) => {
+            io.to(user.actualSocketID).emit('all_players_ready_Diamant', { action: uniqueActions });
+            user.isReady = false; 
+            user.action = null; 
+          });
+        }
+      }
+    }
+  });
+  
+  //const allPlayersData = [];
+
+  socket.on("Update_Players_Data_Diamant", (Data) => {
+    const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
+    if (user) {
+      
+      
+      if (lobby) {
+        lobby.users.forEach((user) => {
+           const allPlayersReady = lobby.users.every((user) => user.isReady);
+  
+        if (allPlayersReady) {
+          const PlayerSet = new Set();
+  
+         
+          lobby.users.forEach((user) => {
+            if (user.action) {
+              actionsSet.add(user.action);
+            }
+          });
+        }
+        io.to(user.actualSocketID).emit("PlayersDataDiamantUpdated", { Players: allPlayersData });
+        })
+      }
+ 
+          allPlayersData.length = 0;
+      }
+    
+  });
+  
+
+
+  //socket.on('create_lobby', ({ roomName, isLocked, maxCount, game }) => {
+  //  const newLobby = { roomName, isLocked, currentCount: 1, maxCount, game, users: [], chatHistory: [] };
+
+  
+  socket.on('create_lobby', ({ roomName, isLocked, maxCount }) => {
+    const newLobby = { roomName, isLocked, currentCount: 1, maxCount, users: [] };
+//////////////////
     lobbies[roomName] = newLobby;
     const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
     user.isCreator = true;

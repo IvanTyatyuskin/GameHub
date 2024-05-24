@@ -40,12 +40,18 @@ export const OnlyWindow = ({children}) =>
 export const RegistrationPage = ({}) =>{
 
   const socket = useContext(SocketContext);
-  const _nickname = getCookie('nickname'); //получить из cookie
-  const _avatar = 0;
-  const _background = 0;
-  const _language = getCookie('language');
 
-  document.cookie = `language=${_language}; max-age=3600; path=/`; // Сохраняем никнейм в Cookie
+  console.log(socket);
+
+  const cookies = document.cookie.split(';').reduce((acc, cookie) => {
+    const [name, value] = cookie.trim().split('=');
+    acc[name] = decodeURIComponent(value);
+    return acc;
+  }, {});
+
+  const _nickname = cookies.nickname || ''; //получить из cookie
+  const _avatar = cookies.avatar ||  0;
+  const _background = cookies.background || 0;
 
   //нужно добавть в cookie значение библиотеки языка (Rus||Eng)
 
@@ -104,7 +110,7 @@ export const RegistrationPage = ({}) =>{
 
   const handleCancel = () => {
     //document.getElementById('inputName').value = ''; // Очищаем поле для текста
-    setInput(_nickname);
+    setInput(_nickname)
   };
 
   return(<>
@@ -121,12 +127,12 @@ export const RegistrationPage = ({}) =>{
           </div>
           {TextInputArea()}
           <div className={styles_registrationPage.panelbuttons}>
-            {getCookie('nickname') !== '' && (
+            {_nickname? 
               <button id="cancel_button" onClick={handleCancel}>
                 <img alt="" src={img}/>
                 <p>Отмена</p>
-              </button>
-            )}
+              </button>: null
+            }
             <button id="accept_button" onClick={handleAccept}>
               <img alt="" src={img}/>
               <p>Принять</p>
