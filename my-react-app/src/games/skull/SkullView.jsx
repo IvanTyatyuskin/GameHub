@@ -136,9 +136,14 @@ export const SkullView2 = ({
             return true;
         return false;
     }
+    function WinHandle(){
+        setModalContent(WinModal(players));
+        setModalActive(true);
+    }
     return (
         <>
             <Body>
+                <button onClick={WinHandle}>Победа</button>
                 <div className="PlayingField">
                     {players.map(player => (
                         <PlayersTablet2 playerView = {player} 
@@ -148,53 +153,32 @@ export const SkullView2 = ({
                 <BottomPanel2
                     thisPlayerView = {thisPlayerView}/>
             </Body>
-            {/* 
             <Modal active={modalActive} setActive={setModalActive}>
                     {modalContent}
-            </Modal>*/}
+            </Modal>
         </>
     )
 }
 
+function WinModal(players){
+    const sortedPlayers = [...players].sort((a, b) => b.VP - a.VP);
 
-
-/*
-SkullView2.propTypes = {
-    thisPlayerView: ThisPlayerView,
-    players: PropTypes.array
-}
-*/
-/*
-export const SkullView2 = ({
-    deck, bet, victoryPoints, 
-    updateBet, updateIsFlipping, 
-    Pass, FlipCard,
-    players}) =>{
-
-    function PlayersHand(){
+    function PlayerItem(player){
         return(
-            <BottomPanel2
-                deck={deck} bet={bet} victoryPoints={victoryPoints} 
-                updateBet={updateBet} updateIsFlipping={updateIsFlipping}
-                Pass={Pass} FlipCard={FlipCard}
-                /*playerInfo*//*/>
-        );
+            <div className='PlayerItem'>
+                <img src={player.Img} className='size64'/>
+                <p>{player.Name}</p>
+                <p>{player.VP}</p>
+            </div>
+        )
     }
+
     return (
         <>
-            <Body>
-                <div className="PlayingField">
-                    {players.map(player => (
-                        <PlayersTablet2 /*players/>*//*
-                            PlayerName={player.Name}
-                            VP={player.VP}
-                            cardsDown={player.CardsDown}
-                            openCards={player.openCards}
-                            onclick={player.onclick}/>
-                    ))}
-                </div>
-                {PlayersHand()}
-            </Body>
+            <h1>Победил игрок {sortedPlayers[0].Name}</h1>
+            {sortedPlayers.map(player => (
+                PlayerItem(player)
+            ))}
         </>
-    )
-}*/
+    );
+}

@@ -23,12 +23,15 @@
     border-radius:12px;
     background: white;
     max-width:700px;
+    max-height: 80vh;
     /*height:400px;*/
     display:flex;
     flex-direction:column;
     gap:10px;
     transform:scale(0.5);
     transition:0.5s all;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 .modal_content.active{
     transform:scale(1);
