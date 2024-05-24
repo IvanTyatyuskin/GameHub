@@ -70,7 +70,7 @@ class Player {
     }
 }
 let Players = [];
-//let Player0=null;
+let Player0=null;
 export let playersDataJS = Players.map(player => {
         return {
             imageId: player.getPlayerId(),
@@ -185,7 +185,7 @@ function PointCount(points) {
     }
     let pointsPerPlayer = Math.floor(points / 2 / Players.length);
     let remainingPoints = points;
-
+    console.log("p: "+pointsPerPlayer)
     if (pointsPerPlayer === 0) {
         allRubyOnMap+=points;
         return remainingPoints
@@ -194,6 +194,7 @@ function PointCount(points) {
     Players.forEach((player)=>player.addRoundPoints(pointsPerPlayer))
     remainingPoints -= pointsPerPlayer * Players.length;
     allRubyOnMap+=remainingPoints;
+    console.log("p2: "+remainingPoints)
     return remainingPoints;
    
 }
@@ -240,6 +241,7 @@ function checkPlayersExited(){
             allExited = false;
         }
     });
+    console.log(allExited)
     return allExited;
 }
 
@@ -322,250 +324,6 @@ class Square extends React.Component {
 }
 
 
-/*class Game extends Component {
-    
-    static contextType = GameContext;
-    constructor(props) {
-
-        super(props);
-        this.state = {
-            startedSquares: [],
-            squareValues: Array(squareCount * squareCount).fill(null),
-            squareCardType:[],
-            squaresTileId:[],
-            isButtonPressed: false,
-        };
-        this.handleContinue = this.handleContinue.bind(this);
-        this.handleExit = this.handleExit.bind(this);
-        //this.handleReadyLeave=this.handleReadyLeave.bind(this);
-        //this.handleReadyMoveOn=this.handleReadyMoveOn.bind(this);
-    }
-    
-    
-    winWindow() {
-        this.setState(()=>{
-            this.context.setModalActive(true);
-            this.context.setModalContent(stringWinnerAlirt());
-        })
-        //this.context.setModalActive(true);
-        //this.context.setModalContent(stringWinnerAlirt());
-        //alert(stringWinnerAlirt());
-    }
-  
-    handleContinue() {
-        this.setState(prevState => {
-            const startedSquares = [...prevState.startedSquares];
-            const squareValues = [...prevState.squareValues];
-            const squareCardType = [...prevState.squareCardType];
-            const squaresTileId=[...prevState.squaresTileId];
-            if (startedSquares.length < squareCount * squareCount) {
-                squaresTileId.push(defineTileId(currentMove+1))
-                let cardType=Deck[currentMove].getСardType();
-                squareCardType.push(cardType);
-                startedSquares.push(true);
-                if(!Deck[currentMove].getСardType().includes("Trap"))
-                {
-                let points = Deck[currentMove].getPoints();
-                squareValues[startedSquares.length - 1] = PointCount(points);
-                updatePlayerInfo()
-                }
-                
-            }
-            currentMove++;
-            console.log(currentMove)
-            trapsInThisRound=GetTrapsInThisRound()
-            if(checkTrapDuplicates())
-        {
-             if(roundNum<5)
-             { 
-                roundNum++;
-             roundData = { round: roundNum };
-            console.log('Раунд.'+roundNum);
-             }
-             else{
-                this.winWindow();
-            }
-            currentMove=0;
-            shuffle(Deck);
-            allRubyOnMap=0;
-             ///Временно
-             let player = Players[0];
-             ////
-             player.setRoundPointsToZero();
-            updatePlayerInfo();
-            return {
-                startedSquares: [],
-                squareValues: Array(squareCount * squareCount).fill(null),
-                squareCardType: [],
-                squaresTileId:[],
-            };
-        }
-            return { startedSquares, squareValues,squareCardType,squaresTileId};
-        }, () => {
-      
-
-            this.context.setRoundData(roundData);
-            this.context.setPlayersData(playersDataJS);
-            this.context.setTrapsInThisRound(trapsInThisRound);
-        });
-    }
-    handleExit() {
-        this.setState(() => {
-            const squareValues = Array(squareCount * squareCount).fill(null);
-            ///Временно
-            let player = Players[0];
-            player.setExit(true)
-            ///
-            let countPlayerExited=0
-            Players.forEach((player) => {
-                if (player.getExit()) {
-                    countPlayerExited++
-                }
-            });
-            
-            let pointsPerPlayer = Math.floor(allRubyOnMap / countPlayerExited);
-            let remainingPoints = allRubyOnMap;
-              
-            Players.forEach((player)=>{if(player.getExit())player.addRoundPoints(pointsPerPlayer)})
-            remainingPoints -= pointsPerPlayer * countPlayerExited;
-
-            for (let i = 0; i < currentMove; i++) {
-                if (Deck[i].getСardType().includes("relic")&&countPlayerExited==1) player.addRelic(Deck[i]);
-            }
-            console.log("Реликвии: "+player.getRelic())
-            allRubyOnMap = 0;
-            allRubyOnMap+=remainingPoints;
-            player.addAllPoints(player.getRoundPoints());
-            player.setExit(true);
-            updatePlayerInfo()
-            if(checkPlayersExited())
-            { 
-                for (let i = 0; i < currentMove; i++) {
-                    if (Deck[i].getСardType().includes("relic")){
-                        Deck.splice(i, 1);
-                        i--;
-                    }
-                }
-                player.setExit(false)
-                if(roundNum<5)
-                {
-               roundNum++;
-            roundData = { round: roundNum };
-                }
-                else{
-                    this.winWindow();
-                    //alert(stringWinnerAlirt());
-                }
-           console.log('Раунд.'+roundNum);
-           currentMove=0;
-           shuffle(Deck);
-           allRubyOnMap=0;
-           
-            player.setRoundPointsToZero();
-           updatePlayerInfo();
-           return {
-              
-               squareValues: Array(squareCount * squareCount).fill(null)
-          
-           };
-            }
-            return {squareValues };
-        }, () => {
-            socket.emit('playerUpdate',);
-            this.context.setRoundData(roundData);
-            this.context.setPlayersData(playersDataJS);
-        });
-    }
-    renderSquare(i) {
-        return (
-            <Square
-                key={i}
-                isStarted={this.state.startedSquares[i]}
-                textButton={this.state.squareValues[i]}
-                cardType={this.state.squareCardType[i]}
-                tileId={this.state.squaresTileId[i]}
-            />
-        );
-    }
-    render() {
-        let buttonMoveOnContColor = !this.state.isButtonPressed ? "rgb(90, 195, 176)" : 'grey' ;
-        let buttonLeaveContColor = !this.state.isButtonPressed ? "rgb(178, 34, 34)" : 'grey' ;
-        let squares = [];
-        for (let i = 0; i < squareCount * squareCount; i++) {
-            squares.push(this.renderSquare(i));
-        }
-        let rows = [];
-        for (let i = 0; i < squareCount; i++) {
-            let rowSquares = squares.slice(
-                i * squareCount,
-                i * squareCount + squareCount
-            );
-            if (i % 2 !== 0) {
-                rowSquares = rowSquares.reverse();
-            }
-            rows.push(
-                <div key={i}
-                    className="board-row"
-                    style={{ display: "flex" }}>
-                    {rowSquares}
-                </div>
-            );
-        }
-        return (
-            <div className="theAreaWithTheGame">
-                <SocketContext.Consumer>
-                {socket => {
-                    socket.on('start_Diamant', (data) => {
-                        console.log("hey");
-                        console.log(`Колода карт: ${JSON.stringify(data)}`);
-                        Deck=(data.Deck.map(card => new Card(card.cardType, card.points)));
-                        Players = data.Players.map(player => new Player(player.id, player.roundPoints, player.allPoints, player.relics, player.nickName, player.exit));
-                        updatePlayerInfo();
-                        console.log(playersDataJS);
-                        this.context.setPlayersData(playersDataJS);
-                    });
-        
-                    return (
-                        <React.Fragment>
-                            <div className="scroll">
-                                {rows}
-                            </div>
-                            <div className="hand">
-                                <div className="theButtonPanel">
-                                    <Button background={buttonMoveOnContColor} disabled={this.state.isButtonPressed}  padding="10px" onClick={() => {
-                                        const move = "MoveOn";
-                                        socket.emit('player_ready_Diamant', move);
-                                        this.setState({ isButtonPressed: true });
-                                        socket.on('all_players_ready_Diamant',()=>{this.handleContinue();console.log("Move")})
-                                    }}>
-                                        Продолжить
-                                    </Button>
-                                    <Button padding="10px" background={buttonLeaveContColor} onClick={() => {
-                                        const move = "Leave";
-                                        socket.emit('player_ready_Diamant', move);
-                                        this.setState({ isButtonPressed: true });
-                                    }}>
-                                        Выйти {allRubyOnMap}
-                                    </Button>
-                                </div>
-                            </div>
-                            <div>
-                                <Button onClick={this.handleStart}>
-                                    START
-                                </Button>
-                            </div>
-                        </React.Fragment>
-                    );
-                }}
-                </SocketContext.Consumer>
-            </div>
-        );
-        
-    }
-}
-*/
-export default Game;
-
 function Game() {
     const socket = useContext(SocketContext);
     
@@ -580,7 +338,8 @@ function Game() {
     useEffect(() => {
         socket.emit("Diamant_begin");
         socket.on('start_Diamant', (data) => {
-            console.log("hey");
+            Player0 = Players.find(player => player.id === data.User.id);
+            console.log(Player0);
             console.log(`Колода карт: ${JSON.stringify(data)}`);
             Deck=(data.Deck.map(card => new Card(card.cardType, card.points)));
             Players = data.Players.map(player => new Player(player.id, player.roundPoints, player.allPoints, player.relics, player.nickName, player.exit));
@@ -603,84 +362,73 @@ function Game() {
         setIsButtonPressed(true);
     };
 
-    useEffect(() => {
-        const handleAllPlayersReady = () => {
-            handleContinue();
-            console.log("Move");
-        };
-    
-        socket.on('all_players_ready_Diamant', handleAllPlayersReady);
-    
-        return () => {
-            socket.off('all_players_ready_Diamant', handleAllPlayersReady);
-        };
-    }, []);
+
     
     const handleReadyMoveOn = () => {
         const move = "MoveOn";
         socket.emit('player_ready_Diamant', move);
         setIsButtonPressed(true);
     };
-    useEffect(() => {
-        setStartedSquares(Deck.map((card, index) => index < currentMove));
-        setSquareValues(Deck.map(card => card.getСardType().includes("Trap") ? null : PointCount(card.getPoints())));
-        setSquareCardType(Deck.map(card => card.getСardType()));
-        setSquaresTileId(Deck.map((card, index) => defineTileId(index + 1)));
-    },[game])
     const handleContinue = () => {
         if (startedSquares.length < squareCount * squareCount) {
-            setSquaresTileId(prevSquaresTileId => [...prevSquaresTileId, defineTileId(currentMove+1)]);
-            let cardType = Deck[currentMove].getСardType();
-            setSquareCardType(prevSquareCardType => [...prevSquareCardType, cardType]);
+            const newTileId = defineTileId(currentMove + 1);
+            const newCardType = Deck[currentMove].getСardType();
+            const points = Deck[currentMove].getPoints();
+
+            let calculatedPoints = null;
+            if (!newCardType.includes("Trap")) {
+                calculatedPoints = PointCount(points);
+            }
+
+            setSquaresTileId(prevSquaresTileId => [...prevSquaresTileId, newTileId]);
+            setSquareCardType(prevSquareCardType => [...prevSquareCardType, newCardType]);
             setStartedSquares(prevStartedSquares => [...prevStartedSquares, true]);
-            if(!Deck[currentMove].getСardType().includes("Trap")) {
-                let points = Deck[currentMove].getPoints();
-                console.log(PointCount(points))
-                setSquareValues(prevSquareValues => {
-                    const newSquareValues = [...prevSquareValues];
-                    newSquareValues[startedSquares.length - 1] = PointCount(points);
-                    return newSquareValues;
-                });
+            setSquareValues(prevSquareValues => {
+                const newSquareValues = [...prevSquareValues];
+                newSquareValues[startedSquares.length] = calculatedPoints;
+                return newSquareValues;
+            });
+
+            if (calculatedPoints !== null) {
                 updatePlayerInfo();
             }
-        }
-        currentMove++;
-        console.log(currentMove);
-        trapsInThisRound = GetTrapsInThisRound();
-        if(checkTrapDuplicates()) {
-            if(roundNum < 5) { 
-                roundNum++;
-                roundData = { round: roundNum };
-                console.log('Раунд.' + roundNum);
-            } else {
-                winWindow(); 
+
+            currentMove++;
+            trapsInThisRound = GetTrapsInThisRound();
+
+            if (checkTrapDuplicates()) {
+                if (roundNum < 5) {
+                    roundNum++;
+                    roundData = { round: roundNum };
+                    console.log('Раунд.' + roundNum);
+                } else {
+                    winWindow();
+                }
+
+                currentMove = 0;
+                shuffle(Deck);
+                allRubyOnMap = 0;
+
+                Players.find(player => player.id === Player0.id).setRoundPointsToZero();
+                updatePlayerInfo();
+
+                setStartedSquares([]);
+                setSquareValues([]);
+                setSquareCardType([]);
+                setSquaresTileId([]);
             }
-            currentMove = 0;
-            shuffle(Deck);
-            allRubyOnMap = 0;
-            let player = Players[0];
-            player.setRoundPointsToZero();
-            updatePlayerInfo();
-            setStartedSquares([]);
-            setSquareValues([]);
-            setSquareCardType([]);
-            setSquaresTileId([]);
+
+            game.setRoundData(roundData);
+            game.setPlayersData(playersDataJS);
+            game.setTrapsInThisRound(trapsInThisRound);
         }
-    
-        game.setRoundData(roundData);
-        game.setPlayersData(playersDataJS);
-        game.setTrapsInThisRound(trapsInThisRound);
     };
     
     
-    /*const handleExit = () => {
-        setSquareValues([]), () => {
-            socket.emit('playerUpdate', );
-            game.setRoundData(roundData);
-            game.setPlayersData(playersDataJS);}
-        ///Временно
-        let player = Players[0];
-        player.setExit(true);
+    const handleExit = () => {
+     
+        ///
+       
         ///
         let countPlayerExited=0;
         Players.forEach((player) => {
@@ -695,22 +443,23 @@ function Game() {
         });
         remainingPoints -= pointsPerPlayer * countPlayerExited;
         for (let i = 0; i < currentMove; i++) {
-            if (Deck[i].getСardType().includes("relic") && countPlayerExited==1) player.addRelic(Deck[i]);
+            if (Deck[i].getСardType().includes("relic") && countPlayerExited==1) Players.find(player => player.id === Player0.id).addRelic(Deck[i]);
         }
-        console.log("Реликвии: "+player.getRelic());
+        console.log("Реликвии: "+Players.find(player => player.id === Player0.id).getRelic());
         allRubyOnMap = 0;
         allRubyOnMap += remainingPoints;
-        player.addAllPoints(player.getRoundPoints());
-        player.setExit(true);
+        Players.find(player => player.id === Player0.id).addAllPoints(Players.find(player => player.id === Player0.id).getRoundPoints());
+        Players.find(player => player.id === Player0.id).setExit(true);
         updatePlayerInfo();
         if(checkPlayersExited()) { 
+            console.log("Все вышли")
             for (let i = 0; i < currentMove; i++) {
                 if (Deck[i].getСardType().includes("relic")) {
                     Deck.splice(i, 1);
                     i--;
                 }
             }
-            player.setExit(false);
+            Players.find(player => player.id === Player0.id).setExit(false);
             if(roundNum<5) {
                 roundNum++;
                 roundData = { round: roundNum };
@@ -722,16 +471,47 @@ function Game() {
             currentMove=0;
             shuffle(Deck);
             allRubyOnMap=0;
-            player.setRoundPointsToZero();
+            Players.find(player => player.id === Player0.id).setRoundPointsToZero();
             updatePlayerInfo();
-            return {
-                squareValues: []
-            };
+           
         }
-        return { squareValues };
+        setSquareValues([]);
+        socket.emit("Update_Players_Data_Diamant",{currentPlayer: Players.find(player => player.id === Player0.id),expectedNumberOfPlayers:Players.length})
+        
+       
+       
+    }
     
-    }*/
+    useEffect(() => {
+        const handleAllPlayersReady = (data) => {
+          console.log(data.action)
+            data.action.forEach((action) => {
+              console.log(action);
+              if (action === "MoveOn") {
+                console.log("Продолжаем");
+                handleContinue();
+              }
+              if (action === "Leave") {
+                console.log("Уходим");
+                handleExit();
+              }
+            });
+         
+        };
+        socket.on("PlayersDataDiamantUpdated",(data)=>{
+            console.log("HEYYYY")
+            Players = data.Players.map(player => new Player(player.id, player.roundPoints, player.allPoints, player.relics, player.nickName, player.exit));
+            console.log(Players)
+            updatePlayerInfo();
+            game.setRoundData(roundData);
+            game.setPlayersData(playersDataJS);
+        });
+        socket.on('all_players_ready_Diamant', handleAllPlayersReady);
     
+        return () => {
+          socket.off('all_players_ready_Diamant', handleAllPlayersReady);
+        };
+      }, [handleContinue, handleExit]);
 const renderSquare = (i) => {
         return (
             <Square
@@ -793,3 +573,5 @@ const renderSquare = (i) => {
         </div>
     );
 }
+
+export default Game;
