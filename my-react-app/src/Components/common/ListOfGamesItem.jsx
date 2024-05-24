@@ -9,7 +9,7 @@ export default function ListOfGamesItem({ ImageSrc, Name,
     return (
         <div className='item'>
             <img className='size128' src={ImageSrc} alt="GameImage" />
-            <Link to={`/${Name}`}>
+            <Link to={`/lobbyList${Name}`}>
                 <div className='Name'><h1>{Name}</h1></div>
             </Link>
             <div className='Description'>

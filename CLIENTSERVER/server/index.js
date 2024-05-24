@@ -32,7 +32,7 @@ let lobbies = {};
 let users = [];
 let TicTacToeGames = [];
 
-function addUser(socketID, nickname, lobbyName, isCreator, actualSocketID,isReady) {
+function addUser(socketID, nickname, lobbyName, isCreator, actualSocketID,isReady,diamantAction) {
   const existingUser = users.find((user) => user.socketID === socketID);
 
   if (existingUser) {
@@ -45,7 +45,8 @@ function addUser(socketID, nickname, lobbyName, isCreator, actualSocketID,isRead
     lobbyName,
     isCreator,
     actualSocketID,
-    isReady
+    isReady,
+    diamantAction
   };
   
   users.push(user);
@@ -75,7 +76,7 @@ io.on('connection', (socket) => {
     console.log('actualSocketID for user', existingUser.nickname, 'changed to', existingUser.actualSocketID);
   }
 
-  addUser(socketID, '', '', false, socketID,false);
+  addUser(socketID, '', '', false, socketID,false,null);
 
   if (!socket.id) {
     socket.id = socket.client.id;
@@ -111,7 +112,7 @@ io.on('connection', (socket) => {
       }
     }
   });
-  socket.on('HEY_de',()=>{console.log("Pepe")});
+
   socket.on('Diamant_start', () => {
     
     const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
@@ -176,33 +177,80 @@ io.on('connection', (socket) => {
          Deck.push(new Card('Trap Magma',null))
       }
         var i = 0;
-        const playersData = lobby.users.map(player => { return new Player(i++, 0, 0, [], player.nickname, false) });
+        const playersData = lobby.users.map(player => { return new Player(player.socketID,i++, 0, 0, [], player.nickname, false) });
         console.log(playersData)
         lobby.users.forEach((user) => {
-          io.to(user.actualSocketID).emit('start_Diamant', {Players:playersData, Deck: Deck});
+          const currentUserData = playersData.find(player => player.socketID === user.socketID);
+          io.to(user.actualSocketID).emit('start_Diamant', {Players:playersData, Deck: Deck,User:currentUserData});
         });
       }
     }
   });
-  socket.on('player_ready_Diamant', () => {
+  socket.on('player_ready_Diamant', (data) => {
     const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
     if (user) {
       user.isReady = true; 
-  
+      user.action = data || null; // Store the action if provided
+    
       const lobby = lobbies[user.lobbyName];
       if (lobby) {
-        const allPlayersReady = lobby.users.every((user) => user.isReady); 
+        const allPlayersReady = lobby.users.every((user) => user.isReady);
   
         if (allPlayersReady) {
+          const actionsSet = new Set();
+  
+         
           lobby.users.forEach((user) => {
-            io.to(user.actualSocketID).emit('all_players_ready_Diamant'); 
+            if (user.action) {
+              actionsSet.add(user.action);
+            }
+          });
+  
+          const uniqueActions = Array.from(actionsSet); 
+          console.log(uniqueActions);
+          lobby.users.forEach((user) => {
+            io.to(user.actualSocketID).emit('all_players_ready_Diamant', { action: uniqueActions });
             user.isReady = false; 
+            user.action = null; 
           });
         }
       }
     }
   });
   
+  //const allPlayersData = [];
+
+  socket.on("Update_Players_Data_Diamant", (Data) => {
+    const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
+    if (user) {
+      
+      
+      if (lobby) {
+        lobby.users.forEach((user) => {
+           const allPlayersReady = lobby.users.every((user) => user.isReady);
+  
+        if (allPlayersReady) {
+          const PlayerSet = new Set();
+  
+         
+          lobby.users.forEach((user) => {
+            if (user.action) {
+              actionsSet.add(user.action);
+            }
+          });
+        }
+        io.to(user.actualSocketID).emit("PlayersDataDiamantUpdated", { Players: allPlayersData });
+        })
+      }
+ 
+          allPlayersData.length = 0;
+      }
+    
+  });
+  
+
+
+
   
   socket.on('create_lobby', ({ roomName, isLocked, maxCount }) => {
     const newLobby = { roomName, isLocked, currentCount: 1, maxCount, users: [] };
