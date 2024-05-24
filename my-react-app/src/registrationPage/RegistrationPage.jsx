@@ -27,9 +27,15 @@ export const RegistrationPage = ({}) =>{
 
   console.log(socket);
 
-  const _nickname = ''; //получить из cookie
-  const _avatar = 0;
-  const _background = 0;
+  const cookies = document.cookie.split(';').reduce((acc, cookie) => {
+    const [name, value] = cookie.trim().split('=');
+    acc[name] = decodeURIComponent(value);
+    return acc;
+  }, {});
+
+  const _nickname = cookies.nickname || ''; //получить из cookie
+  const _avatar = cookies.avatar ||  0;
+  const _background = cookies.background || 0;
 
   //нужно добавть в cookie значение библиотеки языка (Rus||Eng)
 
@@ -101,7 +107,8 @@ export const RegistrationPage = ({}) =>{
 
   const handleCancel = () => {
     //document.getElementById('inputName').value = ''; // Очищаем поле для текста
-    setInput('');
+    //setInput('');
+    window.location.href = '/ListOfGames'; 
   };
 
   return(<>
@@ -118,10 +125,12 @@ export const RegistrationPage = ({}) =>{
           </div>
           {TextInputArea()}
           <div className={styles_registrationPage.panelbuttons}>
-            <button id="cancel_button" onClick={handleCancel}>
-              <img alt="" src={img}/>
-              <p>Отмена</p>
-            </button>
+            {cookies.nickname? 
+              <button id="cancel_button" onClick={handleCancel}>
+                <img alt="" src={img}/>
+                <p>Отмена</p>
+              </button>: null
+            }
             <button id="accept_button" onClick={handleAccept}>
               <img alt="" src={img}/>
               <p>Принять</p>
