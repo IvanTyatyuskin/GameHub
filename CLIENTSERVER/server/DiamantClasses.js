@@ -14,7 +14,8 @@
     
 }
  class Player {
-    constructor(id, roundPoints, allPoints, relics, nickName,exit) {
+    constructor(socketID,id, roundPoints, allPoints, relics, nickName,exit) {
+        this.socketID=socketID;
         this.id = id;
         this.roundPoints = roundPoints;
         this.allPoints = allPoints;
