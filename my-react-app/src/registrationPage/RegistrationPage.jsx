@@ -139,7 +139,7 @@ export const RegistrationPage = ({}) =>{
           </div>
           {TextInputArea()}
           <div className={styles_registrationPage.panelbuttons}>
-            {getInput !== '' && (
+            {getCookie('nickname') !== '' && (
               <button id="cancel_button" onClick={handleCancel}>
                 <img alt="" src={img}/>
                 <p>Отмена</p>
