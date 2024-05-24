@@ -5,6 +5,8 @@ import './Components/css/section.css'
 import ListOfGamesItem from './Components/common/ListOfGamesItem.jsx'
 import { Modal } from './Components/common/Modal.jsx'
 //import { InputText } from './Components/common/Input.jsx'
+import { Link } from 'react-router-dom';
+
 
 
 export default function ListOfGames() {
@@ -30,6 +32,7 @@ export default function ListOfGames() {
                         )
                         )}
                     </div>
+                    <Link to={'/lobbylist'}>Интерактовное лобби</Link>
                     <Modal active={modalActive} setActive={setModalActive}>
                         {modalContent}
                     </Modal>
