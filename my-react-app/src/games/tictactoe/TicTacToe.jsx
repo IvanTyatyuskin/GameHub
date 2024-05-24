@@ -33,6 +33,7 @@ const TicTacToe = () => {
       };
     }, [socket]);
 
+
     socket.emit('start_tictactoe_game');
 
     socket.on('set_symbol', (symbol) => {

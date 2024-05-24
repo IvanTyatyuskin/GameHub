@@ -90,11 +90,15 @@ io.on('connection', (socket) => {
     const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
     const lobbyName = user.lobbyName;
     lobby = lobbies[lobbyName];
-    io.emit('lobby_name', lobbyName);
-    io.emit('isCreator', user.isCreator);
-    io.emit('gameName', lobby.game);
-    io.emit('users', lobby.users);
-    io.emit('chat_history', lobby.chatHistory);
+    if (lobby) {
+      lobby.users.forEach((user) => {
+        io.to(user.actualSocketID).emit('lobby_name', lobbyName);
+        io.to(user.actualSocketID).emit('isCreator', user.isCreator);
+        io.to(user.actualSocketID).emit('gameName', lobby.game);
+        io.to(user.actualSocketID).emit('users', lobby.users);
+        io.to(user.actualSocketID).emit('chat_history', lobby.chatHistory);
+      })
+    }
   })
 
   socket.on('send_chat_message', (message) => {
@@ -115,18 +119,6 @@ io.on('connection', (socket) => {
     const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
     user.nickname = nickname;
   })
-
-  socket.on('tictactoe_start', () => {
-    const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
-    if (user && user.isCreator) {
-      const lobby = lobbies[user.lobbyName];
-      if (lobby) {
-        lobby.users.forEach((user) => {
-          io.to(user.actualSocketID).emit('tictactoe_started');
-        });
-      }
-    }
-  });
 
   socket.on('create_lobby', ({ roomName, isLocked, maxCount, game }) => {
     const newLobby = { roomName, isLocked, currentCount: 1, maxCount, game, users: [], chatHistory: [] };
@@ -174,6 +166,18 @@ io.on('connection', (socket) => {
     return null;
   }
 
+  socket.on('tictactoe_start', () => {
+    const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
+    if (user && user.isCreator) {
+      const lobby = lobbies[user.lobbyName];
+      if (lobby) {
+        lobby.users.forEach((user) => {
+          io.to(user.actualSocketID).emit('tictactoe_started');
+        });
+      }
+    }
+  });
+
   socket.on('start_tictactoe_game', () => {
     const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
     if(user.isCreator) {
@@ -207,18 +211,16 @@ io.on('connection', (socket) => {
     game.cells[num] = game.currentTurn;
     if (checkWinner(game.cells) === "X") {
       game.winner = game.Xplayer;
-      console.log('Winner is: X');
     } else if (checkWinner(game.cells) === "O") {
       game.winner = game.Oplayer;
-      console.log('Winner is: O');
     } else if (game.cells.every((cell) => cell !== "")) {
       game.isDraw = true;
-      console.log("It's a draw");
     } else {
       game.currentTurn = game.currentTurn === "X" ? "O" : "X";
     }
 
     const Cells = game.cells;
+    winnerUser = users.find((user) => user.socketID === game.winner);
     const Winner = game.winner;
     const IsDraw = game.isDraw;
     const CurrentTurn = game.currentTurn;

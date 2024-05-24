@@ -64,7 +64,7 @@ export const LobbyPage = ({
         setInputValue("");
     }
 
-    if (!isLobbyDataRequested){
+    if (!isLobbyDataRequested && socket){
         socket.emit('get_lobby_info');
         socket.on('lobby_name', (lobbyName) => {
             setLobbyName(lobbyName);
@@ -101,9 +101,12 @@ export const LobbyPage = ({
         socket.emit('tictactoe_start');
     };
 
-    socket.on('tictactoe_started', () => {
-        navigate('/TicTacToe');
-    })
+
+    if (socket) {
+        socket.on('tictactoe_started', () => {
+            navigate('/TicTacToe');
+        })
+    }
 
 
     const RoomData = () => {
