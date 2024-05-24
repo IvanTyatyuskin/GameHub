@@ -15,25 +15,16 @@ import { useState, useEffect, useRef } from 'react'
 import io from 'socket.io-client';
 import { useNavigate } from 'react-router-dom'
 import Cookies from 'js-cookie'
-import React, { useContext } from 'react'
-import { SocketContext } from '../SocketContext'
 
-const createLobby = (roomName, isLocked, maxCount, navigate, socket) => {
-  if (socket) {
-    socket.emit('create_lobby', { roomName, isLocked, maxCount });
-    navigate(`/lobbyPage/Diamant`);
-
-  } else {
-    console.error('Socket is not connected');
-  }
+const createLobby = (roomName, isLocked, maxCount, nickname, navigate) => {
+  socket.emit('create_lobby', { roomName, isLocked, maxCount, nickname });
+  navigate('/LobbyPage');
 };
 
-
-const joinLobby = (roomName, navigate, socket) => {
-  socket.emit('join_lobby', { roomName });
-  navigate(`/lobbyPage/Diamant`);
+const joinLobby = (roomName, nickname, navigate) => {
+  socket.emit('join_lobby', { roomName, nickname });
+  navigate('/LobbyPage');
 };
-
 
 export const LobbyItem = ({
   roomName = "Test Room",
@@ -41,15 +32,14 @@ export const LobbyItem = ({
   count = '0',
   maxcount = '6',
   navigate,
-  socket,
-  onClick = () => joinLobby(roomName, navigate, socket),
+  onClick = () => joinLobby(roomName, Cookies.get('nickname'), navigate),
 }) => {
   var availability = image_unlocked;
   if (locked) availability = image_locked;
   var styleItem = styles.lobbyItem;
   if (onClick) styleItem += ' ' + styles.clickable;
   return (
-    <button className={styleItem} onClick={() => onClick(roomName, navigate, socket)}>
+    <button className={styleItem} onClick={() => onClick(roomName, Cookies.get('nickname'), navigate)}>
       <div className={styles.lobbyIcon}>
         <img src={image_group2}/>
       </div>
@@ -66,7 +56,7 @@ export const LobbyItem = ({
   )
 }
 
-export const CreateLobbyModal = ({ maxPlayers = '5', minPlayers = '3', navigate,socket }) => {
+export const CreateLobbyModal = ({ maxPlayers = '5', minPlayers = '3', navigate }) => {
   const playersOptions = Array.from({ length: maxPlayers - minPlayers + 1 },
     (_, i) => i + parseInt(minPlayers));
 
@@ -74,7 +64,7 @@ export const CreateLobbyModal = ({ maxPlayers = '5', minPlayers = '3', navigate,
     const roomName = document.querySelector('input[name="roomName"]').value;
     const isLocked = document.querySelector('input[name="isLocked"]').checked;
     const maxCount = document.querySelector('select[name="maxCount"]').value;
-    createLobby(roomName, isLocked, maxCount, navigate,socket);
+    createLobby(roomName, isLocked, maxCount, Cookies.get('nickname'), navigate);
   };
 
   return (
@@ -107,21 +97,27 @@ export const CreateLobbyModal = ({ maxPlayers = '5', minPlayers = '3', navigate,
 const LobbyListDiamantPage = ({
   GameIndex = "0"
 }) => {
-  const socket = useContext(SocketContext);
   const DataAboutGame = Games[GameIndex];
   const [modalActive, setModalActive] = useState(false);
   const navigate = useNavigate();
   const [lobbies, setLobbies] = useState([]);
   const isLobbiesLoaded = useRef(false);
 
-  setTimeout(() => {
-    if(socket){
+  useEffect(() => {
+    if (!isLobbiesLoaded.current) {
       socket.emit('get_lobbies_list');
-      socket.on('lobbies_list', (lobbiesList) => {
-        setLobbies(lobbiesList);
-      })
+      isLobbiesLoaded.current = true;
     }
-  }, 1000);
+
+    socket.on('lobbies_list', (lobbiesList) => {
+      setLobbies(lobbiesList);
+    });
+
+    return () => {
+      socket.off('lobbies_list');
+    };
+  }, []);
+
   return (
     <>
       <Header/>
@@ -153,8 +149,7 @@ const LobbyListDiamantPage = ({
                   count={lobby.currentCount}
                   maxcount={lobby.maxCount}
                   navigate={navigate}
-                  socket={socket}
-                  onClick={() => joinLobby(lobby.roomName, navigate, socket)}
+                  onClick={() => joinLobby(lobby.roomName, Cookies.get('nickname'), navigate)}
                 />
               ))}
             </div>
@@ -162,7 +157,7 @@ const LobbyListDiamantPage = ({
         </div>
       </div>
       <Modal active={modalActive} setActive={setModalActive}>
-        <CreateLobbyModal maxPlayers={DataAboutGame.MaxPlayers} minPlayers={DataAboutGame.MinPlayers} navigate={navigate}socket={socket} />
+        <CreateLobbyModal maxPlayers={DataAboutGame.MaxPlayers} minPlayers={DataAboutGame.MinPlayers} navigate={navigate} />
       </Modal>
     </>
   )

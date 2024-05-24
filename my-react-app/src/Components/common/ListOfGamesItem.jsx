@@ -3,13 +3,11 @@ import './ListOfGamesItem.css'
 import testImg from '../../assets/react.svg'
 import { Link } from 'react-router-dom';
 
-export default function ListOfGamesItem({ ImageSrc, Name,
-    Description, rule, onlineCount = '0',
-    JSX = null, setContent, setActive }) {
+export default function ListOfGamesItem({ ImageSrc, Name, Description, rule, onlineCount = '0', JSX = null, setContent, setActive }) {
     return (
         <div className='item'>
             <img className='size128' src={ImageSrc} alt="GameImage" />
-            <Link to={`/${Name}`}>
+            <Link to={{ pathname: `/lobbyList${Name}`}}>
                 <div className='Name'><h1>{Name}</h1></div>
             </Link>
             <div className='Description'>

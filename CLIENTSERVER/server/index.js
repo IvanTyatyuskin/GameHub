@@ -4,7 +4,7 @@ const http = require('http');
 const cors = require('cors');
 const { Server } = require('socket.io');
 const cookieParser = require('cookie-parser');
-const {Card,Player}  =  require('./DiamantClasses');
+
 
 app.use(cors());
 app.use(cookieParser());
@@ -32,7 +32,7 @@ let lobbies = {};
 let users = [];
 let TicTacToeGames = [];
 
-function addUser(socketID, nickname, lobbyName, isCreator, actualSocketID,isReady) {
+function addUser(socketID, nickname, lobbyName, isCreator, actualSocketID) {
   const existingUser = users.find((user) => user.socketID === socketID);
 
   if (existingUser) {
@@ -45,7 +45,6 @@ function addUser(socketID, nickname, lobbyName, isCreator, actualSocketID,isRead
     lobbyName,
     isCreator,
     actualSocketID,
-    isReady
   };
   
   users.push(user);
@@ -75,15 +74,16 @@ io.on('connection', (socket) => {
     console.log('actualSocketID for user', existingUser.nickname, 'changed to', existingUser.actualSocketID);
   }
 
-  addUser(socketID, '', '', false, socketID,false);
+  addUser(socketID, '', '', false, socketID);
 
   if (!socket.id) {
     socket.id = socket.client.id;
   }
   clientSockets.set(socket.id, socket);
 
-  socket.on('get_lobbies_list', () => {
-    io.emit('lobbies_list', Object.values(lobbies));
+  socket.on('get_lobbies_list', (game) => {
+    const currentLobbyList = Object.values(lobbies).filter(lobby => lobby.game === game);
+    io.emit('lobbies_list', currentLobbyList);
   })
 
   socket.on('get_lobby_info', () => {
@@ -92,6 +92,22 @@ io.on('connection', (socket) => {
     lobby = lobbies[lobbyName];
     io.emit('lobby_name', lobbyName);
     io.emit('isCreator', user.isCreator);
+    io.emit('gameName', lobby.game);
+    io.emit('users', lobby.users);
+    io.emit('chat_history', lobby.chatHistory);
+  })
+
+  socket.on('send_chat_message', (message) => {
+    const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
+    const lobbyName = user.lobbyName;
+    const Message = { sender: user.nickname, text: message }
+    lobby = lobbies[lobbyName]
+    lobby.chatHistory.push(Message);
+    if (lobby) {
+      lobby.users.forEach((user) => {
+        io.to(user.actualSocketID).emit('chat_history', lobby.chatHistory);
+      });
+    }
   })
 
   socket.on('setNickname', (data) => {
@@ -111,101 +127,9 @@ io.on('connection', (socket) => {
       }
     }
   });
-  socket.on('HEY_de',()=>{console.log("Pepe")});
-  socket.on('Diamant_start', () => {
-    
-    const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
-    if (user && user.isCreator) {
-     
-      const lobby = lobbies[user.lobbyName];
-      if (lobby) {
-      
-        lobby.users.forEach((user) => {
-          
-          io.to(user.actualSocketID).emit('Diamant_started', () => {
-            console.log('Client confirmed receipt of start_game event');
-          });
-        });
-      }
-    }
-  });
-  socket.on('Diamant_begin', () => {
-    
-    const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
-    if (user && user.isCreator) {
-     
-      const lobby = lobbies[user.lobbyName];
-      if (lobby) {
-        
-        console.log("sd")
-        // Собираем данные игроков и колоды
-        let Deck = [];
-        let RelicDeck = [];
-        for (let i = 0; i < 5; i++) {
-         Deck.push(new Card('Treasure',i+1))
-      }
-      Deck.push(new Card('Treasure',5))
-      Deck.push(new Card('Treasure',7))
-      Deck.push(new Card('Treasure',7))
-      Deck.push(new Card('Treasure',9))
-      Deck.push(new Card('Treasure',9))
-      Deck.push(new Card('Treasure',11))
-      Deck.push(new Card('Treasure',11))
-      Deck.push(new Card('Treasure',13))
-      Deck.push(new Card('Treasure',14))
-      Deck.push(new Card('Treasure',15))
-      Deck.push(new Card('Treasure',17))
-      RelicDeck.push(new Card('relic',5))
-      RelicDeck.push(new Card('relic',7))
-      RelicDeck.push(new Card('relic',8))
-      RelicDeck.push(new Card('relic',10))
-      RelicDeck.push(new Card('relic',12))
-      for (let i = 0; i < 3; i++) {
-         Deck.push(new Card('Trap Spider',null))
-      }
-      for (let i = 0; i < 3; i++) {
-         Deck.push(new Card('Trap Snake',null))
-      }
-      for (let i = 0; i < 3; i++) {
-         Deck.push(new Card('Trap Stone',null))
-      }
-      for (let i = 0; i < 3; i++) {
-         Deck.push(new Card('Trap Wood',null))
-      }
-      for (let i = 0; i < 3; i++) {
-         Deck.push(new Card('Trap Magma',null))
-      }
-        var i = 0;
-        const playersData = lobby.users.map(player => { return new Player(i++, 0, 0, [], player.nickname, false) });
-        console.log(playersData)
-        lobby.users.forEach((user) => {
-          io.to(user.actualSocketID).emit('start_Diamant', {Players:playersData, Deck: Deck});
-        });
-      }
-    }
-  });
-  socket.on('player_ready_Diamant', () => {
-    const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
-    if (user) {
-      user.isReady = true; 
-  
-      const lobby = lobbies[user.lobbyName];
-      if (lobby) {
-        const allPlayersReady = lobby.users.every((user) => user.isReady); 
-  
-        if (allPlayersReady) {
-          lobby.users.forEach((user) => {
-            io.to(user.actualSocketID).emit('all_players_ready_Diamant'); 
-            user.isReady = false; 
-          });
-        }
-      }
-    }
-  });
-  
-  
-  socket.on('create_lobby', ({ roomName, isLocked, maxCount }) => {
-    const newLobby = { roomName, isLocked, currentCount: 1, maxCount, users: [] };
+
+  socket.on('create_lobby', ({ roomName, isLocked, maxCount, game }) => {
+    const newLobby = { roomName, isLocked, currentCount: 1, maxCount, game, users: [], chatHistory: [] };
     lobbies[roomName] = newLobby;
     const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
     user.isCreator = true;
@@ -217,12 +141,13 @@ io.on('connection', (socket) => {
 
   socket.on('join_lobby', ({ roomName }) => {
     const lobby = lobbies[roomName];
-    const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
-    user.lobbyName = roomName;
-    lobby.users.push(user);
-    lobby.currentCount++;
-    console.log('User: ', user.nickname, 'joined to lobby', roomName);
-    console.log(lobby)
+    if (lobby.currentCount < lobby.maxCount) {
+      const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
+      user.lobbyName = roomName;
+      lobby.users.push(user);
+      lobby.currentCount++;
+      console.log('User: ', user.nickname, 'joined to lobby', roomName);
+    }
   });
 
   //TicTacToe------------------------------------------------------------------------------

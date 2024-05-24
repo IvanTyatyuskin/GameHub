@@ -1,4 +1,3 @@
-import React, { useState } from 'react'
 import { Games } from "./games/DataAboutGames.jsx"
 import Header from './Components/Header.jsx'
 import './Components/css/section.css'
@@ -6,6 +5,9 @@ import './Components/css/input.css'
 import ListOfGamesItem from './Components/common/ListOfGamesItem.jsx'
 import { Modal } from './Components/common/Modal.jsx'
 import { InputText } from './Components/common/Input.jsx'
+import React, { useState, useContext } from 'react'
+import { SocketContext } from './SocketContext'
+
 
 export default function ListOfGames() {
     const [modalActive, setModalActive] = useState(false);
@@ -45,10 +47,8 @@ export default function ListOfGames() {
                     <Modal active={modalActive} setActive={setModalActive}>
                         {modalContent}
                     </Modal>
+                    <a href="/lobbyListTicTacToe">Нажмите здесь чтобы открыть список лобби игры Крестики-нолики</a>
                     {/*<Inputs/>*/}
-
-                    <a href="/lobbylist" className="redirect-button">Перейти к созданию/подключению к лобби Diamant</a>
-
                 </div>
             </div>
 

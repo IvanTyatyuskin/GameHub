@@ -10,6 +10,22 @@ import { LanguageButton } from '../Components/common/button'
 import React, { useContext, useState } from 'react'
 import { SocketContext } from '../SocketContext'
 
+function getCookie(cname) {
+  let name = cname + "=";
+  let decodedCookie = decodeURIComponent(document.cookie);
+  let ca = decodedCookie.split(';');
+  for(let i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) === ' ') {
+      c = c.substring(1);
+    }
+    if (c.indexOf(name) === 0) {
+      return c.substring(name.length, c.length);
+    }
+  }
+  return "";
+}
+
 export const OnlyWindow = ({children}) =>
 {
   return (
@@ -24,19 +40,17 @@ export const OnlyWindow = ({children}) =>
 export const RegistrationPage = ({}) =>{
 
   const socket = useContext(SocketContext);
-
-  console.log(socket);
-
-  const _nickname = ''; //получить из cookie
+  const _nickname = getCookie('nickname'); //получить из cookie
   const _avatar = 0;
   const _background = 0;
+  const _language = 'Rus';
 
   //нужно добавть в cookie значение библиотеки языка (Rus||Eng)
-
 
   const [getInput, setInput] = useState(_nickname);
   const [getAvatar, setAvatar] = useState(_avatar);
   const [getBackground, setBackground] = useState(_background);
+  const [getLanguage, setLanguage] = useState(_language);
 
   function LanguageSelection() {
     return(
@@ -83,20 +97,21 @@ export const RegistrationPage = ({}) =>{
 
   const handleAccept = () => {
     const nickname = getInput;
-    //document.getElementById('inputName').value; // Получаем значение никнейма
-    //const avatar = 0;
-    //const background = 0;
-    document.cookie = `nickname=${nickname}; max-age=3600; path=/`; // Сохраняем никнейм в Cookie
-    document.cookie = `avatar=${getAvatar}; max-age=3600; path=/`; // Сохраняем никнейм в Cookie
-    document.cookie = `background=${getBackground}; max-age=3600; path=/`; // Сохраняем никнейм в Cookie
 
-    if (socket) {
-      socket.emit('setNickname', { nickname });
-    } else {
-      console.error('Socket is not connected');
+
+    if (nickname != '') {
+      document.cookie = `nickname=${nickname}; max-age=3600; path=/`; // Сохраняем никнейм в Cookie
+      document.cookie = `avatar=${getAvatar}; max-age=3600; path=/`; // Сохраняем никнейм в Cookie
+      document.cookie = `background=${getBackground}; max-age=3600; path=/`; // Сохраняем никнейм в Cookie
+  
+      if (socket) {
+        socket.emit('setNickname', { nickname });
+      } else {
+        console.error('Socket is not connected');
+      }
+  
+      window.location.href = '/ListOfGames'; 
     }
-
-    window.location.href = '/ListOfGames'; 
   };
 
   const handleCancel = () => {

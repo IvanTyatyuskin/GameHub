@@ -16,7 +16,6 @@ export default function Diamant() {
 
     const { playersData, setPlayersData, 
         roundD, setRoundData, 
-        deck, setDeck,
         traps, setTrapsInThisRound,
         modalContent, setModalContent,
         modalActive, setModalActive
@@ -28,11 +27,12 @@ export default function Diamant() {
         const timer = setInterval(() => {
             setNow(new Date());
         }, 1000);
-    
+
         return () => {
             clearInterval(timer);
         };
     }, []);
+
     const WinPlayer = ({modalContent}) => {
         if (!modalContent) return(<h1>Тут искать нечего</h1>)
         return(
@@ -68,7 +68,6 @@ export default function Diamant() {
             <div className="base">
                 <DataList heading={textContent.informationAboutTheRound}>
                     <DataList heading={textContent.loot} type='3'>
-                        
                         <PlayersLootList playersData={playersData} />
                     </DataList>
                     <DataList heading={textContent.traps}>
@@ -78,8 +77,7 @@ export default function Diamant() {
                        
                     </DataList>
                 </DataList>
-                
-               { <Game />}
+                <Game />
                 <DataList heading={textContent.score}>
                     <PlayersScore playerData={playersData} />
                 </DataList>

@@ -18,19 +18,16 @@ import Cookies from 'js-cookie'
 import React, { useContext } from 'react'
 import { SocketContext } from '../SocketContext'
 
-const createLobby = (roomName, isLocked, maxCount, navigate, socket) => {
-  if (socket) {
-    socket.emit('create_lobby', { roomName, isLocked, maxCount });
-    navigate('/LobbyPage');
-  } else {
-    console.error('Socket is not connected');
-  }
+const createLobby = (roomName, isLocked, maxCount, navigate, socket, game) => {
+  socket.emit('create_lobby', { roomName, isLocked, maxCount, game});
+  navigate('/LobbyPage');
 };
 
-
-const joinLobby = (roomName, navigate, socket) => {
-  socket.emit('join_lobby', { roomName });
-  navigate('/LobbyPage');
+const joinLobby = (roomName, count, maxcount, navigate, socket) => {
+  if (count < maxcount) {
+    socket.emit('join_lobby', { roomName });
+    navigate('/LobbyPage');
+  }
 };
 
 export const LobbyItem = ({
@@ -40,14 +37,14 @@ export const LobbyItem = ({
   maxcount = '6',
   navigate,
   socket,
-  onClick = () => joinLobby(roomName, navigate, socket),
+  onClick = () => joinLobby(roomName, count, maxcount, navigate, socket),
 }) => {
   var availability = image_unlocked;
   if (locked) availability = image_locked;
   var styleItem = styles.lobbyItem;
   if (onClick) styleItem += ' ' + styles.clickable;
   return (
-    <button className={styleItem} onClick={() => onClick(roomName, navigate, socket)}>
+    <button className={styleItem} onClick={() => onClick(roomName, count, maxcount, navigate, socket)}>
       <div className={styles.lobbyIcon}>
         <img src={image_group2}/>
       </div>
@@ -72,7 +69,7 @@ export const CreateLobbyModal = ({ maxPlayers = '2', minPlayers = '2', navigate,
     const roomName = document.querySelector('input[name="roomName"]').value;
     const isLocked = document.querySelector('input[name="isLocked"]').checked;
     const maxCount = document.querySelector('select[name="maxCount"]').value;
-    createLobby(roomName, isLocked, maxCount, navigate, socket);
+    createLobby(roomName, isLocked, maxCount, navigate, socket, 'TicTacToe');
   };
 
   return (
@@ -114,7 +111,7 @@ export const LobbyListTicTacToePage = ({
 
   setTimeout(() => {
     if(socket){
-      socket.emit('get_lobbies_list');
+      socket.emit('get_lobbies_list', 'TicTacToe');
       socket.on('lobbies_list', (lobbiesList) => {
         setLobbies(lobbiesList);
       })
@@ -148,11 +145,11 @@ export const LobbyListTicTacToePage = ({
                   key={index}
                   roomName={lobby.roomName}
                   locked={lobby.isLocked}
-                  count={lobby.currentCount}
+                  count={lobby.currentCount} // Update this line
                   maxcount={lobby.maxCount}
                   navigate={navigate}
                   socket={socket}
-                  onClick={() => joinLobby(lobby.roomName, navigate, socket)}
+                  onClick={() => joinLobby(lobby.roomName, lobby.currentCount, lobby.maxCount, navigate, socket)} // Update this line
                 />
               ))}
             </div>
@@ -167,3 +164,4 @@ export const LobbyListTicTacToePage = ({
 }
 
 export default LobbyListTicTacToePage;
+

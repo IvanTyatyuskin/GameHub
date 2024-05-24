@@ -11,8 +11,9 @@ import { Games } from '../games/DataAboutGames'
 import { Input3, InputText2 } from '../Components/common/Input'
 import Button from '../Components/common/button'
 import { Modal } from '../Components/common/Modal'
-import { useState } from 'react'
-
+import { useState, useEffect } from 'react'
+import { useLocation } from 'react-router-dom';
+import io from 'socket.io-client';
 
 export const LobbyItem = ({
     roomName = "Test Room",
@@ -73,9 +74,25 @@ export const CreateLobbyModal = ({maxPlayers = '5', minPlayers = '3'}) =>{
     )
 }
 
-const SearchLobbyPage = ({
-    GameIndex = "1"
-}) => {
+function SearchLobbyPage()
+{
+    const location = useLocation();
+    const [gameName, setGameName] = useState(null);
+  
+    useEffect(() => {
+      setGameName(location.state?.name);
+    }, [location]);
+  
+    console.log(gameName);
+    console.log(location);
+    let index = 3;
+    if (gameName == 'Diamant') index = 0;
+    if (gameName == 'Skull') index = 1;
+
+    const GameIndex = index;
+
+    console.log(index);
+
     const DataAboutGame = Games[GameIndex];
     const [modalActive, setModalActive] = useState(false);
     return(
@@ -107,7 +124,8 @@ const SearchLobbyPage = ({
                             <LobbyItem/>
                             <LobbyItem/>
                             <LobbyItem locked={true}/>
-                            <LobbyItem locked={true}/>                            <LobbyItem/>
+                            <LobbyItem locked={true}/>                            
+                            <LobbyItem/>
                             <LobbyItem/>
                             {/*список лобби*/}
                         </div>

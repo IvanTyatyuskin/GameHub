@@ -1,9 +1,7 @@
 import { InputText2 } from '../../../Components/common/Input'
 import './BottomPanel.css'
-import { Chip } from './chip'
+import { Chip, Chip2 } from './chip'
 import { textDataToView } from '../textDataToView'
-import {ThisPlayerView} from '../Classes.js'
-
 
 export const BottomPanel = ({
     cards=[{
@@ -70,128 +68,7 @@ export const BottomPanel = ({
         </div>
     )
 }   
-
-
-/**
- * param {ThisPlayerView} thisPlayerView 
- */
-export const BottomPanel2 = ({ 
-    indexDictionary = '0',
-    thisPlayerView
-}) => {
-    const textContext = textDataToView[indexDictionary];
-    //if (!thisPlayerView.Active){return(<></>)}
-
-    var HandIsActive = false;
-    var CounterIsVisible = false;
-    var BetIsVisible = false;
-    //var BetIsActive = false;
-    var PassIsVisible = false;
-
-    switch (thisPlayerView.Phase){
-        /*only the choice of chips*/
-        case '0':{
-            HandIsActive = true;
-            break;
-        }
-        /*You can place a bet*/
-        case '1':{
-            HandIsActive = true;
-            BetIsVisible = true;
-            //BetIsActive = true;
-            break;
-        }
-        /*the betting phase*/
-        case '2':{
-            BetIsVisible = true;
-            //BetIsActive = true;
-            PassIsVisible = true;
-            break;
-        }
-        /*opening chips*/
-        case '3':{
-            CounterIsVisible = true;
-            break;
-        }
-        default:{
-            break;
-        }
-    }
-
-    function CardsView(cards)
-    {
-        if (cards.length === 0) return(
-            <div className='Cards'>
-                <p>Карт нет</p>
-            </div>
-        )
-        if (!HandIsActive) return(
-            <div className='Cards'>
-            {cards.map((card, index)=>{
-                return(
-                        <Chip key={index} type={card.Type}/>
-                    )
-            })}
-        </div>
-        );
-        else return(
-            <div className='Cards'>
-                {cards.map((card, index)=>{
-                    return(
-                        <Chip 
-                            key={index}
-                            type={card.Type}
-                            onClick={card.Onclick}
-                            />
-                    )
-                })}
-            </div>
-        )
-    }
-    const PassButton = ({func}) =>{
-        if (!PassIsVisible) return(<></>)
-        else return(
-            <button className="OptionButton" onClick={func}>
-                {textContext.skip}
-            </button>
-        )
-    }
-    function WindowWithBid()
-    {
-        if (!BetIsVisible) return(<></>);
-        else return(
-            <div className='Bid'>
-                <button className="OptionButton" 
-                    onClick={thisPlayerView.UpdateBet}>
-                    {textContext.placeBet}
-                </button>
-                <InputText2 
-                    labelText={thisPlayerView.Bet +" >"} 
-                    name='userInput' 
-                    value={thisPlayerView.InputValue} 
-                    setValue={thisPlayerView.SetInputValue}/>
-                <PassButton func = {thisPlayerView.Pass}/>
-            </div>
-        );
-    }
-    function CounterView() {
-        if (!CounterIsVisible) return (<></>)
-        return (
-            <div className='Bid'>
-                <p>{textContext.ItRemainsToTurnItOver}:</p>
-                <p>{thisPlayerView.UpdateIsFlipping}</p>
-            </div>
-        )
-    }
-    return(
-        <div className="BottomPanel1">
-            {CardsView(thisPlayerView.ViewCards)}
-            {CounterView()}
-            {WindowWithBid()}
-        </div>
-    )
-}  
-{/*
+/*
 export const BottomPanel2 = ({deck, bet, victoryPoints, 
     updateBet, updateIsFlipping, Pass, FlipCard}) => {
     const textContext = textDataToView[indexDictionary];
@@ -234,7 +111,7 @@ export const BottomPanel2 = ({deck, bet, victoryPoints,
             {WindowWithBid()}
         </div>
     )
-} */}            
+} */            
 {/*
     <button  hidden={deck[0].IsDisabled} className="Card" onClick={FlipCard(0)}>
         img name = 'img' src = {deck[0].Image} className="OptionImage" />

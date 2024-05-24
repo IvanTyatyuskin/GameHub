@@ -28,8 +28,6 @@ const SocketProvider = ({ children }) => {
       setSocket(null);
     });
 
-    
-
     setSocket(newSocket);
 
     return () => newSocket.disconnect();

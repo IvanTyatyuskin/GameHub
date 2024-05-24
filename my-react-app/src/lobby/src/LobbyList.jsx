@@ -1,20 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import io from 'socket.io-client';
 import Cookies from 'js-cookie';
-//Aero
-import { useNavigate } from 'react-router-dom';
-//
-import { socket } from '../../games/ConnectionJSX';
-//Aero
 
-//
 function LobbyList() {
-
   const [lobbies, setLobbies] = useState([]);
   const [currentLobby, setCurrentLobby] = useState(null);
   const [userInfo, setUserInfo] = useState({});
   const [privateLobbies, setPrivateLobbies] = useState([]);
-  const navigate = useNavigate();
+
   function loadChatHistory() {
     const chatHistory = localStorage.getItem('chatHistory');
 
@@ -75,12 +68,7 @@ function LobbyList() {
         const chatMessages = document.getElementById('chat-messages');
         localStorage.setItem('chatHistory', chatMessages.innerHTML);
     });
-    //Aero
-    socket.on('start_game', (data,callback) => {
-      navigate('/Diamant');
-      callback();
-    });
-    //
+
     return () => {
       socket.off('lobby list');
       socket.off('join lobby');
@@ -112,21 +100,7 @@ function LobbyList() {
 
     socket.emit('create lobby', { ...userInfo, lobbyName, isPrivate, password });
   };
-  //Aero
-  const handleReady = () => {
-    // Собираем данные игрока. В вашем случае это может быть информация, сохраненная в состоянии компонента.
-    const playerData = {
-      nickname: userInfo.nickname,
-      avatar: userInfo.avatar,
-      background: userInfo.background,
-      // Добавьте любые другие данные, которые вы хотите отправить на сервер
-    };
-  
-    // Отправляем событие 'player_ready' на сервер с данными игрока
-    socket.emit('player_ready', playerData);
-  };
-  
-//
+
   const joinLobby = (event) => {
     event.preventDefault();
 
@@ -162,6 +136,11 @@ function LobbyList() {
       chatInput.value = '';
     }
   };
+
+  const startGame = () => {
+    socket.emit('start game', currentLobby.name);
+  };
+  
 
   return (
     <>
@@ -199,6 +178,9 @@ function LobbyList() {
           <button type="submit" id="create-lobby" className="DisplayText" onClick={createLobby}>Create lobby</button>
           <button type="submit" id="join-lobby" className="DisplayText" onClick={joinLobby}>Join lobby</button>
           <button type="button" id="leave-lobby" className="DisplayText" onClick={leaveLobby} disabled={!currentLobby}>Leave lobby</button>
+          {currentLobby && currentLobby.creator === userInfo.nickname && (
+            <button onClick={startGame}>Начать игру</button>
+          )}
         </form>
 
         {currentLobby && (
@@ -208,9 +190,6 @@ function LobbyList() {
             <form id="chat-form" onSubmit={sendChatMessage}>
               <input type="text" id="chat-input" placeholder="Type your message..." />
               <button type="submit">Send</button>
-           
-      <button onClick={handleReady} >Play</button>
-
             </form>
           </div>
         )}

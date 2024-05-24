@@ -24,9 +24,9 @@ export const SimpleButton = ({children}) => {
 }
 
 
-export const LanguageButton = ({children, text}) => {
+export const LanguageButton = ({children, text, onclick}) => {
     return(
-        <button className={styles.langbutton}>
+        <button className={styles.langbutton} onClick={onclick}>
             <p>{text}</p>
         </button>
     )
