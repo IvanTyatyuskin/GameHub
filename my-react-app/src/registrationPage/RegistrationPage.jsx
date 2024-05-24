@@ -43,7 +43,9 @@ export const RegistrationPage = ({}) =>{
   const _nickname = getCookie('nickname'); //получить из cookie
   const _avatar = 0;
   const _background = 0;
-  const _language = 'Rus';
+  const _language = getCookie('language');
+
+  document.cookie = `language=${_language}; max-age=3600; path=/`; // Сохраняем никнейм в Cookie
 
   //нужно добавть в cookie значение библиотеки языка (Rus||Eng)
 
@@ -52,11 +54,16 @@ export const RegistrationPage = ({}) =>{
   const [getBackground, setBackground] = useState(_background);
   const [getLanguage, setLanguage] = useState(_language);
 
-  function LanguageSelection() {
+  const handleLanguageChange = (language) => {
+    setLanguage(language);
+    document.cookie = `language=${language}; max-age=3600; path=/`
+  }
+
+  function LanguageSelection({ onLanguageChange }) {
     return(
       <div className={styles_registrationPage.languageselection}>
-        <LanguageButton text='Rus'/>
-        <LanguageButton text='Eng'/>
+        <LanguageButton text='Rus' onclick={() => onLanguageChange("Rus")} />
+        <LanguageButton text='Eng' onclick={() => onLanguageChange("Eng")} />
       </div>
     )
   }
@@ -98,7 +105,6 @@ export const RegistrationPage = ({}) =>{
   const handleAccept = () => {
     const nickname = getInput;
 
-
     if (nickname != '') {
       document.cookie = `nickname=${nickname}; max-age=3600; path=/`; // Сохраняем никнейм в Cookie
       document.cookie = `avatar=${getAvatar}; max-age=3600; path=/`; // Сохраняем никнейм в Cookie
@@ -123,7 +129,7 @@ export const RegistrationPage = ({}) =>{
     <OnlyWindow>
       <div className={styles_onlyWindow.header}>
         <LogoComponent/>
-        {LanguageSelection()}
+        <LanguageSelection onLanguageChange={handleLanguageChange} />
         <p></p>
       </div>
       <div className={styles_onlyWindow.body}>
@@ -133,10 +139,12 @@ export const RegistrationPage = ({}) =>{
           </div>
           {TextInputArea()}
           <div className={styles_registrationPage.panelbuttons}>
-            <button id="cancel_button" onClick={handleCancel}>
-              <img alt="" src={img}/>
-              <p>Отмена</p>
-            </button>
+            {getInput !== '' && (
+              <button id="cancel_button" onClick={handleCancel}>
+                <img alt="" src={img}/>
+                <p>Отмена</p>
+              </button>
+            )}
             <button id="accept_button" onClick={handleAccept}>
               <img alt="" src={img}/>
               <p>Принять</p>
