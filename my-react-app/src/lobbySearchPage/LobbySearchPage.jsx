@@ -8,7 +8,7 @@ import '../Components/css/image.css'
 import '../Components/css/section.css'
 
 import { Games } from '../games/DataAboutGames'
-import { Input3, InputText2 } from '../Components/common/Input'
+import { InputText2 } from '../Components/common/Input'
 import Button from '../Components/common/button'
 import { Modal } from '../Components/common/Modal'
 import { useState, useEffect } from 'react'
@@ -54,25 +54,27 @@ export const LobbyItem = ({
 
 
 const SearchLobbyPage = ({
-    GameIndex = "1",
+    //GameIndex = "1",
     Rooms = testRoomsData
 }) => {
-    //const location = useLocation();
-    //const [gameName, setGameName] = useState(null);
+    ////////
+    const location = useLocation();
+    const [gameName, setGameName] = useState(null);
   
-    //useEffect(() => {
-    //  setGameName(location.state?.name);
-    //}, [location]);
+    useEffect(() => {
+      setGameName(location.state?.name);
+    }, [location]);
   
-    //console.log(gameName);
-    //console.log(location);
-    //let index = 3;
-    //if (gameName == 'Diamant') index = 0;
-    //if (gameName == 'Skull') index = 1;
+    console.log(gameName);
+    console.log(location);
+    let index = 3;
+    if (gameName == 'Diamant') index = 0;
+    if (gameName == 'Skull') index = 1;
 
-    //const GameIndex = index;
+    const GameIndex = index;
 
-    //console.log(index);
+    console.log(index);
+    ////////
 
     const DataAboutGame = Games[GameIndex];
     const [modalActive, setModalActive] = useState(false);
