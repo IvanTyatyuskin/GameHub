@@ -84,24 +84,6 @@ export const RegistrationPage = ({}) =>{
     )
   }
 
-  function PanelButtons(){
-    return(
-      <div className={styles_registrationPage.panelbuttons}>
-        <button id="cancel_button">
-          <img
-            alt=""
-            src={img}
-          />
-          <p>Отмена</p>
-        </button>
-        <button id="accept_button">
-          <img alt="" src={img}/>
-          <p>Принять</p>
-        </button>
-      </div>
-    )
-  }
-
   const handleAccept = () => {
     const nickname = getInput;
 
@@ -122,7 +104,7 @@ export const RegistrationPage = ({}) =>{
 
   const handleCancel = () => {
     //document.getElementById('inputName').value = ''; // Очищаем поле для текста
-    setInput('');
+    setInput(_nickname);
   };
 
   return(<>
