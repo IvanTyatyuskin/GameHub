@@ -4,17 +4,17 @@ import UserImage3 from '../assets/UserImage3.png'
 
 export const TestData = [
     {
-        img:{UserImage1},
+        img: UserImage1,
         Name: "Игрок 1",
         host: true
     },
     {
-        img:{UserImage2},
+        img: UserImage2,
         Name: "Игрок 2",
         host:false        
     },
     {
-        img:{UserImage3},
+        img: UserImage3,
         Name: "Игрок 3",
         host:false
     }
