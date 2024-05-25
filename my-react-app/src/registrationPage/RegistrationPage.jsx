@@ -37,6 +37,7 @@ export const RegistrationPage = ({}) =>{
   const _nickname = cookies.nickname || ''; //получить из cookie
   const _avatar = cookies.avatar ||  0;
   const _background = cookies.background || 0;
+  const _language = cookies.background || "Rus";
 
   //нужно добавть в cookie значение библиотеки языка (Rus||Eng)
 

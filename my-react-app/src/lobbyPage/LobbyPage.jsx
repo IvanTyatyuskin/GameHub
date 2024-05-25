@@ -13,6 +13,7 @@ import { SocketContext } from '../SocketContext'
 import { useNavigate } from 'react-router-dom'
 import { useParams } from 'react-router-dom';
 import { TextDataLobby } from './TextViewData.js'
+import LobbyPageView from './LobbyPageView.jsx'
 
 
 export const PlayerItem = ({Img={img_playButton}, Name='player', forHost = false, host = false}) =>{
@@ -106,81 +107,19 @@ export const LobbyPage = ({
         navigate('/TicTacToe');
     })
 
-
-    const RoomData = () => {
-        return(
-            <div className={styles.RoomData}>
-                <h1>Название лобби: {lobbyName}</h1>
-                <p>Название игры: {gameName}</p>
-                <p>{roomId}</p>
-            </div>
-        )
-    }
-
-    const UsersPanel = () => {
-        return(
-            <div className={styles.UserListPanel}>
-                <div className={styles.UserList}>
-                    {usersData.map(player => (
-                        <PlayerItem Img={player.img} Name={player.Name} host={player.host}/>
-                    ))}
-                    <button className={styles.ButtonAddPlayer}>
-                        <p>{TextContext.InviteAPlayer}</p>
-                    </button>
-                </div>
-            </div>
-        )
-    }
-
-    const ButtonPanel = () => {
-        return(
-            <div className={styles.ButtonPanel}>
-                <button className={styles.SimpleButton}>
-                    {TextContext.Exit}
-                </button>
-                <button className={styles.SimpleButton}>
-                    {TextContext.Settings}
-                </button>
-                <button className={styles.SimpleButton + " " + styles.Large}>
-                    {TextContext.HowToPlay}
-                </button>
-                {isCreator ? (
-                    <button className={styles.SimpleButton + " " + styles.Large + ' ' + styles.WithIcon}
-                    onClick={handleStartClick}>
-                        <img src={img_playButton} alt="" />
-                        {TextContext.Play}
-                    </button>
-                ) : null}
-            </div>
-        )
-    }
-    return (
-        <>
-        <Header/>
-        <div className='content-box height-fullscreen fix-height'>
-            <div className='content-single' style={{paddingBottom: '30px'}}>
-                <RoomData/>
-                <div className={styles.MainPanel}>
-                    <UsersPanel/>
-                    <div className={styles.chatFrame}>
-                        <div className={styles.chatLog}>
-                            {chatHistory.map((message, index) => (
-                                <p key={index}>
-                                    {message.sender}: {message.text}
-                                </p>
-                            ))}
-                        </div>
-                        <div id="input" className={styles.InputWithButton}>
-                            <input type='text' value={inputValue} onChange={(e) => setInputValue(e.target.value)}/>
-                            <button onClick={() => handleSendClick(inputValue)}>
-                                Отправить
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <ButtonPanel/>
-            </div>
-        </div>
-        </>
+    return(
+        <LobbyPageView
+            LobbyName = {lobbyName}
+            isCreator = {isCreator}
+            GameName = {gameName}
+            roomId={roomId}
+            usersData = {usersData}
+            inputValue = {inputValue}
+            setInputValue = {inputValue}
+            chatHistory = {chatHistory}
+            handleSendClick={handleSendClick}
+            handleStart={isCreator?handleStartClick:null}
+            TextContext = {TextContext}
+        />
     )
 }

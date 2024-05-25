@@ -22,7 +22,7 @@ export function Inputs() {
     )
 }
 
-export const InputText = ({ labelText='', name = 'username', id = name, 
+export const InputText = ({ labelText, name = 'username', id = name, 
     placeholder = 'Username', value, setValue , 
     disabled = false, readonly = false }) => {
     

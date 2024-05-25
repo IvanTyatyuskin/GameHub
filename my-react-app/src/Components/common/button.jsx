@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './button.module.css'
-
+import { ButtonType } from './ButtomEnum.ts';
 
 const Button = ({ type = 'button', onClick, children, color, background, width, padding, className }) =>
 {
