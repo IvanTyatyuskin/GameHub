@@ -6,45 +6,6 @@ import { PlayerView } from '../Classes.js'
 import React from 'react'
 
 
-export const PlayersTablet = ({
-        PlayerImg = react, 
-        PlayerName = "Player", 
-        VP = "0", 
-        cardsDown="0",
-        openCards=[],
-        onclick
-    }) => {
-    function ViewOpenCards(){
-        if (openCards.length > 0){
-            return(
-                openCards.map(chip=>(
-                    <Chip type={chip}/>
-                ))
-            )
-        }
-        return (<></>)
-    }
-    return(
-        <div className='playersTablet'>
-            <div className='playerCard'>
-                <div>
-                    <img src={PlayerImg} className='size64'/>
-                    <p>{PlayerName}</p>
-                    <p>{VP}</p>
-                </div>
-                <div>
-                    <span id="count">{cardsDown}</span>
-                    <Chip onClick={onclick}/>
-                </div>
-            </div>
-            <div>
-                {ViewOpenCards()}
-            </div>
-        </div>
-    )
-}
-
-
 /**
  * 
  * @param {PlayerView} playerView 
