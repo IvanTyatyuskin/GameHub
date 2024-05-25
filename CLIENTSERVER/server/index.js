@@ -23,7 +23,7 @@ let lobbies = { publicLobbies: [], privateLobbies: [] };
 
 let SkullPlayers=[]
 let SkullPlayersData=[]
-let GameMode=''
+let GameMode=''      
 let Bet=0
 let CurrPlayerInd=0
 io.on('connection', (socket) => {
@@ -36,16 +36,16 @@ io.on('connection', (socket) => {
 
   socket.on('get lobby list', () => {
     io.emit('lobby list', lobbies);
-  });
+  });                  
 
   socket.on('create lobby', (data) => {
-    const lobby = {
+    const lobby = {      
       name: data.lobbyName,
       players: [{ nickname: data.nickname, avatar: data.avatar, background: data.background }],
       isPrivate: data.isPrivate,
       password: data.isPrivate ? data.password : null,
     };
-
+        
     if (data.isPrivate) {
       lobbies.privateLobbies.push(lobby);
     } else {
@@ -133,7 +133,7 @@ io.on('connection', (socket) => {
         lobbies.privateLobbies.splice(lobbyIndex, 1);
       }
     }
-
+    
     socket.leave(data.lobbyName);
     io.emit('lobby list', lobbies);
     socket.emit('leave lobby');
@@ -162,7 +162,7 @@ io.on('connection', (socket) => {
  Deck.push(new Card('Treasure',14))
  Deck.push(new Card('Treasure',15))
  Deck.push(new Card('Treasure',17))
- RelicDeck.push(new Card('relic',5))
+ RelicDeck.push(new Card('relic',5))   
  RelicDeck.push(new Card('relic',7)) 
  RelicDeck.push(new Card('relic',8)) 
  RelicDeck.push(new Card('relic',10))
@@ -171,7 +171,7 @@ io.on('connection', (socket) => {
      Deck.push(new Card('Trap Spider',null))
  }
  for (let i = 0; i < 3; i++) {
-     Deck.push(new Card('Trap Snake',null))
+     Deck.push(new Card('Trap Snake',null))                
  }
  for (let i = 0; i < 3; i++) {
      Deck.push(new Card('Trap Stone',null))   
@@ -181,7 +181,7 @@ io.on('connection', (socket) => {
  }
  for (let i = 0; i < 3; i++) {
      Deck.push(new Card('Trap Magma',null))
- }
+ }         
  //shuffle(Deck);
 
     // Отправляем данные игрока и колоду карт на клиент
@@ -197,7 +197,7 @@ io.on('connection', (socket) => {
   });
 
   
-  socket.on('AddSkullPlayer', () => {     
+  socket.on('AddSkullPlayer', () => {                            
 
     console.log(socket.id);
       SkullPlayers.push(new SkullPlayer(socket.id,'player',0,0,0,null,false,false,[],'setup',null,false));
@@ -205,19 +205,27 @@ io.on('connection', (socket) => {
       if(SkullPlayers.length==1){
         SkullPlayers[0].IsActive=true; 
       }
+      socket.emit("SkullGetPlayerId",socket.id);                  
       console.log(SkullPlayers);
       socket.join('Skull');
       io.sockets.in('Skull').emit('SkullPLayersUpdate', SkullPlayers);
-      socket.emit("SkullGetPlayerId",socket.id);
+          
     
-  });
- 
+  });          
+  socket.on('SkullUpdate', () => {                            
+
+    //console.log(socket.id);      
+      socket.emit("SkullPLayersUpdate",SkullPlayers);                  
+      
+    
+  });              
+
   socket.on('EndTurn', (data) => {   
     console.log(`End Turn`);
     console.log(data);
     let ActivePlayers=0; 
     GameMode=data.gameMode;     
-    Bet=data.Bet;  
+    Bet=data.Bet;     
     console.log(GameMode);  
     for (let i = 0; i < SkullPlayers.length; i++) {
   if(SkullPlayers[i].Id==data.id)    
@@ -233,15 +241,16 @@ io.on('connection', (socket) => {
     if (!SkullPlayers[i].HavePassed){
       ActivePlayers++;
     }
+    SkullPlayers[i].Bet=Bet;                
     if (Bet>0&&GameMode=='play'){  
-      SkullPlayers[i].Bet=Bet;
+     
       SkullPlayers[i].GameMode='betting';  
     }
     //console.log(SkullPlayers[i].Id);
     }
-   
+      
 
-
+  
     MoveToNextPlayer();
 while(SkullPlayers[CurrPlayerInd].HavePassed==true)
   {
@@ -250,7 +259,7 @@ while(SkullPlayers[CurrPlayerInd].HavePassed==true)
   SkullPlayers[CurrPlayerInd].IsActive=true;
 
   let PlayersSetuped=0;
-  
+     
 if(ActivePlayers==1) 
   {
              
@@ -306,8 +315,8 @@ if(ActivePlayers==1)
 
     io.sockets.in('Skull').emit('SkullPLayersUpdate', SkullPlayers);
     console.log(SkullPlayers);  
-    console.log(SkullPlayersData);   
-    
+    console.log(SkullPlayersData[0].PlayedCards);     
+          
   });
 
   socket.on('OpenChip', (data) => {
@@ -325,7 +334,7 @@ if(ActivePlayers==1)
         MoveToNextRound(); 
       }          
       else   
-      {
+      {       
        
         Bet=Bet-1;
         SkullPlayers[j].IsActive=true;
@@ -360,7 +369,7 @@ if(ActivePlayers==1)
       console.log(SkullPlayers);   
   io.sockets.in('Skull').emit('SkullPLayersUpdate', SkullPlayers);
   });
-
+        
 });  
 function FindSkullPlayerById(id)   
 {
@@ -369,7 +378,7 @@ function FindSkullPlayerById(id)
     if(SkullPlayers[i].Id==id) 
     {
       return i;
-    }
+    }    
   }
 }
 function MoveToNextPlayer()
@@ -388,11 +397,11 @@ function MoveToNextRound()
     SkullPlayers[i].GameMode='play';
     SkullPlayers[i].Bet=0;
     SkullPlayers[i].CardsDown=0;
-    SkullPlayers[i].HavePassed=false;
+    SkullPlayers[i].HavePassed=false;  
     SkullPlayersData[i].PlayedCards=[];
   } 
   Bet=0; 
-  GameMode='play';
+  GameMode='play';              
   io.sockets.in('Skull').emit('Reset');
   
 }
