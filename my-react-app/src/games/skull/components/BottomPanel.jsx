@@ -170,7 +170,12 @@ export const BottomPanel2 = ({
                     name='userInput' 
                     value={thisPlayerView.InputValue} 
                     setValue={thisPlayerView.SetInputValue}/>
-                <PassButton func = {thisPlayerView.Pass}/>
+                {/*<PassButton func = {thisPlayerView.Pass}/>*/}
+                <div style={{ display: !PassIsVisible? 'none' : 'block' }}>
+                    <button className="OptionButton" onClick={thisPlayerView.Pass}>
+                        {textContext.skip}
+                    </button>
+                </div>
             </div>
         );
     }
