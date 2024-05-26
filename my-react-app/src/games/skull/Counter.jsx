@@ -14,9 +14,10 @@ class Card {
   }
 
 }
-
+let debug=0;
 let id=0;
 let playedDeck=[];
+let lost=false;
 function Counter() {
   const [bet, setBet] = useState(0);
   const [victoryPoints, setVP] = useState(0);
@@ -29,9 +30,9 @@ function Counter() {
   const [gameMode, setGameMode] = useState("setup");
   const [thisPlayer, setThisPlayer] = useState([]);
   const [PlayersView, setPlayersView] = useState([]);   
- 
+ // const [winWindow, setWinWindow] = useState(false);  
 
-  const ThisPlayerToView = (deckValue,active,vp,gameMode,Bet) => () => {
+  const ThisPlayerToView = (deckValue,active,vp,gameMode,Bet,winWindow) => () => {
   let cards=[];
   for (let i = 0; i < deckValue.length; i++) { 
     let val='0';
@@ -46,17 +47,35 @@ function Counter() {
     cards.push(new CardView(val,FlipCard(i), deckValue[i].IsDown,deckValue[i].IsDisabled));
   }
   //console.log(cards);
-  let view= new ThisPlayerView(id,cards,active,vp,Bet,updateBet(),Pass(),input,setInput,false,gameMode);
+  let view= new ThisPlayerView(id,cards,active,vp,Bet,updateBet(),Pass(),input,setInput,winWindow,gameMode);
  // setThisPlayer([...thisPlayer, ...view]);
  return view;
   }
 
   const PlayersToView = (playersValue) => () => {
     let newPlayers=[];
+    
     for (let i = 0; i < playersValue.length; i++) { 
-      newPlayers.push(new PlayerView(playersValue[i].Id, "player "+String(i), skull, playersValue[i].VP, playersValue[i].CardsDown,playersValue[i].OpenCards, playersValue[i].IsActive, openChip(i)));
+      let cards=[];
+       for (let j = 0; j < playersValue[i].OpenCards.length; j++) { 
+        let val='0';
+                
+        if(playersValue[i].OpenCards[j].IsSkull)
+          {
+            val='1';
+        }
+      
+          cards.push(new CardView(val,null, false,false));
+        }
+        if(debug==0)
+          {
+          debug++;
+          console.log(cards);
+          }
+       
+        newPlayers.push(new PlayerView(playersValue[i].Id, "player"+String(i), skull, playersValue[i].VP, playersValue[i].CardsDown,cards, playersValue[i].IsActive, openChip(i)));
+       
     }
-
    // setThisPlayer([...thisPlayer, ...view]);
    return newPlayers;
     }
@@ -69,7 +88,7 @@ function Counter() {
     ]; 
     socket.emit('AddSkullPlayer');
     setDeck([...deck, ...initialDeck]);
-    setThisPlayer(ThisPlayerToView(initialDeck,false,0,'setup', 0));
+    setThisPlayer(ThisPlayerToView(initialDeck,false,0,'setup', 0,false));
     
   }, []);
   socket.emit('SkullUpdate');
@@ -94,7 +113,7 @@ function Counter() {
    // console.log(id);
     setPlayers(data);
     setPlayersView(PlayersToView(data)); 
-    setThisPlayer(ThisPlayerToView(deck,data[ind].IsActive,data[ind].VP,data[ind].GameMode,data[ind].Bet));
+    setThisPlayer(ThisPlayerToView(deck,data[ind].IsActive,data[ind].VP,data[ind].GameMode,data[ind].Bet,data[ind].WinWindow));
   });
 
   socket.on('SkullGetPlayerId', (data) => {
@@ -105,25 +124,31 @@ function Counter() {
 
   socket.on('BetFail', () => {
 if(deck.length>0)
-  {
+  { 
+    if(lost==false)
+    {
+      lost=true;
     const newDeck = [...deck];
     newDeck[Math.floor(Math.random()*(3+1))].IsDisabled=true;
     setDeck(newDeck);
     console.log("fail");
     console.log(newDeck);
-    setThisPlayer(ThisPlayerToView(newDeck,isActive,victoryPoints,gameMode,bet));
+    setThisPlayer(ThisPlayerToView(newDeck,isActive,victoryPoints,gameMode,bet,false));
   }
+}
   }); 
 
   socket.on('Reset', () => {
     let newDeck = [];
+    playedDeck=[]
+    lost=false;
     for (let i = 0; i < deck.length; i++) 
       {
         newDeck.push(deck[i]);
         newDeck[i].IsDown=false;
       }
     setDeck(newDeck);
-    setThisPlayer(ThisPlayerToView(newDeck,isActive,victoryPoints,gameMode,bet));
+    setThisPlayer(ThisPlayerToView(newDeck,isActive,victoryPoints,gameMode,bet,false));
   });  
 
 function CardsDown(){
@@ -160,10 +185,10 @@ const updateBet = () => () => {
     let pass=false;
     socket.emit('EndTurn',{id,downCount,playedDeck,gameMode,Bet,active,pass});
     }
-    else if(Bet>CardsDown()){
+    else if(Bet>totalCardsDown()){
       alert("Недостаточно карт на столе")
     }
-    else if(Bet<bet){
+    else if(Bet<=bet){
       alert("Ставка меньше текущей")
     }
     else{
@@ -220,7 +245,7 @@ const updateBet = () => () => {
     console.log(thisPlayer);
   }
   
-   };
+   };   
 
    const openChip = (ind) => () => {
     if(gameMode=='flippingChips')
