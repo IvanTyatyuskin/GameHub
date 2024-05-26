@@ -57,18 +57,27 @@ export const LobbyPage = ({
     const navigate = useNavigate();
     const { gameName } = useParams();
 
-    if (!isLobbyDataRequested){
-        socket.emit('get_lobby_info');
-        socket.on('lobby_name', (lobbyName) => {
-            setLobbyName(lobbyName);
-        })
-        socket.on('isCreator', (creator) => {
-            if(creator) {
-                setIsCreator(true);
-            }
-        })
-        setIsLobbyDataRequested(true);
-    }
+
+    useEffect(() => {
+        if (socket && !isLobbyDataRequested) {
+            socket.emit('get_lobby_info');
+            socket.on('lobby_name', (lobbyName) => {
+                setLobbyName(lobbyName);
+            });
+            socket.on('isCreator', (creator) => {
+                if (creator) {
+                    setIsCreator(true);
+                }
+            });
+            setIsLobbyDataRequested(true);
+
+            // Cleanup function to remove event listeners
+            return () => {
+                socket.off('lobby_name');
+                socket.off('isCreator');
+            };
+        }
+    }, [socket, isLobbyDataRequested]);
 
 
     const handleStartClick = () => {
@@ -76,11 +85,22 @@ export const LobbyPage = ({
         socket.emit(`${gameName}_start`);
     };
 
-    socket.on(`${gameName}_started`, (callback) => {
-        console.log("HEY")
-        navigate(`/${gameName}`);
-        callback();
-    })
+    useEffect(() => {
+        if (socket) {
+            const handleGameStarted = (callback) => {
+                console.log("HEY");
+                navigate(`/${gameName}`);
+                callback();
+            };
+
+            socket.on(`${gameName}_started`, handleGameStarted);
+
+            // Cleanup function to remove event listeners
+            return () => {
+                socket.off(`${gameName}_started`, handleGameStarted);
+            };
+        }
+    }, [socket, gameName, navigate]);
 
 
     const RoomData = () => {

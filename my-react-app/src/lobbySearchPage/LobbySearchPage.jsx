@@ -12,88 +12,60 @@ import { Input3, InputText2 } from '../Components/common/Input'
 import Button from '../Components/common/button'
 import { Modal } from '../Components/common/Modal'
 import { useState } from 'react'
-import { ConnectToRoomModal, CreateLobbyModal } from './ModalWindows'
-import {Room, testRoomsData} from './testData.js'
+import { ConnectToRoomModal, CreateLobbyModal, CreateLobbyModal1 } from './ModalWindows'
+import {LobbyInfoView, testRoomsData} from './LobbyInfoClass.js'
+import { LobbyItem } from './LobbyItem.jsx'
+import GameInfo from '../games/GameInfoClass.js'
+
 
 /**
  * 
- * @param {Room} roomInfo 
+ * @param {GameInfo} DataAboutGame 
  * @returns 
  */
-export const LobbyItem = ({
-    roomInfo,
-    onClick = ()=>{},
-    connectFunc
-}) =>{
-    const availability = roomInfo.locked? image_locked : image_unlocked;
-    var styleItem = styles.lobbyItem;
-    if (onClick) styleItem += ' ' + styles.clickable;
-    return(
-        <button className={styleItem} onClick={()=>
-            {
-                connectFunc(roomInfo);
-            }}>
-            <div className={styles.lobbyIcon}>
-                <img src={image_group2}/>
-            </div>
-            <div className={styles.lobbyname}>
-                <p>{roomInfo.name}</p>
-            </div>
-            <div className={styles.playersnumber}>
-                <p>{roomInfo.count}/{roomInfo.maxCount}</p>
-            </div>
-            <div className={styles.lobbyIcon}>
-                <img src={availability}/>
-            </div>
-        </button>
-    )
-} 
-
 const SearchLobbyPage = ({
-    GameIndex = "1",
-    Rooms = testRoomsData
+    DataAboutGame = Games[0],
+    Rooms = [],
+    createLobbyFun,
+    connectToRoomFun,
+    canCreateLobbyCheck,
+    canConnectToRoomCheck
 }) => {
-    const DataAboutGame = Games[GameIndex];
+    //console.log(Rooms);
     const [modalActive, setModalActive] = useState(false);
     const [getModalContent, setModalContent] = useState("");
     const [searchText, setSearchText] = useState("");
-    const GameRestrictions = {
-        maxPlayers: DataAboutGame.maxPlayers,
-        minPlayers: DataAboutGame.minPlayers
-    }
-    const [getRoomSettings, setRoomSettings] = useState({
-        Name: '',
-        Public: false,
-        Password:'',
-        MaxOfPlayers: GameRestrictions.minPlayers
-    })
 
-    function createButtonClick(roomSettings){
-        if (roomSettings.Name === ''){ //какая-то проверка
-            alert("Чел, ты не прав");
+    function tryCreateLobby(roomSettings){
+        const [canCreate, message] = canCreateLobbyCheck(roomSettings);
+        if (canCreate){ //какая-то проверка
+            createLobbyFun(roomSettings);
         }
         else{
-            alert("Дело сделано");
-            setModalActive(false);
+            alert("Чел, ты не прав " + message);
         }
     }
-    function connectToRoomClick(lobbyInfo, password) {
-        //логика подключения если комната публичная пароль игнорируем
+    function tryConnectToLobby(roomSettings, password){
+        const [canCreate, message] = canConnectToRoomCheck(roomSettings, password);
+        if (canCreate){ //какая-то проверка
+            connectToRoomFun(roomSettings);
+        }
+        else{
+            alert("Чел, ты не прав " + message);
+        }
     }
+
     function CreateLobbyButton() {
         setModalContent(
-            <CreateLobbyModal 
-                gameRestrictions = {GameRestrictions}
-                getRoomSettings = {getRoomSettings}
-                setRoomSettings = {setRoomSettings}
-                createFunc = {createButtonClick}/>);
+            <CreateLobbyModal1 DataAboutGame={DataAboutGame} createFun={tryCreateLobby} />
+        )
         setModalActive(true);
     }
-    function СonnectToRoom(lobbyInfo){
+    function СonnectToRoomButton(lobbyInfo){
         setModalContent(
             <ConnectToRoomModal 
                 lobbyInfo = {lobbyInfo}
-                connectFunc = {connectToRoomClick}/>
+                connectFunc = {tryConnectToLobby}/>
         );
         setModalActive(true);
     }
@@ -129,7 +101,8 @@ const SearchLobbyPage = ({
                         <h1>Список доступных лобби</h1>
                         <div className={styles.search_block}>
                             <InputText2 labelText="Название комнаты"
-                                value={searchText} setValue={handleSearchChange}/>
+                                value={searchText}
+                                setValue={handleSearchChange}/>
                             <Button onClick={handleRandomGame}>
                                 <p>Случайная игра</p>
                             </Button>
@@ -139,10 +112,10 @@ const SearchLobbyPage = ({
                         </div>
                         
                         <div className={styles.lobbyList}>
-                            {filteredLobbies.map(room =>{
+                            {filteredLobbies.map((room, index) =>{
                                 return (
-                                <LobbyItem roomInfo={room}
-                                connectFunc={СonnectToRoom}
+                                <LobbyItem key={index} roomInfo={room}
+                                onClick={СonnectToRoomButton}
                                 />);
                             })}
                         </div>

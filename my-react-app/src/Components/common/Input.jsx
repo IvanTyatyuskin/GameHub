@@ -49,10 +49,11 @@ export const InputText2 = ({ labelText,
 }) => {
     const [value, setValue] = useState(propValue || '');
     const handleChange = (event) => {
+        const newValue = event.target.value;
         if (propSetValue){
-            propSetValue(event.target.value);
+            propSetValue(newValue);
         } else{
-            setValue(event.target.value);
+            setValue(newValue);
         }
     }
     return (

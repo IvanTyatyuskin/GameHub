@@ -1,4 +1,4 @@
-export class Room {
+export class LobbyInfoView {
     constructor(id = '', name = '', 
     locked = false, password = '', 
     count = null, maxCount = null){
@@ -12,8 +12,8 @@ export class Room {
 }
 
 export const testRoomsData = [
-    new Room(null, "Room 1", true, '', '5', '6'),
-    new Room(null, "Room 2", false, '', '3', '3'),
-    new Room(null, "Room 3", false, '', '4', '6'),
-    new Room(null, "Room 4", true, '', '5', '6'),
+    new LobbyInfoView(null, "Room 1", true, '', '5', '6'),
+    new LobbyInfoView(null, "Room 2", false, '', '3', '3'),
+    new LobbyInfoView(null, "Room 3", false, '', '4', '6'),
+    new LobbyInfoView(null, "Room 4", true, '', '5', '6'),
 ]
