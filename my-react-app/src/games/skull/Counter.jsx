@@ -17,6 +17,8 @@ class Card {
 let debug=0;
 let id=0;
 let playedDeck=[];
+let debounceTimeout;
+let UpdateDebounceTimeout;
 let lost=false;
 function Counter() {
   const [bet, setBet] = useState(0);
@@ -70,7 +72,7 @@ function Counter() {
         if(debug==0)
           {
           debug++;
-          console.log(cards);
+          //console.log(cards);
           }
        
         newPlayers.push(new PlayerView(playersValue[i].Id, "player"+String(i), skull, playersValue[i].VP, playersValue[i].CardsDown,cards, playersValue[i].IsActive, openChip(i)));
@@ -91,11 +93,16 @@ function Counter() {
     setThisPlayer(ThisPlayerToView(initialDeck,false,0,'setup', 0,false));
     
   }, []);
+
+  if (UpdateDebounceTimeout) clearTimeout(UpdateDebounceTimeout);
+  UpdateDebounceTimeout = setTimeout(() => {
   socket.emit('SkullUpdate');
+}, 100);
+
   socket.on('SkullPLayersUpdate', (data) => {
    // console.log('SkullPLayersUpdate');
-  //  console.log(data);
-    
+    //console.log(data);
+    if(data!=null){
     let ind=0
     for (let i = 0; i < data.length; i++) 
     {
@@ -114,28 +121,38 @@ function Counter() {
     setPlayers(data);
     setPlayersView(PlayersToView(data)); 
     setThisPlayer(ThisPlayerToView(deck,data[ind].IsActive,data[ind].VP,data[ind].GameMode,data[ind].Bet,data[ind].WinWindow));
+  }
   });
 
   socket.on('SkullGetPlayerId', (data) => {
   id=data;
-  console.log("got id");
-  console.log(id);  
+ // console.log("got id");
+ // console.log(id);  
   });  
 
   socket.on('BetFail', () => {
+    if (debounceTimeout) clearTimeout(debounceTimeout);
+    debounceTimeout = setTimeout(() => {
 if(deck.length>0)
   { 
     if(lost==false)
     {
-      lost=true;
     const newDeck = [...deck];
-    newDeck[Math.floor(Math.random()*(3+1))].IsDisabled=true;
+    lost=true;
+    //const enabled=deck.filter(em=>!em.IsDisabled);
+    newDeck.splice(Math.floor(Math.random()*((newDeck.length-1)+1)),1);
+   // newDeck[Math.floor(Math.random()*((deck.length-1)+1))].IsDisabled=true;
+    //const randomInd=Math.floor(Math.random()*((newDeck.length-1)+1));
+    //const removedElement = enabled.splice(randomInd, 1);
+    //const ind=newDeck.indexOf(removedElement[0]);
+    //newDeck[ind].IsDisabled=true;
     setDeck(newDeck);
-    console.log("fail");
-    console.log(newDeck);
+   // console.log("fail");
+    //console.log(newDeck);
     setThisPlayer(ThisPlayerToView(newDeck,isActive,victoryPoints,gameMode,bet,false));
   }
 }
+}, 100);
   }); 
 
   socket.on('Reset', () => {
@@ -211,14 +228,15 @@ const updateBet = () => () => {
       }
   }*/
   const Pass = () => () => {
-   // setHavePassed(true);
+   if(isActive)
+    {
     setIsActive(false);
     let downCount=CardsDown();
     let active=false;
     let pass=true;
     let Bet=bet;
     socket.emit('EndTurn',{id,downCount,playedDeck,gameMode,Bet,active,pass});
- 
+   }
   }
   /*
   function updateIsFlipping() {
@@ -240,15 +258,15 @@ const updateBet = () => () => {
     let pass=false;
     let Bet=bet;
     socket.emit('EndTurn',{id,downCount,playedDeck,gameMode,Bet,active,pass});
-    console.log(deck)
+    //console.log(deck)
    // setThisPlayer(ThisPlayerToView(newDeck,isActive,victoryPoints,gameMode,Bet));
-    console.log(thisPlayer);
+    //console.log(thisPlayer);
   }
   
    };   
 
    const openChip = (ind) => () => {
-    if(gameMode=='flippingChips')
+    if(gameMode=='flippingChips'&&players[ind].Id!=id&&isActive)
     {
         let targetId=players[ind].Id;
         socket.emit('OpenChip',{targetId});
@@ -270,9 +288,7 @@ const updateBet = () => () => {
             */
             
            } 
-           <button className='OptionButton'  onClick={ openChip(1)}>
-            OpenChip
-           </button>
+          
             <SkullView2 players = {PlayersView} thisPlayerView={thisPlayer}/>
            
             {/*
