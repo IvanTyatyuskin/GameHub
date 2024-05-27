@@ -16,7 +16,7 @@ import PropTypes from 'prop-types';
 import { SocketContext } from '../../SocketContext'
 
 
-
+let totalPlayersCount=0
 const squareCount = 6;
 let roundNum=1;
 let currentMove=0;
@@ -346,6 +346,7 @@ function Game() {
             Players = data.Players.map(player => new Player(player.socketID,player.id, player.roundPoints, player.allPoints, player.relics, player.nickName, player.exit));
             updatePlayerInfo();
             console.log(playersDataJS);
+            totalPlayersCount=playersDataJS.length
             game.setPlayersData(playersDataJS);
             return () => {
                 socket.off('start_Diamant');
@@ -407,7 +408,11 @@ function Game() {
                 }
 
                 currentMove = 0;
-                shuffle(Deck);
+
+                socket.emit('shuffle_Diamant',roundNum);
+                socket.on("Diamant_shuffled",(data)=>{
+                    Deck=(data.Deck.map(card => new Card(card.cardType, card.points)));
+                })
                 allRubyOnMap = 0;
 
                 Players.find(player => player.id === Player0.id).setRoundPointsToZero();
@@ -426,17 +431,10 @@ function Game() {
     };
     
     
-    const handleExit = () => {
-     
-        ///
-       
-        ///
-        let countPlayerExited=0;
-        Players.forEach((player) => {
-            if (player.getExit()) {
-                countPlayerExited++;
-            }
-        });
+    const handleExit = (LeaveCount) => {
+        let countPlayerExited=LeaveCount;
+        Players.find(player => player.id === Player0.id).setExit(true)
+        console.log(countPlayerExited)
         let pointsPerPlayer = Math.floor(allRubyOnMap / countPlayerExited);
         let remainingPoints = allRubyOnMap;
         Players.forEach((player) => {
@@ -446,13 +444,13 @@ function Game() {
         for (let i = 0; i < currentMove; i++) {
             if (Deck[i].getСardType().includes("relic") && countPlayerExited==1) Players.find(player => player.id === Player0.id).addRelic(Deck[i]);
         }
-        console.log("Реликвии: "+Players.find(player => player.id === Player0.id).getRelic());
+        //console.log("Реликвии: "+Players.find(player => player.id === Player0.id).getRelic());
         allRubyOnMap = 0;
         allRubyOnMap += remainingPoints;
         Players.find(player => player.id === Player0.id).addAllPoints(Players.find(player => player.id === Player0.id).getRoundPoints());
         Players.find(player => player.id === Player0.id).setExit(true);
         updatePlayerInfo();
-        if(checkPlayersExited()) { 
+        if(LeaveCount==totalPlayersCount) { 
             console.log("Все вышли")
             for (let i = 0; i < currentMove; i++) {
                 if (Deck[i].getСardType().includes("relic")) {
@@ -470,18 +468,25 @@ function Game() {
             }
             console.log('Раунд.'+roundNum);
             currentMove=0;
-            shuffle(Deck);
+            socket.emit('shuffle_Diamant',roundNum);
+                socket.on("Diamant_shuffled",(data)=>{
+                    Deck=(data.Deck.map(card => new Card(card.cardType, card.points)));
+                })
             allRubyOnMap=0;
             Players.find(player => player.id === Player0.id).setRoundPointsToZero();
             updatePlayerInfo();
+            setStartedSquares([]);
+            setSquareValues([]);
+            setSquareCardType([]);
+            setSquaresTileId([]);
            
         }
-        setSquareValues([]);
+       
+        ///
         console.log(Players.find(player => player.id === Player0.id))
         socket.emit("Update_Players_Data_Diamant",{currentPlayer: Players.find(player => player.id === Player0.id)})
         Players=[]
-       
-       
+        ///
     }
     
     useEffect(() => {
@@ -495,7 +500,8 @@ function Game() {
               }
               if (action === "Leave") {
                 console.log("Уходим");
-                handleExit();
+                
+                handleExit(data.leaveCount);
               }
             });
           }
@@ -514,9 +520,13 @@ function Game() {
             data.uniquePlayer.exit
           ))
           console.log(Players);
-          updatePlayerInfo();
-          game.setRoundData(roundData);
-          game.setPlayersData(playersDataJS);
+       
+         
+        
+         
+         updatePlayerInfo();
+         game.setRoundData(roundData);
+         game.setPlayersData(playersDataJS);
         });
       
         socket.on('all_players_ready_Diamant', handleAllPlayersReady);

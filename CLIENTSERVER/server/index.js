@@ -131,6 +131,42 @@ io.on('connection', (socket) => {
       }
     }
   });
+  let Deck = [];
+  let RelicDeck = [];
+  for (let i = 0; i < 5; i++) {
+    Deck.push(new Card('Treasure',i+1))
+ }
+ Deck.push(new Card('Treasure',5))
+ Deck.push(new Card('Treasure',7))
+ Deck.push(new Card('Treasure',7))
+ Deck.push(new Card('Treasure',9))
+ Deck.push(new Card('Treasure',9))
+ Deck.push(new Card('Treasure',11))
+ Deck.push(new Card('Treasure',11))
+ Deck.push(new Card('Treasure',13))
+ Deck.push(new Card('Treasure',14))
+ Deck.push(new Card('Treasure',15))
+ Deck.push(new Card('Treasure',17))
+ RelicDeck.push(new Card('relic',5))
+ RelicDeck.push(new Card('relic',7))
+ RelicDeck.push(new Card('relic',8))
+ RelicDeck.push(new Card('relic',10))
+ RelicDeck.push(new Card('relic',12))
+ for (let i = 0; i < 3; i++) {
+    Deck.push(new Card('Trap Spider',null))
+ }
+ for (let i = 0; i < 3; i++) {
+    Deck.push(new Card('Trap Snake',null))
+ }
+ for (let i = 0; i < 3; i++) {
+    Deck.push(new Card('Trap Stone',null))
+ }
+ for (let i = 0; i < 3; i++) {
+    Deck.push(new Card('Trap Wood',null))
+ }
+ for (let i = 0; i < 3; i++) {
+    Deck.push(new Card('Trap Magma',null))
+ }
   socket.on('Diamant_begin', () => {
     
     const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
@@ -141,42 +177,10 @@ io.on('connection', (socket) => {
         
         console.log("sd")
         // Собираем данные игроков и колоды
-        let Deck = [];
-        let RelicDeck = [];
-        for (let i = 0; i < 5; i++) {
-         Deck.push(new Card('Treasure',i+1))
-      }
-      Deck.push(new Card('Treasure',5))
-      Deck.push(new Card('Treasure',7))
-      Deck.push(new Card('Treasure',7))
-      Deck.push(new Card('Treasure',9))
-      Deck.push(new Card('Treasure',9))
-      Deck.push(new Card('Treasure',11))
-      Deck.push(new Card('Treasure',11))
-      Deck.push(new Card('Treasure',13))
-      Deck.push(new Card('Treasure',14))
-      Deck.push(new Card('Treasure',15))
-      Deck.push(new Card('Treasure',17))
-      RelicDeck.push(new Card('relic',5))
-      RelicDeck.push(new Card('relic',7))
-      RelicDeck.push(new Card('relic',8))
-      RelicDeck.push(new Card('relic',10))
-      RelicDeck.push(new Card('relic',12))
-      for (let i = 0; i < 3; i++) {
-         Deck.push(new Card('Trap Spider',null))
-      }
-      for (let i = 0; i < 3; i++) {
-         Deck.push(new Card('Trap Snake',null))
-      }
-      for (let i = 0; i < 3; i++) {
-         Deck.push(new Card('Trap Stone',null))
-      }
-      for (let i = 0; i < 3; i++) {
-         Deck.push(new Card('Trap Wood',null))
-      }
-      for (let i = 0; i < 3; i++) {
-         Deck.push(new Card('Trap Magma',null))
-      }
+      
+        
+      shuffle(Deck,RelicDeck,1)
+      console.log(Deck)
         var i = 0;
         const playersData = lobby.users.map(player => { return new Player(player.socketID,i++, 0, 0, [], player.nickname, false) });
         console.log(playersData)
@@ -187,37 +191,66 @@ io.on('connection', (socket) => {
       }
     }
   });
+  function shuffle(array,RelicDeck,roundNum) {
+    array.push(RelicDeck[roundNum-1])
+    //console.log(RelicDeck[roundNum-1].points)
+    for (let i = array.length - 1; i > 0; i--) {
+        let j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+socket.on("shuffle_Diamant",(roundNum)=>{
+  const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
+    if (user) {
+      const lobby = lobbies[user.lobbyName];
+      if (lobby) {
+        shuffle(Deck,RelicDeck,roundNum)
+        lobby.users.forEach((u) => {
+          io.to(u.actualSocketID).emit('Diamant_shuffled', {Deck: Deck});
+        })
+      }}
+})
+
   socket.on('player_ready_Diamant', (data) => {
     const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
     if (user) {
-      user.isReady = true; 
-      user.action = data || null; // Store the action if provided
-    
-      const lobby = lobbies[user.lobbyName];
-      if (lobby) {
-        const allPlayersReady = lobby.users.every((user) => user.isReady);
-  
-        if (allPlayersReady) {
-          const actionsSet = new Set();
-  
-         
-          lobby.users.forEach((user) => {
-            if (user.action) {
-              actionsSet.add(user.action);
+        user.isReady = true;
+        user.action = data || null; 
+
+        const lobby = lobbies[user.lobbyName];
+        if (lobby) {
+            const allPlayersReady = lobby.users.every((user) => user.isReady);
+
+            if (allPlayersReady) {
+                const actionsSet = new Set();
+                let leaveCount = 0;
+
+                lobby.users.forEach((user) => {
+                    if (user.action) {
+                        actionsSet.add(user.action);
+                        if (user.action === 'Leave') {
+                            leaveCount++;
+                        }
+                    }
+                });
+
+                const uniqueActions = Array.from(actionsSet);
+                console.log(uniqueActions);
+                console.log(`Number of players with 'Leave' action: ${leaveCount}`);
+
+                lobby.users.forEach((user) => {
+                    io.to(user.actualSocketID).emit('all_players_ready_Diamant', { 
+                        action: uniqueActions,
+                        leaveCount: leaveCount 
+                    });
+                    user.isReady = false;
+                    user.action = null;
+                });
             }
-          });
-  
-          const uniqueActions = Array.from(actionsSet); 
-          console.log(uniqueActions);
-          lobby.users.forEach((user) => {
-            io.to(user.actualSocketID).emit('all_players_ready_Diamant', { action: uniqueActions });
-            user.isReady = false; 
-            user.action = null; 
-          });
         }
-      }
     }
-  });
+});
+
 
   socket.on("Update_Players_Data_Diamant", (data) => {
     const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
