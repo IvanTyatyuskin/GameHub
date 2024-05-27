@@ -211,45 +211,53 @@ socket.on("shuffle_Diamant",(roundNum)=>{
       }}
 })
 
-  socket.on('player_ready_Diamant', (data) => {
-    const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
-    if (user) {
-        user.isReady = true;
-        user.action = data || null; 
+socket.on('player_ready_Diamant', (data) => {
+  const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
+  if (user) {
+      user.isReady = true;
+      user.action = data || null; 
 
-        const lobby = lobbies[user.lobbyName];
-        if (lobby) {
-            const allPlayersReady = lobby.users.every((user) => user.isReady);
+      const lobby = lobbies[user.lobbyName];
+      if (lobby) {
+          const allPlayersReady = lobby.users.every((user) => user.isReady);
 
-            if (allPlayersReady) {
-                const actionsSet = new Set();
-                let leaveCount = 0;
+          if (allPlayersReady) {
+              const actionsSet = new Set();
+              let leaveCount = 0;
 
-                lobby.users.forEach((user) => {
-                    if (user.action) {
-                        actionsSet.add(user.action);
-                        if (user.action === 'Leave') {
-                            leaveCount++;
-                        }
-                    }
-                });
+              lobby.users.forEach((user) => {
+                  if (user.action) {
+                      actionsSet.add(user.action);
+                      if (user.action === 'Leave') {
+                          leaveCount++;
+                      }
+                  }
+              });
 
-                const uniqueActions = Array.from(actionsSet);
-                console.log(uniqueActions);
-                console.log(`Number of players with 'Leave' action: ${leaveCount}`);
+              const uniqueActions = Array.from(actionsSet);
+              console.log(uniqueActions);
+              console.log(`Number of players with 'Leave' action: ${leaveCount}`);
 
-                lobby.users.forEach((user) => {
-                    io.to(user.actualSocketID).emit('all_players_ready_Diamant', { 
-                        action: uniqueActions,
-                        leaveCount: leaveCount 
-                    });
-                    user.isReady = false;
-                    user.action = null;
-                });
-            }
-        }
-    }
+              lobby.users.forEach((u) => {
+                  let actionsToSend;
+                  if (u.action === 'Leave') {
+                      actionsToSend = uniqueActions;
+                  } else {
+                      actionsToSend = [u.action];
+                  }
+
+                  io.to(u.actualSocketID).emit('all_players_ready_Diamant', { 
+                      action: actionsToSend,
+                      leaveCount: leaveCount 
+                  });
+                  u.isReady = false;
+                  u.action = null;
+              });
+          }
+      }
+  }
 });
+
 
 
   socket.on("Update_Players_Data_Diamant", (data) => {

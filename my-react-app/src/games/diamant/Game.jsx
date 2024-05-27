@@ -152,14 +152,6 @@ function stringWinnerAlirt(){
 
     return Winner;
 }
-function shuffle(array) {
-    array.push(RelicDeck[roundNum-1])
-    //console.log(RelicDeck[roundNum-1].points)
-    for (let i = array.length - 1; i > 0; i--) {
-        let j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
-}
 
 function defineTileId(index) {
     let tileId = 0;
@@ -359,14 +351,20 @@ function Game() {
     };
     
     const handleReadyLeave = () => {
+        if (isButtonPressed) {
+            return;
+          }
+
         const move = "Leave";
         socket.emit('player_ready_Diamant', move);
         setIsButtonPressed(true);
     };
 
-
     
     const handleReadyMoveOn = () => {
+        if (isButtonPressed) {
+            return;
+          }
         const move = "MoveOn";
         socket.emit('player_ready_Diamant', move);
         setIsButtonPressed(true);
@@ -427,19 +425,22 @@ function Game() {
             game.setRoundData(roundData);
             game.setPlayersData(playersDataJS);
             game.setTrapsInThisRound(trapsInThisRound);
+            if(!Players.find(player => player.id === Player0.id).getExit())
+                {
+                    setIsButtonPressed(false);
+                }
+            
         }
     };
     
     
     const handleExit = (LeaveCount) => {
         let countPlayerExited=LeaveCount;
-        Players.find(player => player.id === Player0.id).setExit(true)
         console.log(countPlayerExited)
         let pointsPerPlayer = Math.floor(allRubyOnMap / countPlayerExited);
         let remainingPoints = allRubyOnMap;
-        Players.forEach((player) => {
-            if(player.getExit()) player.addRoundPoints(pointsPerPlayer);
-        });
+        Players.find(player => player.id === Player0.id).addRoundPoints(pointsPerPlayer);
+       
         remainingPoints -= pointsPerPlayer * countPlayerExited;
         for (let i = 0; i < currentMove; i++) {
             if (Deck[i].getСardType().includes("relic") && countPlayerExited==1) Players.find(player => player.id === Player0.id).addRelic(Deck[i]);
@@ -448,17 +449,20 @@ function Game() {
         allRubyOnMap = 0;
         allRubyOnMap += remainingPoints;
         Players.find(player => player.id === Player0.id).addAllPoints(Players.find(player => player.id === Player0.id).getRoundPoints());
-        Players.find(player => player.id === Player0.id).setExit(true);
+    
         updatePlayerInfo();
-        if(LeaveCount==totalPlayersCount) { 
-            console.log("Все вышли")
-            for (let i = 0; i < currentMove; i++) {
-                if (Deck[i].getСardType().includes("relic")) {
-                    Deck.splice(i, 1);
-                    i--;
-                }
+        for (let i = 0; i < currentMove; i++) {
+            if (Deck[i].getСardType().includes("relic")) {
+                Deck.splice(i, 1);
+                i--;
             }
+        }
+      console.log(Players.filter(player => player.exit === true).length)
+        if(LeaveCount==(totalPlayersCount-Players.filter(player => player.exit === true).length)) { 
+            console.log("Все вышли")
+           
             Players.find(player => player.id === Player0.id).setExit(false);
+            
             if(roundNum<5) {
                 roundNum++;
                 roundData = { round: roundNum };
@@ -476,57 +480,81 @@ function Game() {
             Players.find(player => player.id === Player0.id).setRoundPointsToZero();
             updatePlayerInfo();
             setStartedSquares([]);
-            setSquareValues([]);
+            
             setSquareCardType([]);
             setSquaresTileId([]);
-           
+            setIsButtonPressed(false);
         }
-       
+        Players.find(player => player.id === Player0.id).setExit(true)
         ///
         console.log(Players.find(player => player.id === Player0.id))
         socket.emit("Update_Players_Data_Diamant",{currentPlayer: Players.find(player => player.id === Player0.id)})
-        Players=[]
+        //Players=[]
         ///
     }
     
     useEffect(() => {
         const handleAllPlayersReady = (data) => {
-          if (Array.isArray(data.action)) {
-            data.action.forEach((action) => {
-              console.log(action);
-              if (action === "MoveOn") {
-                console.log("Продолжаем");
-                handleContinue();
+            if (Array.isArray(data.action)) {
+                const leaveActions = data.action.filter(action => action === "Leave");
+                const otherActions = data.action.filter(action => action !== "Leave");
+              
+                leaveActions.forEach(action => {
+                  console.log(action);
+                  if (action === "Leave") {
+                    console.log("Уходим");
+                    handleExit(data.leaveCount);
+                  }
+                });
+              
+                otherActions.forEach(action => {
+                  console.log(action);
+                  if (action === "MoveOn") {
+                    console.log("Продолжаем");
+                    handleContinue();
+                  }
+                });
               }
-              if (action === "Leave") {
-                console.log("Уходим");
-                
-                handleExit(data.leaveCount);
-              }
-            });
+              else{
+            
+                console.log(data.action);
+                if (data.action === "MoveOn") {
+                  console.log("Продолжаем");
+                  handleContinue();
+                }
+                if (data.action === "Leave") {
+                  console.log("Уходим");
+                  
+                  handleExit(data.leaveCount);
+                }
+             
           }
         };
       
         socket.on("PlayersDataDiamantUpdated", (data) => {
           console.log("Player data updated:", data.uniquePlayer);
 
-          Players.push(new Player(
-            data.uniquePlayer.socketID,
-            data.uniquePlayer.id,
-            data.uniquePlayer.roundPoints,
-            data.uniquePlayer.allPoints,
-            data.uniquePlayer.relics,
-            data.uniquePlayer.nickName,
-            data.uniquePlayer.exit
-          ))
+          const playerIndex = Players.findIndex(player => player.socketID === data.uniquePlayer.socketID);
+
+    if (playerIndex !== -1) {
+        // Update the existing player's data
+        Players[playerIndex].id = data.uniquePlayer.id;
+        Players[playerIndex].roundPoints = data.uniquePlayer.roundPoints;
+        Players[playerIndex].allPoints = data.uniquePlayer.allPoints;
+        Players[playerIndex].relics = data.uniquePlayer.relics;
+        Players[playerIndex].nickName = data.uniquePlayer.nickName;
+        Players[playerIndex].exit = data.uniquePlayer.exit;
+    }
           console.log(Players);
        
          
         
-         
+          setSquareValues([]);
          updatePlayerInfo();
          game.setRoundData(roundData);
          game.setPlayersData(playersDataJS);
+         console.log(Players.find(player => player.id === Player0.id).getExit())
+         
         });
       
         socket.on('all_players_ready_Diamant', handleAllPlayersReady);
@@ -581,10 +609,10 @@ const renderSquare = (i) => {
             </div>
             <div className="hand">
                 <div className="theButtonPanel">
-                    <Button background={buttonMoveOnContColor} disabled={isButtonPressed} padding="10px" onClick={handleReadyMoveOn}>
+                    <Button background={buttonMoveOnContColor}  disabled={isButtonPressed} padding="10px" onClick={handleReadyMoveOn}>
                         Продолжить
                     </Button>
-                    <Button padding="10px" background={buttonLeaveContColor} onClick={handleReadyLeave}>
+                    <Button padding="10px" background={buttonLeaveContColor} disabled={isButtonPressed} onClick={handleReadyLeave}>
                         Выйти {allRubyOnMap}
                     </Button>
                 </div>
