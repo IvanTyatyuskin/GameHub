@@ -13,6 +13,7 @@ import LobbyListTicTacToePage from './lobbyListTicTacToePage/LobbyListTicTacToeP
 import TicTacToe from './games/tictactoe/TicTacToe.jsx'
 //import LobbyList from './lobby/src/LobbyList.jsx'
 import Login from './lobby/src/Login.jsx'
+import TestPage from './Test.jsx';
 
 function App() {
   function MainContent(){
@@ -30,6 +31,7 @@ function App() {
           <Route path="lobbyListSkull" element={<LobbyListSkullPage/>} />
           <Route path="lobbyListDiamant" element={<LobbyListDiamantPage/>} />
           <Route path="lobbyListTicTacToe" element={<LobbyListTicTacToePage/>} />
+          <Route path="test" element={<TestPage/>} />
         </Routes>
       </BrowserRouter>
     )

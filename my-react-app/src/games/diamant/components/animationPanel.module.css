@@ -1,0 +1,41 @@
+.root{
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    --content-height: calc(var(--Square-size)*var(--height-count));
+    --content-width: calc(var(--Square-size)*var(--widht-count));
+}
+.canvas{
+    --indent:10px;
+    height: var(--content-height)/*+var(--indent)*/;
+    width: var(--content-width)/*+var(--indent)*/;
+    padding: 0/*calc(var(--indent)/2)*/;
+    background-color: azure;
+    position: relative;
+    overflow: hidden;
+}
+
+.point{
+    height: 10px;
+    width: 10px;
+    border-radius: 50%;
+    background-color: black;
+}
+.cell{
+    width: var(--Square-size);
+    height: var(--Square-size);
+    border: 1px solid black;
+    position: absolute;
+    top: calc(var(--height-pos)*120px);
+    left: calc(var(--widht-pos)*120px);
+    transition: 1.5s;
+}
+
+.cell.home{
+    top: calc(var(--height-pos-home)*120px);
+    left: calc(var(--widht-pos-home)*120px);
+    transition: 0.2s linear;
+}
+

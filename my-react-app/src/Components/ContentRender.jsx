@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function ContentRenderer({ content }) {
+export default function ContentRenderer({ content = [] }) {
     return (
         <>
             {content.map((item, index) => {
