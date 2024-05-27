@@ -176,9 +176,7 @@ io.on('connection', (socket) => {
       if (lobby) {
         
         console.log("sd")
-        // Собираем данные игроков и колоды
-      
-        
+        // Собираем данные игроков и колоды     
       shuffle(Deck,RelicDeck,1)
       console.log(Deck)
         var i = 0;
