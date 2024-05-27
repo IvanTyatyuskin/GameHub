@@ -7,7 +7,8 @@ export const textDataToView = [
     {
         placeBet: 'Сделать ставку',
         skip: 'Пасс',
-        ItRemainsToTurnItOver : 'Осталось перевернуть'
+        ItRemainsToTurnItOver : 'Осталось перевернуть',
+        currentBet: 'Текущая ставка',
     }
 ]
 

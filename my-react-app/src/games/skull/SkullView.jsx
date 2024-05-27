@@ -5,7 +5,7 @@ import './components/playingField.css'
 import {Body} from '../../Components/Body'
 import {ThisPlayerView, PlayerView, CardView} from './Classes.js'
 import PropTypes, { array } from 'prop-types';
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { TestDataPlayers, TestDataThisPlayer } from './textDataToView.js'
 import { act } from 'react'
 import { Modal } from '../../Components/common/Modal.jsx'
@@ -32,6 +32,12 @@ export const SkullView2 = ({
             return true;
         return false;
     }
+
+    useEffect(()=>{
+        if(thisPlayerView.WinWindow){
+            WinHandle();
+        }
+    }, [thisPlayerView.WinWindow])
     function WinHandle(){
         setModalContent(WinModal(players));
         setModalActive(true);
@@ -39,7 +45,6 @@ export const SkullView2 = ({
     return (
         <>
             <Body>
-                <button onClick={WinHandle}>Победа</button>
                 <div className="PlayingField">
                     {players.map(player => (
                         <PlayersTablet2 playerView = {player} 
@@ -50,7 +55,7 @@ export const SkullView2 = ({
                     thisPlayerView = {thisPlayerView}/>
             </Body>
             <Modal active={modalActive} setActive={setModalActive}>
-                    {modalContent}
+                {modalContent}
             </Modal>
         </>
     )

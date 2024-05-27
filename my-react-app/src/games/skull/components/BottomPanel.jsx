@@ -23,6 +23,8 @@ export const BottomPanel2 = ({
     const [BetIsVisible, setBetIsVisible] = useState(false);
     const [PassIsVisible, setPassIsVisible] = useState(false);
 
+
+    //const [Dimmed, setDimmed] = useState(<></>)
     //var HandIsActive = false;
     //var CounterIsVisible = false;
     //var BetIsVisible = false;
@@ -67,6 +69,9 @@ export const BottomPanel2 = ({
         if (thisPlayerView.IsActive) {
             setHandIsActive(false);
             setBetIsVisible(false);
+            //setDimmed(
+            //    <div className='dimmed'/>
+            //)
         }
     }, [thisPlayerView.Phase, thisPlayerView.IsActive]);
 
@@ -84,7 +89,8 @@ export const BottomPanel2 = ({
                         <Chip 
                             key={index}
                             type={card.Type}
-                            onClick={HandIsActive? card.Onclick:""}
+                            onClick={HandIsActive? card.Onclick:null}
+                            disabled={card.Disabled}
                             />
                     )
                 })}
@@ -97,6 +103,7 @@ export const BottomPanel2 = ({
         if (!BetIsVisible) return(<></>);
         else return(
             <div className='Bid'>
+
                 <button className="OptionButton" 
                     onClick={thisPlayerView.UpdateBet}>
                     {textContext.placeBet}
@@ -120,7 +127,16 @@ export const BottomPanel2 = ({
         return (
             <div className='Bid'>
                 <p>{textContext.ItRemainsToTurnItOver}:</p>
-                <p>{thisPlayerView.UpdateIsFlipping}</p>
+                <p>{thisPlayerView.Bet}</p>
+            </div>
+        )
+    }
+    function CurrentBetView() {
+        if (!BetIsVisible) return (<></>)
+        return (
+            <div className='Bid'>
+                <p>{textContext.currentBet}:</p>
+                <p>{thisPlayerView.Bet}</p>
             </div>
         )
     }
@@ -128,6 +144,7 @@ export const BottomPanel2 = ({
         <div className="BottomPanel1">
             {CardsView(thisPlayerView.ViewCards)}
             {CounterView()}
+            {CurrentBetView()}
             {WindowWithBid()}
         </div>
     )
