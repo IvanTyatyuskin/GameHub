@@ -24,7 +24,8 @@ export let Deck=[];
 let RelicDeck=[];
 let allRubyOnMap=0;
 class Player {
-    constructor(id, roundPoints, allPoints, relics, nickName,exit) {
+    constructor(socketID,id, roundPoints, allPoints, relics, nickName,exit) {
+        this.socketID=socketID;
         this.id = id;
         this.roundPoints = roundPoints;
         this.allPoints = allPoints;
@@ -342,7 +343,7 @@ function Game() {
             console.log(Player0);
             console.log(`Колода карт: ${JSON.stringify(data)}`);
             Deck=(data.Deck.map(card => new Card(card.cardType, card.points)));
-            Players = data.Players.map(player => new Player(player.id, player.roundPoints, player.allPoints, player.relics, player.nickName, player.exit));
+            Players = data.Players.map(player => new Player(player.socketID,player.id, player.roundPoints, player.allPoints, player.relics, player.nickName, player.exit));
             updatePlayerInfo();
             console.log(playersDataJS);
             game.setPlayersData(playersDataJS);
@@ -476,15 +477,16 @@ function Game() {
            
         }
         setSquareValues([]);
-        socket.emit("Update_Players_Data_Diamant",{currentPlayer: Players.find(player => player.id === Player0.id),expectedNumberOfPlayers:Players.length})
-        
+        console.log(Players.find(player => player.id === Player0.id))
+        socket.emit("Update_Players_Data_Diamant",{currentPlayer: Players.find(player => player.id === Player0.id)})
+        Players=[]
        
        
     }
     
     useEffect(() => {
         const handleAllPlayersReady = (data) => {
-          console.log(data.action)
+          if (Array.isArray(data.action)) {
             data.action.forEach((action) => {
               console.log(action);
               if (action === "MoveOn") {
@@ -496,20 +498,32 @@ function Game() {
                 handleExit();
               }
             });
-         
+          }
         };
-        socket.on("PlayersDataDiamantUpdated",(data)=>{
-            console.log("HEYYYY")
-            Players = data.Players.map(player => new Player(player.id, player.roundPoints, player.allPoints, player.relics, player.nickName, player.exit));
-            console.log(Players)
-            updatePlayerInfo();
-            game.setRoundData(roundData);
-            game.setPlayersData(playersDataJS);
+      
+        socket.on("PlayersDataDiamantUpdated", (data) => {
+          console.log("Player data updated:", data.uniquePlayer);
+
+          Players.push(new Player(
+            data.uniquePlayer.socketID,
+            data.uniquePlayer.id,
+            data.uniquePlayer.roundPoints,
+            data.uniquePlayer.allPoints,
+            data.uniquePlayer.relics,
+            data.uniquePlayer.nickName,
+            data.uniquePlayer.exit
+          ))
+          console.log(Players);
+          updatePlayerInfo();
+          game.setRoundData(roundData);
+          game.setPlayersData(playersDataJS);
         });
+      
         socket.on('all_players_ready_Diamant', handleAllPlayersReady);
-    
+      
         return () => {
           socket.off('all_players_ready_Diamant', handleAllPlayersReady);
+          socket.off("PlayersDataDiamantUpdated");
         };
       }, [handleContinue, handleExit]);
 const renderSquare = (i) => {

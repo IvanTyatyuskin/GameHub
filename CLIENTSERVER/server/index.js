@@ -32,7 +32,7 @@ let lobbies = {};
 let users = [];
 let TicTacToeGames = [];
 
-function addUser(socketID, nickname, lobbyName, isCreator, actualSocketID,isReady,diamantAction) {
+function addUser(socketID, nickname, lobbyName, isCreator, actualSocketID,isReady,diamantAction,dataReadyDiamant) {
   const existingUser = users.find((user) => user.socketID === socketID);
 
   if (existingUser) {
@@ -46,7 +46,8 @@ function addUser(socketID, nickname, lobbyName, isCreator, actualSocketID,isRead
     isCreator,
     actualSocketID,
     isReady,
-    diamantAction
+    diamantAction,
+    dataReadyDiamant
   };
   
   users.push(user);
@@ -76,7 +77,7 @@ io.on('connection', (socket) => {
     console.log('actualSocketID for user', existingUser.nickname, 'changed to', existingUser.actualSocketID);
   }
 
-  addUser(socketID, '', '', false, socketID,false,null);
+  addUser(socketID, '', '', false, socketID,false,null,false);
 
   if (!socket.id) {
     socket.id = socket.client.id;
@@ -179,9 +180,9 @@ io.on('connection', (socket) => {
         var i = 0;
         const playersData = lobby.users.map(player => { return new Player(player.socketID,i++, 0, 0, [], player.nickname, false) });
         console.log(playersData)
-        lobby.users.forEach((user) => {
-          const currentUserData = playersData.find(player => player.socketID === user.socketID);
-          io.to(user.actualSocketID).emit('start_Diamant', {Players:playersData, Deck: Deck,User:currentUserData});
+        lobby.users.forEach((u) => {
+          const currentUserData = playersData.find(player => player.socketID === u.socketID);
+          io.to(u.actualSocketID).emit('start_Diamant', {Players:playersData, Deck: Deck,User:currentUserData});
         });
       }
     }
@@ -217,36 +218,23 @@ io.on('connection', (socket) => {
       }
     }
   });
-  
-  //const allPlayersData = [];
 
-  socket.on("Update_Players_Data_Diamant", (Data) => {
+  socket.on("Update_Players_Data_Diamant", (data) => {
     const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
     if (user) {
-      
-      
+      const lobby = lobbies[user.lobbyName];
       if (lobby) {
+        const updatedPlayer = data.currentPlayer;
+       console.log("uniquePlayer "+JSON.stringify(data))
         lobby.users.forEach((user) => {
-           const allPlayersReady = lobby.users.every((user) => user.isReady);
-  
-        if (allPlayersReady) {
-          const PlayerSet = new Set();
-  
-         
-          lobby.users.forEach((user) => {
-            if (user.action) {
-              actionsSet.add(user.action);
-            }
+          io.to(user.actualSocketID).emit('PlayersDataDiamantUpdated', {
+            uniquePlayer: updatedPlayer
           });
-        }
-        io.to(user.actualSocketID).emit("PlayersDataDiamantUpdated", { Players: allPlayersData });
-        })
+        });
       }
- 
-          allPlayersData.length = 0;
-      }
-    
+    }
   });
+
   
 
 

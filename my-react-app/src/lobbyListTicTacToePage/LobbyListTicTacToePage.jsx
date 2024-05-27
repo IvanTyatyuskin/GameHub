@@ -21,7 +21,7 @@ import { SocketContext } from '../SocketContext'
 const createLobby = (roomName, isLocked, maxCount, navigate, socket) => {
   if (socket) {
     socket.emit('create_lobby', { roomName, isLocked, maxCount });
-    navigate('/LobbyPage');
+    navigate('/lobbyPage/TicTacToe');
   } else {
     console.error('Socket is not connected');
   }
@@ -30,7 +30,7 @@ const createLobby = (roomName, isLocked, maxCount, navigate, socket) => {
 
 const joinLobby = (roomName, navigate, socket) => {
   socket.emit('join_lobby', { roomName });
-  navigate('/LobbyPage');
+  navigate('/lobbyPage/TicTacToe');
 };
 
 export const LobbyItem = ({
