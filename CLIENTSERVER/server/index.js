@@ -258,12 +258,14 @@ socket.on('player_ready_Diamant', (data) => {
           if (u.action === 'Leave') {
             actionsToSend = uniqueActions;
           } else if(u.action === null){
-            actionsToSend = uniqueActions;
+            
+            actionsToSend = uniqueActions.filter(action => action !== 'Leave');
+            actionsToSend.push("Exit")
           }
            else{
             actionsToSend = [u.action];
           }
-
+          console.log(actionsToSend);
           io.to(u.actualSocketID).emit('all_players_ready_Diamant', { 
             action: actionsToSend,
             leaveCount: leaveCount 

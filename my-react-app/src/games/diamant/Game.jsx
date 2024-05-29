@@ -515,11 +515,69 @@ function Game() {
                     console.log("Продолжаем");
                     handleContinue();
                   }
+                  if(action ==="Exit"){
+                    if(data.leaveCount==(totalPlayersCount-Players.filter(player => player.exit === true).length)) { 
+                        console.log("Все вышли")
+                       
+                        Players.find(player => player.id === Player0.id).setExit(false);
+                        
+                        if(roundNum<5) {
+                            roundNum++;
+                            roundData = { round: roundNum };
+                        } else {
+                            winWindow();
+                            //alert(stringWinnerAlirt());
+                        }
+                        console.log('Раунд.'+roundNum);
+                        currentMove=0;
+                        socket.emit('shuffle_Diamant',roundNum);
+                            socket.on("Diamant_shuffled",(data)=>{
+                                Deck=(data.Deck.map(card => new Card(card.cardType, card.points)));
+                            })
+                       
+                        updatePlayerInfo();
+                        setStartedSquares([]);
+                        
+                        setSquareCardType([]);
+                        setSquaresTileId([]);
+                        setIsButtonPressed(false);
+                        socket.emit("Update_Players_Data_Diamant",{currentPlayer: Players.find(player => player.id === Player0.id)})
+                    }
+                  }
                 });
               }
               else{
             
                 console.log(data.action);
+                if(action ==="Exit"){
+                    if(LeaveCount==(totalPlayersCount-Players.filter(player => player.exit === true).length)) { 
+                        console.log("Все вышли")
+                       
+                        Players.find(player => player.id === Player0.id).setExit(false);
+                        
+                        if(roundNum<5) {
+                            roundNum++;
+                            roundData = { round: roundNum };
+                        } else {
+                            winWindow();
+                            //alert(stringWinnerAlirt());
+                        }
+                        console.log('Раунд.'+roundNum);
+                        currentMove=0;
+                        socket.emit('shuffle_Diamant',roundNum);
+                            socket.on("Diamant_shuffled",(data)=>{
+                                Deck=(data.Deck.map(card => new Card(card.cardType, card.points)));
+                            })
+                       
+                        updatePlayerInfo();
+                        setStartedSquares([]);
+                        
+                        setSquareCardType([]);
+                        setSquaresTileId([]);
+                        setIsButtonPressed(false);
+                        socket.emit("Update_Players_Data_Diamant",{currentPlayer: Players.find(player => player.id === Player0.id)})
+                    }
+                  }
                 if (data.action === "MoveOn") {
                   console.log("Продолжаем");
                   handleContinue();
@@ -529,6 +587,7 @@ function Game() {
                   
                   handleExit(data.leaveCount);
                 }
+                
              
           }
         };
@@ -551,7 +610,7 @@ function Game() {
        
           setSquareValues([]);
         
-          
+          allRubyOnMap=0;
          updatePlayerInfo();
          game.setRoundData(roundData);
          game.setPlayersData(playersDataJS);
