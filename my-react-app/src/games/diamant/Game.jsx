@@ -125,7 +125,11 @@ function determiningWinner() {
         let points = player.getallPoints();
         let relicPoints=0
         player.getRelic().forEach(relic=>{
-            relicPoints+=relic.getPoints()
+            if(relic)
+                {
+                    console.log(relic)
+                    relicPoints+=relic.points
+                }
         })
         points+=relicPoints
         if (points > maxPoints) {
@@ -140,7 +144,7 @@ function stringWinnerAlirt(){
     let winner = determiningWinner();
     let relicPoints=0
     winner.getRelic().forEach(relic=>{
-        relicPoints+=relic.getPoints()
+        relicPoints+=relic.points
     })
 
     const Winner = {
@@ -397,29 +401,33 @@ function Game() {
             trapsInThisRound = GetTrapsInThisRound();
 
             if (checkTrapDuplicates()) {
-                if (roundNum < 5) {
-                    roundNum++;
-                    roundData = { round: roundNum };
-                    console.log('Раунд.' + roundNum);
-                } else {
-                    winWindow();
-                }
-
-                currentMove = 0;
-
+                console.log("Все вышли")
+           
+                Players.find(player => player.id === Player0.id).setExit(false);
+                
+                
+                console.log('Раунд.'+roundNum);
+                currentMove=0;
                 socket.emit('shuffle_Diamant',roundNum);
-                socket.on("Diamant_shuffled",(data)=>{
-                    Deck=(data.Deck.map(card => new Card(card.cardType, card.points)));
-                })
-                allRubyOnMap = 0;
-
-                Players.find(player => player.id === Player0.id).setRoundPointsToZero();
+                    socket.on("Diamant_shuffled",(data)=>{
+                        Deck=(data.Deck.map(card => new Card(card.cardType, card.points)));
+                    })
+                    Players.find(player => player.id === Player0.id).setRoundPointsToZero();
+                    Players.find(player => player.id === Player0.id).setExit(false)
                 updatePlayerInfo();
-
                 setStartedSquares([]);
-                setSquareValues([]);
+                
                 setSquareCardType([]);
                 setSquaresTileId([]);
+                setIsButtonPressed(false);
+                socket.emit("Update_Players_Data_Diamant",{currentPlayer: Players.find(player => player.id === Player0.id)})
+                if(roundNum<=5) {
+                    roundNum++;
+                    roundData = { round: roundNum };
+                } 
+                return;
+                
+             
             }
 
             game.setRoundData(roundData);
@@ -464,13 +472,7 @@ function Game() {
            
             Players.find(player => player.id === Player0.id).setExit(false);
             
-            if(roundNum<5) {
-                roundNum++;
-                roundData = { round: roundNum };
-            } else {
-                winWindow();
-                //alert(stringWinnerAlirt());
-            }
+            
             console.log('Раунд.'+roundNum);
             currentMove=0;
             socket.emit('shuffle_Diamant',roundNum);
@@ -485,6 +487,10 @@ function Game() {
             setSquaresTileId([]);
             setIsButtonPressed(false);
             socket.emit("Update_Players_Data_Diamant",{currentPlayer: Players.find(player => player.id === Player0.id)})
+            if(roundNum<=5) {
+                roundNum++;
+                roundData = { round: roundNum };
+            } 
             return;
         }
         Players.find(player => player.id === Player0.id).setExit(true)
@@ -521,20 +527,14 @@ function Game() {
                        
                         Players.find(player => player.id === Player0.id).setExit(false);
                         
-                        if(roundNum<5) {
-                            roundNum++;
-                            roundData = { round: roundNum };
-                        } else {
-                            winWindow();
-                            //alert(stringWinnerAlirt());
-                        }
+                      
                         console.log('Раунд.'+roundNum);
                         currentMove=0;
                         socket.emit('shuffle_Diamant',roundNum);
                             socket.on("Diamant_shuffled",(data)=>{
                                 Deck=(data.Deck.map(card => new Card(card.cardType, card.points)));
                             })
-                       
+                        Players.find(player => player.id === Player0.id).setExit(false)
                         updatePlayerInfo();
                         setStartedSquares([]);
                         
@@ -542,6 +542,10 @@ function Game() {
                         setSquaresTileId([]);
                         setIsButtonPressed(false);
                         socket.emit("Update_Players_Data_Diamant",{currentPlayer: Players.find(player => player.id === Player0.id)})
+                        if(roundNum<=5) {
+                            roundNum++;
+                            roundData = { round: roundNum };
+                        } 
                     }
                   }
                 });
@@ -551,17 +555,11 @@ function Game() {
                 console.log(data.action);
                 if(action ==="Exit"){
                     if(LeaveCount==(totalPlayersCount-Players.filter(player => player.exit === true).length)) { 
-                        console.log("Все вышли")
+                        console.log("Exit")
                        
                         Players.find(player => player.id === Player0.id).setExit(false);
                         
-                        if(roundNum<5) {
-                            roundNum++;
-                            roundData = { round: roundNum };
-                        } else {
-                            winWindow();
-                            //alert(stringWinnerAlirt());
-                        }
+                       
                         console.log('Раунд.'+roundNum);
                         currentMove=0;
                         socket.emit('shuffle_Diamant',roundNum);
@@ -576,6 +574,10 @@ function Game() {
                         setSquaresTileId([]);
                         setIsButtonPressed(false);
                         socket.emit("Update_Players_Data_Diamant",{currentPlayer: Players.find(player => player.id === Player0.id)})
+                        if(roundNum<=5) {
+                            roundNum++;
+                            roundData = { round: roundNum };
+                        } 
                     }
                   }
                 if (data.action === "MoveOn") {
@@ -607,7 +609,10 @@ function Game() {
         Players[playerIndex].exit = data.uniquePlayer.exit;
     }
           console.log(Players);
-       
+          if(roundNum>5) {
+            winWindow();
+            //alert(stringWinnerAlirt());
+        }
           setSquareValues([]);
         
           allRubyOnMap=0;
