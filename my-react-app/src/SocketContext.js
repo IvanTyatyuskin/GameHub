@@ -5,6 +5,7 @@ import Cookies from 'js-cookie';
 
 const SocketContext = createContext();
 
+
 const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
   const storedSocketID = Cookies.get('socketID');
