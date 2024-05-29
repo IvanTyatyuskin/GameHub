@@ -212,49 +212,70 @@ socket.on("shuffle_Diamant",(roundNum)=>{
 socket.on('player_ready_Diamant', (data) => {
   const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
   if (user) {
-      user.isReady = true;
-      user.action = data || null; 
+    user.isReady = true;
+    user.action = data.Move || null; 
 
-      const lobby = lobbies[user.lobbyName];
-      if (lobby) {
-          const allPlayersReady = lobby.users.every((user) => user.isReady);
+    const lobby = lobbies[user.lobbyName];
+    if (lobby) {
+      let activeUsers = null;
+      console.log("ldsl " + JSON.stringify(data));
 
-          if (allPlayersReady) {
-              const actionsSet = new Set();
-              let leaveCount = 0;
-
-              lobby.users.forEach((user) => {
-                  if (user.action) {
-                      actionsSet.add(user.action);
-                      if (user.action === 'Leave') {
-                          leaveCount++;
-                      }
-                  }
-              });
-
-              const uniqueActions = Array.from(actionsSet);
-              console.log(uniqueActions);
-              console.log(`Number of players with 'Leave' action: ${leaveCount}`);
-
-              lobby.users.forEach((u) => {
-                  let actionsToSend;
-                  if (u.action === 'Leave') {
-                      actionsToSend = uniqueActions;
-                  } else {
-                      actionsToSend = [u.action];
-                  }
-
-                  io.to(u.actualSocketID).emit('all_players_ready_Diamant', { 
-                      action: actionsToSend,
-                      leaveCount: leaveCount 
-                  });
-                  u.isReady = false;
-                  u.action = null;
-              });
-          }
+      if (data.ExitPlayers) {
+        const exitSocketIDs = data.ExitPlayers.map(player => player.socketID);
+        activeUsers = lobby.users.filter(user => !exitSocketIDs.includes(user.socketID));
       }
+
+      let allPlayersReady = false;
+      if (activeUsers != null) {
+        console.log("bb " + JSON.stringify(activeUsers));
+        allPlayersReady = activeUsers.every((user) => user.isReady);
+        console.log("Zzzz");
+      } else {
+        allPlayersReady = lobby.users.every((user) => user.isReady);
+      }
+
+      console.log(allPlayersReady);
+
+      if (allPlayersReady) {
+        const actionsSet = new Set();
+        let leaveCount = 0;
+
+        lobby.users.forEach((user) => {
+          if (user.action) {
+            actionsSet.add(user.action);
+            if (user.action === 'Leave') {
+              leaveCount++;
+            }
+          }
+        });
+
+        const uniqueActions = Array.from(actionsSet);
+        console.log(uniqueActions);
+        console.log(`Number of players with 'Leave' action: ${leaveCount}`);
+
+        lobby.users.forEach((u) => {
+          let actionsToSend;
+          if (u.action === 'Leave') {
+            actionsToSend = uniqueActions;
+          } else if(u.action === null){
+            actionsToSend = uniqueActions;
+          }
+           else{
+            actionsToSend = [u.action];
+          }
+
+          io.to(u.actualSocketID).emit('all_players_ready_Diamant', { 
+            action: actionsToSend,
+            leaveCount: leaveCount 
+          });
+          u.isReady = false;
+          u.action = null;
+        });
+      }
+    }
   }
 });
+
 
 
 

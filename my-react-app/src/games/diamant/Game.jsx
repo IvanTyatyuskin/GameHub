@@ -176,7 +176,7 @@ function PointCount(points) {
     {
         return null
     }
-    let pointsPerPlayer = Math.floor(points / 2 / Players.length);
+    let pointsPerPlayer = Math.floor(points / 2 / (Players.length));
     let remainingPoints = points;
     console.log("p: "+pointsPerPlayer)
     if (pointsPerPlayer === 0) {
@@ -184,7 +184,7 @@ function PointCount(points) {
         return remainingPoints
     }
 
-    Players.forEach((player)=>player.addRoundPoints(pointsPerPlayer))
+    Players.filter(player => player.exit === false).forEach((player) => player.addRoundPoints(pointsPerPlayer));
     remainingPoints -= pointsPerPlayer * Players.length;
     allRubyOnMap+=remainingPoints;
     console.log("p2: "+remainingPoints)
@@ -356,7 +356,7 @@ function Game() {
           }
 
         const move = "Leave";
-        socket.emit('player_ready_Diamant', move);
+        socket.emit('player_ready_Diamant', {Move:move,ExitPlayers:Players.filter(player => player.exit === true)});
         setIsButtonPressed(true);
     };
 
@@ -366,7 +366,7 @@ function Game() {
             return;
           }
         const move = "MoveOn";
-        socket.emit('player_ready_Diamant', move);
+        socket.emit('player_ready_Diamant', {Move:move,ExitPlayers:Players.filter(player => player.exit === true)});
         setIsButtonPressed(true);
     };
     const handleContinue = () => {
@@ -449,7 +449,8 @@ function Game() {
         allRubyOnMap = 0;
         allRubyOnMap += remainingPoints;
         Players.find(player => player.id === Player0.id).addAllPoints(Players.find(player => player.id === Player0.id).getRoundPoints());
-    
+        Players.find(player => player.id === Player0.id).setRoundPointsToZero();
+        allRubyOnMap=0;
         updatePlayerInfo();
         for (let i = 0; i < currentMove; i++) {
             if (Deck[i].getСardType().includes("relic")) {
@@ -476,14 +477,15 @@ function Game() {
                 socket.on("Diamant_shuffled",(data)=>{
                     Deck=(data.Deck.map(card => new Card(card.cardType, card.points)));
                 })
-            allRubyOnMap=0;
-            Players.find(player => player.id === Player0.id).setRoundPointsToZero();
+           
             updatePlayerInfo();
             setStartedSquares([]);
             
             setSquareCardType([]);
             setSquaresTileId([]);
             setIsButtonPressed(false);
+            socket.emit("Update_Players_Data_Diamant",{currentPlayer: Players.find(player => player.id === Player0.id)})
+            return;
         }
         Players.find(player => player.id === Player0.id).setExit(true)
         ///
@@ -547,9 +549,9 @@ function Game() {
     }
           console.log(Players);
        
-         
-        
           setSquareValues([]);
+        
+          
          updatePlayerInfo();
          game.setRoundData(roundData);
          game.setPlayersData(playersDataJS);
