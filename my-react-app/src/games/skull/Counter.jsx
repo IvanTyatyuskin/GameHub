@@ -1,99 +1,173 @@
 import { useState, useEffect } from 'react';
 import io from 'socket.io-client';
-import flower from '../../assets/flower.png'
 import skull from '../../assets/skull.png'
-import back from '../../assets/back.png'
 import './index.css'
-import {SkullView, SkullView2} from './SkullView';
+import { SkullView2} from './SkullView';
 import { CardView,ThisPlayerView,PlayerView } from './Classes'; 
+//import {SocketContext} from '../../SocketContext'
 
-const socket = io.connect('http://localhost:3000');
+const socket = io.connect('http://localhost:4000');
 class Card {
-  constructor(isSkull, isDown, initialImage, image, isDisabled) {
+  constructor(isSkull, isDown, isDisabled) {
     this.IsSkull = isSkull;
     this.IsDown = isDown;
-    this.Image = image;
-    this.InitialImage=initialImage;
     this.IsDisabled=isDisabled;
   }
 
 }
-
-class Player {
-  constructor(name,vP, cardsDown,image, isDisabled,isActive) {
-    this.VP = vP;
-    this.CardsDown = cardsDown;
-    this.Image = image;
-    this.IsDisabled=isDisabled;
-    this.Name=name;
-    this.IsActive=isActive;
-  }
-  
-}
-
+let debug=0;
+let id=0;
+let playedDeck=[];
+let debounceTimeout;
+let UpdateDebounceTimeout;
+let lost=false;
 function Counter() {
   const [bet, setBet] = useState(0);
   const [victoryPoints, setVP] = useState(0);
   const [deck, setDeck] = useState([]);
   const [players, setPlayers] = useState([]);
   const [input, setInput] = useState("");
-  const [playerDeck, setPlayerDeck] = useState([]);
-  const [playedDeck, setPlayedDeck] = useState([]);
-  const [showBets, setShowBets] = useState(false);
-  const [isActive, setIsActive] = useState(true);
-  const [havePassed, setHavePassed] = useState(true);
-  const [isFlipping, setIsFlipping] = useState(false);
-  const [gameMode, setGameMode] = useState("beforeBet");
+ 
+  const [isActive, setIsActive] = useState(false);
+ // const [havePassed, setHavePassed] = useState(false);
+  const [gameMode, setGameMode] = useState("setup");
   const [thisPlayer, setThisPlayer] = useState([]);
-  const [PlayersView, setPlayersView] = useState([]);
+  const [PlayersView, setPlayersView] = useState([]);   
+ // const [winWindow, setWinWindow] = useState(false);  
 
-  let fail=false;
-
-  const ThisPlayerToView = (deckValue) => () => {
+  const ThisPlayerToView = (deckValue,active,vp,gameMode,Bet,winWindow) => () => {
   let cards=[];
   for (let i = 0; i < deckValue.length; i++) { 
-    cards.push(new CardView(deckValue[i].IsSkull,FlipCard(i), deckValue[i].IsDown,deckValue[i].IsDisabled));
+    let val='0';
+    if(deckValue[i].IsSkull)
+      {
+        val='1';
+    }
+    if(deckValue[i].IsDown)
+      {
+        val=null;
+      }
+    cards.push(new CardView(val,FlipCard(i), deckValue[i].IsDown,deckValue[i].IsDisabled));
   }
-  let view= new ThisPlayerView(0,cards,isActive,victoryPoints,bet,updateBet,updateIsFlipping,Pass,setBet);
+  //console.log(cards);
+  let view= new ThisPlayerView(id,cards,active,vp,Bet,updateBet(),Pass(),input,setInput,winWindow,gameMode);
  // setThisPlayer([...thisPlayer, ...view]);
  return view;
   }
 
   const PlayersToView = (playersValue) => () => {
     let newPlayers=[];
+    
     for (let i = 0; i < playersValue.length; i++) { 
-      newPlayers.push(new PlayerView(i, "player "+String(i), skull, playersValue[i].VP, playersValue[i].CardsDown,playersValue[i].IsActive, null));
+      let cards=[];
+       for (let j = 0; j < playersValue[i].OpenCards.length; j++) { 
+        let val='0';
+                
+        if(playersValue[i].OpenCards[j].IsSkull)
+          {
+            val='1';
+        }
+      
+          cards.push(new CardView(val,null, false,false));
+        }
+        if(debug==0)
+          {
+          debug++;
+          //console.log(cards);
+          }  
+       
+        newPlayers.push(new PlayerView(playersValue[i].Id, "player"+String(i), skull, playersValue[i].VP, playersValue[i].CardsDown,cards, playersValue[i].IsActive, openChip(i)));
+       
     }
-
    // setThisPlayer([...thisPlayer, ...view]);
    return newPlayers;
     }
   useEffect(() => {
     const initialDeck = [
-      new Card(false, false, flower,flower,false),
-      new Card(false, false, flower,flower,false),
-      new Card(false, false, flower,flower,false),
-      new Card(true, false, skull, skull, false)
-    ];
-  
+      new Card(false, false, false),
+      new Card(false, false, false),
+      new Card(false, false, false),
+      new Card(true, false,  false)
+    ]; 
+    socket.emit('AddSkullPlayer');
     setDeck([...deck, ...initialDeck]);
-    setThisPlayer(ThisPlayerToView(initialDeck));
-   
-  }, []);
-  
-  useEffect(() => {
-    const initplayers = [
-      new Player("player1", 0, 0, flower, false, false),
-      new Player("player2", 0, 0, flower, false, false),
-      new Player("player3", 0, 0, flower, false, false),
-      new Player("player4", 0, 0, flower, false, false),
-      new Player("player5", 0, 0, flower, false, false),
-    ];
-
-    setPlayers([...players, ...initplayers]);
-    setPlayersView(PlayersToView(initplayers));
+    setThisPlayer(ThisPlayerToView(initialDeck,false,0,'setup', 0,false));
+    
   }, []);
 
+  if (UpdateDebounceTimeout) clearTimeout(UpdateDebounceTimeout);
+  UpdateDebounceTimeout = setTimeout(() => {
+  socket.emit('SkullUpdate');
+}, 100);
+
+  socket.on('SkullPLayersUpdate', (data) => {
+   // console.log('SkullPLayersUpdate');
+    //console.log(data);
+    if(data!=null){
+    let ind=0
+    for (let i = 0; i < data.length; i++) 
+    {
+     
+      if(data[i].Id==id) 
+        {
+          setVP(data[i].VP);
+          setIsActive(data[i].IsActive);
+          setGameMode(data[i].GameMode);
+          setBet(data[i].Bet);
+          ind=i;
+        }
+       
+    }
+   // console.log(id);
+    setPlayers(data);
+    setPlayersView(PlayersToView(data)); 
+    setThisPlayer(ThisPlayerToView(deck,data[ind].IsActive,data[ind].VP,data[ind].GameMode,data[ind].Bet,data[ind].WinWindow));
+  }
+  });
+
+  socket.on('SkullGetPlayerId', (data) => {
+  id=data;
+ // console.log("got id");
+ // console.log(id);  
+  });  
+
+  socket.on('BetFail', () => {
+    if (debounceTimeout) clearTimeout(debounceTimeout);
+    debounceTimeout = setTimeout(() => {
+if(deck.length>0)
+  { 
+    if(lost==false)
+    {
+    const newDeck = [...deck];
+    lost=true;
+    //const enabled=deck.filter(em=>!em.IsDisabled);
+    newDeck.splice(Math.floor(Math.random()*((newDeck.length-1)+1)),1);
+   // newDeck[Math.floor(Math.random()*((deck.length-1)+1))].IsDisabled=true;
+    //const randomInd=Math.floor(Math.random()*((newDeck.length-1)+1));
+    //const removedElement = enabled.splice(randomInd, 1);
+    //const ind=newDeck.indexOf(removedElement[0]);
+    //newDeck[ind].IsDisabled=true;
+    setDeck(newDeck);
+   // console.log("fail");
+    //console.log(newDeck);
+    setThisPlayer(ThisPlayerToView(newDeck,isActive,victoryPoints,gameMode,bet,false));
+  }
+}
+}, 100);
+  }); 
+
+  socket.on('Reset', () => {
+    let newDeck = [];
+    playedDeck=[]
+    lost=false;
+    for (let i = 0; i < deck.length; i++) 
+      {
+        newDeck.push(deck[i]);
+        newDeck[i].IsDown=false;
+      }
+    setDeck(newDeck);
+    setThisPlayer(ThisPlayerToView(newDeck,isActive,victoryPoints,gameMode,bet,false));
+  });  
 
 function CardsDown(){
   let count=0
@@ -105,84 +179,106 @@ count++
   return count;
 }
 
-  function updateBet() {
-    const val= (Number(input));
-    if (val>bet&&(val<=CardsDown())){
-      setBet(val);
-      Pass();
+function totalCardsDown(){
+  let count=0
+  for (let i = 0; i < players.length; i++) { 
+    count+=players[i].CardsDown;
+  }
+  return count;
+}
+
+const updateBet = () => () => {
+   if(isActive)
+    {
+    const Bet=(Number(input));
+    if (Bet>bet&&Bet<=totalCardsDown()){
+      if(bet==0)
+      {
+        //setGameMode('betting');
+      }
+      setBet(Bet);
+      setIsActive(false);
+    let downCount=CardsDown();
+    let active=false;
+    let pass=false;
+    socket.emit('EndTurn',{id,downCount,playedDeck,gameMode,Bet,active,pass});
     }
-    else if(val>CardsDown()){
+    else if(Bet>totalCardsDown()){
       alert("Недостаточно карт на столе")
     }
-    else if(val<bet){
+    else if(Bet<=bet){
       alert("Ставка меньше текущей")
     }
     else{
       alert("Назначьте ставку")
     }
   }
-
-  function EndTurn(emit_name) {
+  }
+/*
+   const EndTurn=()=> {
+    if(deck.length>0){
+    if (!newDeck[ind].IsDown&&isActive)
+      {
     setIsActive(false);
     let downCount=CardsDown();
-    socket.emit('EndTurn',{emit_name,downCount,playedDeck,gameMode,bet,isActive,havePassed});
+    let active=false;
+    let pass=false;
+    socket.emit('EndTurn',{id,downCount,playedDeck,gameMode,bet,active,pass});
+    console.log("EndTurn");
+      }
+      }
+  }*/
+  const Pass = () => () => {
+   if(isActive)
+    {
+    setIsActive(false);
+    let downCount=CardsDown();
+    let active=false;
+    let pass=true;
+    let Bet=bet;
+    socket.emit('EndTurn',{id,downCount,playedDeck,gameMode,Bet,active,pass});
+   }
   }
-  function Pass() {
-    setHavePassed(true);
-   EndTurn("Pass");
- 
-  }
+  /*
   function updateIsFlipping() {
     setIsFlipping(true);
   }
+*/
+  const FlipCard = (ind) =>() => {
 
-  const FlipCard = (ind) => () => {
     const newDeck = [...deck];
-    const newPlayedDeck = [...playedDeck];
-    let prev=false;
-    if (!newDeck[ind].IsDown&&isActive&&!isFlipping){
+    if (!newDeck[ind].IsDown&&isActive)
+      {
       newDeck[ind].IsDown=true;
       //newDeck[ind].Image=back;
-      newPlayedDeck.push(newDeck[ind]);
-    }
-    else if (newDeck[ind].IsDown&&isActive&&isFlipping){
-     
-      newDeck[ind].IsDown=false;
-      prev=true;
-    //  newDeck[ind].Image=newDeck[ind].InitialImage;
-      if (!newDeck[ind].IsSkull){
-        let n=bet-1;
-        setBet(bet-1);
-      
-      }
-      else{
-        alert("Поиграно"); 
-        console.log(Math.floor(Math.random()*(3+1)));
-        newDeck[Math.floor(Math.random()*(3+1))].IsDisabled=true;
-        fail=true;
+      playedDeck.push(newDeck[ind]);
+  
+    setDeck(newDeck);     
+    let downCount=CardsDown();
+    let active=false;
+    let pass=false;
+    let Bet=bet;
+    socket.emit('EndTurn',{id,downCount,playedDeck,gameMode,Bet,active,pass});
+    //console.log(deck)
+   // setThisPlayer(ThisPlayerToView(newDeck,isActive,victoryPoints,gameMode,Bet));
+    //console.log(thisPlayer);
+  }
+  
+   };   
 
-      }
-      console.log(bet);
+   const openChip = (ind) => () => {
+    if(gameMode=='flippingChips'&&players[ind].Id!=id&&isActive)
+    {
+        let targetId=players[ind].Id;
+        socket.emit('OpenChip',{targetId});
     }
     
-    if(isFlipping&&bet==1&&prev==true&&fail==false){
-      alert("Ставка сыграла");
-      setIsFlipping(false);
-      setShowBets(false);
-      setVP(victoryPoints+1);
-    }
-    setDeck(newDeck);
-    setPlayerDeck(newPlayedDeck);
-    Pass()
-    console.log(deck)
-    setThisPlayer(ThisPlayerToView(newDeck));
-    console.log(thisPlayer);
-   };
-     
+   }
+   
 
   if(deck.length>0&&players.length>0){
-    if(isActive&&!isFlipping){
-      if (!showBets) {
+    //if(isActive&&!isFlipping){
+     // if (!showBets) {
         return (
           <>        
             {/*
@@ -190,8 +286,12 @@ count++
             <button hidden={deck[3].IsDisabled} className="Card"  onClick={FlipCard(3)}>
               <img name = 'img' src = {deck[3].Image} className="OptionImage" />
             </button>
-            */}
-            <SkullView2/>
+            */
+            
+           } 
+          
+            <SkullView2 players = {PlayersView} thisPlayerView={thisPlayer}/>
+           
             {/*
             
             <Header/>
@@ -211,181 +311,9 @@ count++
             */}
           </>
         );
-      } else {
-        return (
-          <>
-          <div className="TopPanel">
-
-    <div className='Player' >
-    <p className="DisplayText">{players[0].Name}</p>
-    <p className="DisplayText"> ПО: {players[0].VP}</p>
-    <button style={{display:"block"}} hidden={players[0].IsDisabled} className="Card" >
-    <img name = 'img' src = {back} className="OptionImage" />
-    <p  className="DisplayText">  {players[0].CardsDown}</p>
-    </button>
-
-    <img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
-    </div>
-
-    <div className='Player' >
-    <p className="DisplayText">{players[1].Name}</p>
-    <p className="DisplayText"> ПО: {players[1].VP}</p>
-    <button style={{display:"block"}} hidden={players[1].IsDisabled} className="Card" >
-    <img name = 'img' src = {back} className="OptionImage" />
-    <p  className="DisplayText">  {players[1].CardsDown}</p>
-    </button>
-
-    <img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
-    </div>
-
-    <div className='Player' >
-    <p className="DisplayText">{players[2].Name}</p>
-    <p className="DisplayText"> ПО: {players[2].VP}</p>
-    <button style={{display:"block"}} hidden={players[2].IsDisabled} className="Card" >
-    <img name = 'img' src = {back} className="OptionImage" />
-    <p  className="DisplayText">  {players[2].CardsDown}</p>
-    </button>
-
-    <img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
-    </div>
-
-    <div className='Player' >
-    <p className="DisplayText">{players[3].Name}</p>
-    <p className="DisplayText"> ПО: {players[3].VP}</p>
-    <button style={{display:"block"}} hidden={players[3].IsDisabled} className="Card" >
-    <img name = 'img' src = {back} className="OptionImage" />
-    <p  className="DisplayText">  {players[3].CardsDown}</p>
-    </button>
-
-    <img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
-    </div>
-
-    <div className='Player' >
-    <p className="DisplayText">{players[4].Name}</p>
-    <p className="DisplayText"> ПО: {players[4].VP}</p>
-    <button style={{display:"block"}} hidden={players[4].IsDisabled} className="Card" >
-    <img name = 'img' src = {back} className="OptionImage" />
-    <p  className="DisplayText">  {players[4].CardsDown}</p>
-    </button>
-
-    <img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
-    </div>
-
-    </div>
-          <div className="BottomPanel">
-        <button hidden={deck[0].IsDisabled} className="Card" onClick={FlipCard(0)}>
-            <img name = 'img' src = {deck[0].Image} className="OptionImage" />
-            </button>
-            <button hidden={deck[1].IsDisabled} className="Card" onClick={FlipCard(1)}>
-            <img name = 'img' src = {deck[1].Image} className="OptionImage" />
-            </button>
-            <button hidden={deck[2].IsDisabled} className="Card"  onClick={FlipCard(2)}>
-            <img name = 'img' src = {deck[2].Image} className="OptionImage" />
-            </button>
-            <button hidden={deck[3].IsDisabled} className="Card"  onClick={FlipCard(3)}>
-            <img name = 'img' src = {deck[3].Image} className="OptionImage" />
-            </button>
-            <button className="OptionButton" onClick={updateBet}>Поднять ставку</button>
-            <button className="OptionButton" onClick={updateIsFlipping}>Проверить ставку</button>
-            <input type="text" id="userInput2" placeholder="Ставка"></input>
-            <button className="OptionButton" onClick={Pass}>Спасовать</button>
-            <p className="DisplayText"> Ставка: {bet}</p>
-            <p className="DisplayText"> ПО: {victoryPoints}</p>
-            </div>
-          </>
-        );
-      }
+      } 
     }
-    else{
-      return(
-        <>
-        {/*
-            <SkullView2 
-            deck={deck} bet={bet} victoryPoints={victoryPoints} 
-            updateBet={updateBet} updateIsFlipping={updateIsFlipping} 
-            Pass={Pass} FlipCard={FlipCard}
-            />
-        
-        */}
-        <div className="TopPanel">
-
-    <div className='Player' >
-    <p className="DisplayText">{players[0].Name}</p>
-    <p className="DisplayText"> ПО: {players[0].VP}</p>
-    <button style={{display:"block"}} hidden={players[0].IsDisabled} className="Card" >
-    <img name = 'img' src = {back} className="OptionImage" />
-    <p  className="DisplayText">  {players[0].CardsDown}</p>
-    </button>
-
-    <img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
-    </div>
-
-    <div className='Player' >
-    <p className="DisplayText">{players[1].Name}</p>
-    <p className="DisplayText"> ПО: {players[1].VP}</p>
-    <button style={{display:"block"}} hidden={players[1].IsDisabled} className="Card" >
-    <img name = 'img' src = {back} className="OptionImage" />
-    <p  className="DisplayText">  {players[1].CardsDown}</p>
-    </button>
-
-    <img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
-    </div>
-
-    <div className='Player' >
-    <p className="DisplayText">{players[2].Name}</p>
-    <p className="DisplayText"> ПО: {players[2].VP}</p>
-    <button style={{display:"block"}} hidden={players[2].IsDisabled} className="Card" >
-    <img name = 'img' src = {back} className="OptionImage" />
-    <p  className="DisplayText">  {players[2].CardsDown}</p>
-    </button>
-
-    <img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
-    </div>
-
-    <div className='Player' >
-    <p className="DisplayText">{players[3].Name}</p>
-    <p className="DisplayText"> ПО: {players[3].VP}</p>
-    <button style={{display:"block"}} hidden={players[3].IsDisabled} className="Card" >
-    <img name = 'img' src = {back} className="OptionImage" />
-    <p  className="DisplayText">  {players[3].CardsDown}</p>
-    </button>
-
-    <img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
-    </div>
-
-    <div className='Player' >
-    <p className="DisplayText">{players[4].Name}</p>
-    <p className="DisplayText"> ПО: {players[4].VP}</p>
-    <button style={{display:"block"}} hidden={players[4].IsDisabled} className="Card" >
-    <img name = 'img' src = {back} className="OptionImage" />
-    <p  className="DisplayText">  {players[4].CardsDown}</p>
-    </button>
-
-    <img  name = 'img'style={{display:"block"}} src = {back} className="OptionImage" />
-    </div>
-
-    </div>
-      <div className="BottomPanel">
-        <button hidden={deck[0].IsDisabled} className="Card" onClick={FlipCard(0)}>
-          <img name = 'img' src = {deck[0].Image} className="OptionImage" />
-          </button>
-          <button hidden={deck[1].IsDisabled} className="Card" onClick={FlipCard(1)}>
-          <img name = 'img' src = {deck[1].Image} className="OptionImage" />
-          </button>
-          <button hidden={deck[2].IsDisabled} className="Card"  onClick={FlipCard(2)}>
-          <img name = 'img' src = {deck[2].Image} className="OptionImage" />
-          </button>
-          <button hidden={deck[3].IsDisabled} className="Card"  onClick={FlipCard(3)}>
-          <img name = 'img' src = {deck[3].Image} className="OptionImage" />
-          </button>
-          <p className="DisplayText"> Ставка: {bet}</p>
-          <p className="DisplayText"> ПО: {victoryPoints}</p>
-      </div>
-    
-      </>
-      );
-    }
-  }
-}
+  //}
+//}
 
 export default Counter;

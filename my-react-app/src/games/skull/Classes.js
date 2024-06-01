@@ -1,26 +1,25 @@
 export class ThisPlayerView {
     constructor(id, viewCards, active, 
         winPoints, bet, updateBet, 
-        updateIsFlipping, pass, inputValue, 
+         pass, inputValue, 
         setInputValue, winWindow, phase) {
       this.Id = id;
       this.ViewCards = viewCards;
       this.Active = active;
       this.WinPoints = winPoints;
       this.Bet = bet;               /*label*/
-      this.UpdateBet = updateBet;   /*onClick*/
-      this.UpdateIsFlipping = updateIsFlipping; /*???*/
+      this.UpdateBet = updateBet;   /*onClick*//*???*/
       this.Pass = pass;             /*onClick*/
       this.InputValue = inputValue;
       this.SetInputValue = setInputValue; /*onChanged*/
       this.WinWindow = winWindow;   /*bool*/
       this.Phase = phase;
     }
-  }
+  } 
   
  export class PlayerView {
     constructor(id, name, img, vP, cardsDown, 
-        openCards, isActive,onclick) {
+        openCards, isActive, onclick) {
       this.Id = id;
       this.Name = name;
       this.Img = img;
