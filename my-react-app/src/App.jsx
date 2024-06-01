@@ -19,12 +19,11 @@ function App() {
       <Routes>
         <Route path="/" element={<RegistrationPage />} />
         <Route path="login" element={<Login />} />
-        
         <Route path="ListOfGames" element={<PrivateRoute element={<ListOfGames />} />} />
         <Route path="Diamant" element={<PrivateRoute element={<GameProvider><Diamant /></GameProvider>} />} />
         <Route path="Skull" element={<PrivateRoute element={<Counter />} />} />
         <Route path="TicTacToe" element={<PrivateRoute element={<TicTacToe />} />} />
-        <Route path="lobbyPage/:gameName" element={<PrivateRoute element={<LobbyPage />} />} />
+        <Route path="LobbyPage" element={<PrivateRoute element={<LobbyPage />} />} />
         <Route path="lobbylist" element={<PrivateRoute element={<SearchLobbyPage />} />} />
         <Route path="lobbyListSkull" element={<PrivateRoute element={<LobbyListSkullPage />} />} />
         <Route path="lobbyListDiamant" element={<PrivateRoute element={<LobbyListDiamantPage />} />} />

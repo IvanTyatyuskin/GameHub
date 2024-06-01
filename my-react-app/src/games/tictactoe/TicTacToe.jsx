@@ -1,6 +1,6 @@
 import "./TicTacToe.css"
 import React, { useState, useEffect, useContext } from 'react'
-import { SocketContext } from '../../SocketContext.js'
+import { SocketContext } from 'C:/Users/tyaty/Documents/GitHub/GameHub/my-react-app/src/SocketContext.js'
 
 
 const TicTacToe = () => {
@@ -22,6 +22,7 @@ const TicTacToe = () => {
       socket.on('reset_game', () => {
         setCells(Array(9).fill(""));
         setWinner();
+        setTurn('X');
         setIsDraw(false);
       });
 
@@ -32,7 +33,7 @@ const TicTacToe = () => {
       };
     }, [socket]);
 
-    socket.emit('start_tictactoe_game');
+    socket.emit('start_TicTacToe_game');
 
     socket.on('set_symbol', (symbol) => {
       setMySymbol(symbol);

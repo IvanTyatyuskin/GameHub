@@ -84,8 +84,8 @@ io.on('connection', (socket) => {
   }
   clientSockets.set(socket.id, socket);
 
-  socket.on('get_lobbies_list', () => {
-    io.emit('lobbies_list', Object.values(lobbies));
+  socket.on('get_lobbies_list', (gameName) => {
+        io.emit('lobbies_list', Object.values(lobbies).filter(lobby => lobby.game === gameName));
   })
 
   socket.on('get_lobby_info', () => {
@@ -94,6 +94,22 @@ io.on('connection', (socket) => {
     lobby = lobbies[lobbyName];
     io.emit('lobby_name', lobbyName);
     io.emit('isCreator', user.isCreator);
+    io.emit('gameName', lobby.game);
+    io.emit('users', lobby.users);
+    io.emit('chat_history', lobby.chatHistory);
+  })
+
+  socket.on('send_chat_message', (message) => {
+    const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
+    const lobbyName = user.lobbyName;
+    const Message = { sender: user.nickname, text: message }
+    lobby = lobbies[lobbyName]
+    lobby.chatHistory.push(Message);
+    if (lobby) {
+      lobby.users.forEach((user) => {
+        io.to(user.actualSocketID).emit('chat_history', lobby.chatHistory);
+      });
+    }
   })
 
   socket.on('setNickname', (data) => {
@@ -101,18 +117,6 @@ io.on('connection', (socket) => {
     const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
     user.nickname = nickname;
   })
-
-  socket.on('tictactoe_start', () => {
-    const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
-    if (user && user.isCreator) {
-      const lobby = lobbies[user.lobbyName];
-      if (lobby) {
-        lobby.users.forEach((user) => {
-          io.to(user.actualSocketID).emit('tictactoe_started');
-        });
-      }
-    }
-  });
 
   socket.on('Diamant_start', () => {
     
@@ -297,13 +301,8 @@ socket.on('player_ready_Diamant', (data) => {
     }
   });
 
-  
-
-
-
-  
-  socket.on('create_lobby', ({ roomName, isLocked, maxCount }) => {
-    const newLobby = { roomName, isLocked, currentCount: 1, maxCount, users: [] };
+  socket.on('create_lobby', ({ roomName, isLocked, maxCount, game }) => {
+    const newLobby = { roomName, isLocked, currentCount: 1, maxCount, game, users: [], chatHistory: [] };
     lobbies[roomName] = newLobby;
     const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
     user.isCreator = true;
@@ -315,15 +314,29 @@ socket.on('player_ready_Diamant', (data) => {
 
   socket.on('join_lobby', ({ roomName }) => {
     const lobby = lobbies[roomName];
-    const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
-    user.lobbyName = roomName;
-    lobby.users.push(user);
-    lobby.currentCount++;
-    console.log('User: ', user.nickname, 'joined to lobby', roomName);
-    console.log(lobby)
+    if (lobby.currentCount < lobby.maxCount) {
+      const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
+      user.lobbyName = roomName;
+      lobby.users.push(user);
+      lobby.currentCount++;
+      console.log('User: ', user.nickname, 'joined to lobby', roomName);
+    }
   });
 
   //TicTacToe------------------------------------------------------------------------------
+  socket.on('TicTacToe_start', () => {
+    const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
+    if (user && user.isCreator) {
+      const lobby = lobbies[user.lobbyName];
+      if (lobby) {
+        lobby.users.forEach((user) => {
+          io.to(user.actualSocketID).emit('TicTacToe_started');
+        });
+      }
+    }
+  });
+
+
   function checkWinner(board) {
     const winningCombinations = [
       [0, 1, 2],
@@ -347,7 +360,7 @@ socket.on('player_ready_Diamant', (data) => {
     return null;
   }
 
-  socket.on('start_tictactoe_game', () => {
+  socket.on('start_TicTacToe_game', () => {
     const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
     if(user.isCreator) {
       const lobby = lobbies[user.lobbyName];

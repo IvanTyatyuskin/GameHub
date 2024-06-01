@@ -11,8 +11,9 @@ import io from 'socket.io-client';
 import React, { useState, useEffect, useContext } from 'react'
 import { SocketContext } from '../SocketContext'
 import { useNavigate } from 'react-router-dom'
-import { useParams } from 'react-router-dom';
-import { TextDataLobby } from './TextViewData.js'
+import UserImage1 from '../assets/UserImage1.png'
+import UserImage2 from '../assets/UserImage2.png'
+
 
 export const PlayerItem = ({Img={img_playButton}, Name='player', forHost = false, host = false}) =>{
     var Options = ""
@@ -42,20 +43,26 @@ export const PlayerItem = ({Img={img_playButton}, Name='player', forHost = false
     )
 }
 
-
 export const LobbyPage = ({
     RoomName = "Lobby",
-    GameName,
+    GameName = "Diamant",
     roomId = "#1234 - система идентификаторов комнат будет добавлена позже",
     PlayersData = TestData,
 }) =>{
-    const TextContext = TextDataLobby[0];
     const socket = useContext(SocketContext);
     const [lobbyName, setLobbyName] = useState('Popka');
     const [isCreator, setIsCreator] = useState(false);
+    const [gameName, setGameName] = useState('Hihihaha');
+    const [usersData, setUsersData] = useState([]);
     const [isLobbyDataRequested, setIsLobbyDataRequested] = useState(false);
+    const [inputValue, setInputValue] = useState("");
+    const [chatHistory, setChatHistory] = useState([]);
     const navigate = useNavigate();
-    const { gameName } = useParams();
+
+    const handleSendClick = (inputValue) => {
+        socket.emit('send_chat_message', inputValue);
+        setInputValue("");
+    }
 
     if (!isLobbyDataRequested){
         socket.emit('get_lobby_info');
@@ -67,27 +74,43 @@ export const LobbyPage = ({
                 setIsCreator(true);
             }
         })
+        socket.on('gameName', (gameName) => {
+            setGameName(gameName);
+        })
+        socket.on('users', (users) => {
+            let currentUsers = [];
+            users.forEach((user) => {
+                currentUsers.push({
+                    img:{UserImage1},
+                    Name: user.nickname,
+                    host: user.isCreator,
+                })
+            });
+
+            setUsersData(currentUsers);
+        })
+        socket.on('chat_history', (chatHistory) => {
+            setChatHistory(chatHistory);     
+            console.log(chatHistory);       
+        })
         setIsLobbyDataRequested(true);
     }
 
 
     const handleStartClick = () => {
-        console.log(gameName)
         socket.emit(`${gameName}_start`);
     };
 
     socket.on(`${gameName}_started`, (callback) => {
-        console.log("HEY")
         navigate(`/${gameName}`);
-        callback();
     })
 
 
     const RoomData = () => {
         return(
             <div className={styles.RoomData}>
-                <h1>{lobbyName}</h1>
-                <p>{gameName}</p>
+                <h1>Название лобби: {lobbyName}</h1>
+                <p>Название игры: {gameName}</p>
                 <p>{roomId}</p>
             </div>
         )
@@ -97,11 +120,11 @@ export const LobbyPage = ({
         return(
             <div className={styles.UserListPanel}>
                 <div className={styles.UserList}>
-                    {PlayersData.map(player => (
+                    {usersData.map(player => (
                         <PlayerItem Img={player.img} Name={player.Name} host={player.host}/>
                     ))}
                     <button className={styles.ButtonAddPlayer}>
-                        <p>{TextContext.InviteAPlayer}</p>
+                        <p>Пригласить игрока</p>
                     </button>
                 </div>
             </div>
@@ -112,19 +135,19 @@ export const LobbyPage = ({
         return(
             <div className={styles.ButtonPanel}>
                 <button className={styles.SimpleButton}>
-                    {TextContext.Exit}
+                    123
                 </button>
                 <button className={styles.SimpleButton}>
-                    {TextContext.Settings}
+                    123
                 </button>
                 <button className={styles.SimpleButton + " " + styles.Large}>
-                    {TextContext.HowToPlay}
+                    123
                 </button>
                 {isCreator ? (
                     <button className={styles.SimpleButton + " " + styles.Large + ' ' + styles.WithIcon}
                     onClick={handleStartClick}>
                         <img src={img_playButton} alt="" />
-                        {TextContext.Play}
+                        Старт
                     </button>
                 ) : null}
             </div>
@@ -140,12 +163,15 @@ export const LobbyPage = ({
                     <UsersPanel/>
                     <div className={styles.chatFrame}>
                         <div className={styles.chatLog}>
-                            <p>Admin: Привет</p>
-                            <p>User: Вечер в хату!</p>
+                            {chatHistory.map((message, index) => (
+                                <p key={index}>
+                                    {message.sender}: {message.text}
+                                </p>
+                            ))}
                         </div>
                         <div id="input" className={styles.InputWithButton}>
-                            <input type='text'/>
-                            <button>
+                            <input type='text' value={inputValue} onChange={(e) => setInputValue(e.target.value)}/>
+                            <button onClick={() => handleSendClick(inputValue)}>
                                 Отправить
                             </button>
                         </div>
