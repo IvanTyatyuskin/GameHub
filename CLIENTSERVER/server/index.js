@@ -168,11 +168,11 @@ function FindSkullLobbyById(id)
     for (let i = 0; i < SkullLobbies[ind].Players.length; i++) 
     {  
       SkullLobbies[ind].Players[i].OpenCards=[];
-      SkullLobbies[ind].Players.GameMode='play';
-      SkullLobbies[ind].Players.Bet=0;
-      SkullLobbies[ind].Players.CardsDown=0;
-      SkullLobbies[ind].Players.HavePassed=false;  
-      SkullLobbies[ind].Players.PlayedCards=[];
+      SkullLobbies[ind].Players[i].GameMode='play';
+      SkullLobbies[ind].Players[i].Bet=0;
+      SkullLobbies[ind].Players[i].CardsDown=0;
+      SkullLobbies[ind].Players[i].HavePassed=false;  
+      SkullLobbies[ind].Players[i].PlayedCards=[];
     } 
     SkullLobbies[ind].Bet=0; 
     SkullLobbies[ind].GameMode='play';              
@@ -184,20 +184,21 @@ function FindSkullLobbyById(id)
        if (lobby) 
        {
          lobby.users.forEach((user) => {
-           io.to(user.actualSocketID).emit('Reset', SkullLobbies[ind].Players);
+           io.to(user.actualSocketID).emit('Reset');
          }); 
      }
    }
-  }
+  } 
    
   socket.on('Skull_start', () => {  
     
     const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
-    if (user && user.isCreator) 
+    if (user) 
       {
-     
+    
       const lobby = lobbies[user.lobbyName];
       if (lobby) {
+       
       let id=SkullCurrId;
       SkullLobbies.push(new SkullLobby(SkullCurrId,user.lobbyName,[],[],0,0,0));
       let ind=FindSkullLobbyById(id);
@@ -217,18 +218,24 @@ function FindSkullLobbyById(id)
           {
             SkullLobbies[ind].Players.push(new SkullPlayer(user.actualSocketID,'player',0,0,0,null,false,false,[],'setup',null,false,id,initialDeck));
           }
+         
           SkullLobbies[ind].PlayersData.push(new SkullPlayerData(user.actualSocketID,[]));
           if(SkullLobbies[ind].Players.length==1){
             SkullLobbies[ind].Players[0].IsActive=true;    
           }
-          console.log(user.actualSocketID);
+          //console.log(user.actualSocketID);
           io.to(user.actualSocketID).emit("SkullGetPlayerId",user.actualSocketID);
           io.to(user.actualSocketID).emit('SkullPLayersUpdate', SkullLobbies[ind].Players);
-          console.log(SkullLobbies[ind].Players);
+          //console.log(SkullLobbies[ind].Players);
           
           io.to(user.actualSocketID).emit('Skull_started', () => {
             console.log('Client confirmed receipt of start_game event');
           });
+           
+        });  
+        lobby.users.forEach((user) => {
+          io.to(user.actualSocketID).emit("SkullGetPlayerId",user.actualSocketID);
+          io.to(user.actualSocketID).emit('SkullPLayersUpdate', SkullLobbies[ind].Players);  
         });  
       }
     }
@@ -297,7 +304,7 @@ if(SkullLobbies[ind].Players[i].Id==data.id)
   SkullLobbies[ind].Players[i].Bet=SkullLobbies[ind].Bet;                
   if (SkullLobbies[ind].Bet>0&&SkullLobbies[ind].GameMode=='play'){  
    
-    SkullLobbies[ind].Players[i].GameMode='betting';  
+    SkullLobbies[ind].Players[i].GameMode='betting';   
   }         
   //console.log(SkullPlayers[i].Id);
   }       
@@ -339,7 +346,7 @@ if(ActivePlayers==1)
     {
       SkullLobbies[ind].Bet=SkullLobbies[ind].Bet-SkullLobbies[ind].PlayersData[SkullLobbies[ind].CurrPlayerInd].PlayedCards.length;
      
-      if(Bet==0)
+      if(SkullLobbies[ind].Bet==0)
         {
           SkullLobbies[ind].Players[SkullLobbies[ind].CurrPlayerInd].VP++;
          
@@ -362,7 +369,7 @@ if(ActivePlayers==1)
           
           for (let k = 0; k < SkullLobbies[ind].Players.length; k++) 
             {
-              SkullLobbies[ind].Players[k].Bet=Bet;
+              SkullLobbies[ind].Players[k].Bet=SkullLobbies[ind].Bet;
             }
         }
     }
@@ -429,37 +436,36 @@ const user = users.find((user) => user.socketID === socket.handshake.query.socke
 
 socket.on('OpenChip', (data) => {                 
   console.log(data.targetId);  
-         
+  let ind=FindSkullLobbyById(data.lobbyId);       
   let i=FindSkullPlayerById(data.targetId,data.lobbyId);   
   let j=FindSkullPlayerById(socket.id,data.lobbyId);    
   
-  if(SkullLobbies[data.lobbyId].PlayersData[CurrPlayerInd].PlayedCards?.length>0)
+  if(SkullLobbies[ind].PlayersData[SkullLobbies[ind].CurrPlayerInd].PlayedCards?.length>0)
     {
-      SkullLobbies[data.lobbyId].Players[i].OpenCards.push(SkullLobbies[data.lobbyId].PlayersData[i].PlayedCards[SkullLobbies[data.lobbyId].PlayersData[i].PlayedCards.length-1]);
-  if(SkullLobbies[data.lobbyId].PlayersData[i].PlayedCards[SkullLobbies[data.lobbyId].PlayersData[i].PlayedCards.length-1].IsSkull)
+      SkullLobbies[ind].Players[i].OpenCards.push(SkullLobbies[ind].PlayersData[i].PlayedCards[SkullLobbies[ind].PlayersData[i].PlayedCards.length-1]);
+  if(SkullLobbies[ind].PlayersData[i].PlayedCards[SkullLobbies[ind].PlayersData[i].PlayedCards.length-1].IsSkull)
     {  
       io.to(socket.id).emit('BetFail');      
-      SkullLobbies[data.lobbyId].Players[j].IsActive=false;             
-      console.log(SkullLobbies[data.lobbyId].Players[j]);    
-      SkullLobbies[data.lobbyId].Players[i].IsActive=true;   
-      SkullLobbies[data.lobbyId].CurrPlayerInd=i;
+      SkullLobbies[ind].Players[j].IsActive=false;             
+      console.log(SkullLobbies[ind].Players[j]);    
+      SkullLobbies[ind].Players[i].IsActive=true;   
+      SkullLobbies[ind].CurrPlayerInd=i;
       MoveToNextRound(data.lobbyId,socket); 
     }          
     else   
     {       
      
-      SkullLobbies[data.lobbyId].Bet=SkullLobbies[data.lobbyId].Bet-1;
-      SkullLobbies[data.lobbyId].Players[j].IsActive=true;
+      SkullLobbies[ind].Bet=SkullLobbies[ind].Bet-1;
+      SkullLobbies[ind].Players[j].IsActive=true;
      
-      if(SkullLobbies[data.lobbyId].Bet==0)
+      if(SkullLobbies[ind].Bet==0)
       {
-        SkullLobbies[data.lobbyId].Players[j].VP++;
-       
-        if(SkullLobbies[data.lobbyId].Players[j].VP==2)   
+        SkullLobbies[ind].Players[j].VP++;
+        if(SkullLobbies[ind].Players[j].VP==2)   
           {
-            for (let k = 0; k < SkullLobbies[data.lobbyId].Players.length; k++) 
+            for (let k = 0; k < SkullLobbies[ind].Players.length; k++) 
             {
-              SkullLobbies[data.lobbyId].Players[k].WinWindow=true;
+              SkullLobbies[ind].Players[k].WinWindow=true;
             }
           }     
           else           
@@ -468,18 +474,28 @@ socket.on('OpenChip', (data) => {
           }
           
       }
-      else
-      {
-        
-        for (let k = 0; k < SkullLobbies[data.lobbyId].Players.length; k++) 
+       else
+       {
+        for (let k = 0; k < SkullLobbies[ind].Players.length; k++) 
           {
-            SkullLobbies[data.lobbyId].Players[k].Bet=SkullLobbies[data.lobbyId].Bet;
+            SkullLobbies[ind].Players[k].Bet=SkullLobbies[ind].Bet;
           }
-      }
+        }
 
     }
   }
-    console.log(SkullLobbies[data.lobbyId].Players);   
+    console.log(SkullLobbies[ind].Players);   
+    const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
+  if (user) 
+    {
+      const lobby = lobbies[user.lobbyName];
+      if (lobby) 
+      {
+        lobby.users.forEach((user) => {
+          io.to(user.actualSocketID).emit('SkullPLayersUpdate', SkullLobbies[ind].Players);
+        }); 
+    }
+  }
 //io.sockets.in('Skull').emit('SkullPLayersUpdate', SkullPlayers);
 });
 
@@ -668,7 +684,7 @@ socket.on('player_ready_Diamant', (data) => {
           });
         });
       }
-    }
+    } 
   });
 
   socket.on('create_lobby', ({ roomName, isLocked, password, maxCount, game }) => {

@@ -5,7 +5,7 @@ import './index.css'
 import { SkullView2} from './SkullView';
 import { CardView,ThisPlayerView,PlayerView } from './Classes'; 
 import { SocketContext } from '../../SocketContext';
-
+import styles from '../../Components/common/input.module.css'
 
 class Card {
   constructor(isSkull, isDown, isDisabled) {
@@ -20,6 +20,7 @@ let id=0;
 let lobbyId=0;
 let playedDeck=[];
 let debounceTimeout;
+let resetTimeout;
 let UpdateDebounceTimeout;
 let lost=false;
 
@@ -28,7 +29,7 @@ let isActive=false;
 let bet=0;
 let victoryPoints=0;
 let players=[];
-//let input="";
+let input="0";
 let gameMode="setup";
 
 function Counter() 
@@ -38,7 +39,7 @@ function Counter()
   //const [victoryPoints, setVP] = useState(0);
  // const [deck, setDeck] = useState([]);
  //const [players, setPlayers] = useState([]);
-const [input, setInput] = useState("");
+//const [input, setInput] = useState("");
  
  // const [isActive, setIsActive] = useState(false);
  // const [havePassed, setHavePassed] = useState(false);
@@ -61,11 +62,12 @@ const [input, setInput] = useState("");
       }
     cards.push(new CardView(val,FlipCard(i), deckValue[i].IsDown,deckValue[i].IsDisabled));
   }
-  //console.log(cards);
-  let view= new ThisPlayerView(id,cards,active,vp,Bet,updateBet(),Pass(),input,setInput,winWindow,gameMode);
+  //console.log(cards); 
+  let view= new ThisPlayerView(id,cards,active,vp,Bet,updateBet(),Pass(),null,null,winWindow,gameMode);
  // setThisPlayer([...thisPlayer, ...view]);
  return view;
   }
+
 
   const PlayersToView = (playersValue) => () => {
     let newPlayers=[];
@@ -117,7 +119,7 @@ const [input, setInput] = useState("");
                isActive=data[i].IsActive;
                gameMode=data[i].GameMode;
                bet=data[i].Bet;
-               deck=data[i].Cards;
+              // deck=data[i].Cards;
                ind=i;
                lobbyId=data[i].LobbyId;
              }
@@ -164,18 +166,22 @@ const [input, setInput] = useState("");
        }); 
      
        socket.on('Reset', () => {
-         let newDeck = [];
+        if (resetTimeout) clearTimeout(resetTimeout);
+        resetTimeout = setTimeout(() => {
+         let newDeck = [...deck];
          playedDeck=[]
          lost=false;
-         for (let i = 0; i < deck.length; i++) 
+         for (let i = 0; i < newDeck.length; i++) 
            {
-             newDeck.push(deck[i]);
+             //newDeck.push(deck[i]);
              newDeck[i].IsDown=false;
            }
         // setDeck(newDeck);
         deck=newDeck;
          setThisPlayer(ThisPlayerToView(newDeck,isActive,victoryPoints,gameMode,bet,false));
+         
        });  
+      }, 100);
 
     },[]);
 
@@ -197,10 +203,11 @@ const [input, setInput] = useState("");
   UpdateDebounceTimeout = setTimeout(() => {
     if(socket!==null)
       {
-        socket.emit('SkullUpdate',lobbyId);
+        //setThisPlayer(ThisPlayerToView(deck,false,0,'setup', 0,false));
+      //  socket.emit('SkullUpdate',lobbyId);
       }
   
-}, 200);
+}, 300);
 
 
 
@@ -282,6 +289,7 @@ const updateBet = () => () => {
     setIsFlipping(true);
   }
 */
+
   const FlipCard = (ind) =>() => {
     const newDeck = [...deck];
     if (!newDeck[ind].IsDown&&isActive)
@@ -312,9 +320,14 @@ const updateBet = () => () => {
     }
     
    }
-   
 
-  if(deck.length>0&&players.length>0){
+   const handleChange = (event) => {
+    
+        input=event.target.value;
+    
+}
+
+  if(deck.length>0&&players.length>0&&(gameMode=='play'||gameMode=='betting')){
     //if(isActive&&!isFlipping){
      // if (!showBets) {
         return (
@@ -327,9 +340,14 @@ const updateBet = () => () => {
             */
             
            } 
-          
+         
             <SkullView2 players = {PlayersView} thisPlayerView={thisPlayer}/>
-           
+            <div className='Bid'>
+           <input
+           className={styles.text_field__input}  
+                onChange={handleChange}
+                />
+                </div>
             {/*
             
             <Header/>
@@ -350,6 +368,12 @@ const updateBet = () => () => {
           </>
         );
       } 
+      else if (deck.length>0&&players.length>0)
+      {
+        return ( 
+          <SkullView2 players = {PlayersView} thisPlayerView={thisPlayer}/>
+        );
+      }
     }
   //}
 //}
