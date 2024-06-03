@@ -31,7 +31,7 @@ let victoryPoints=0;
 let players=[];
 let input="0";
 let gameMode="setup";
-
+let win=false;
 function Counter() 
 {
   const socket = useContext(SocketContext);
@@ -119,6 +119,7 @@ function Counter()
                isActive=data[i].IsActive;
                gameMode=data[i].GameMode;
                bet=data[i].Bet;
+               win=data[i].WinWindow;
               // deck=data[i].Cards;
                ind=i;
                lobbyId=data[i].LobbyId;
@@ -168,9 +169,12 @@ function Counter()
        socket.on('Reset', () => {
         if (resetTimeout) clearTimeout(resetTimeout);
         resetTimeout = setTimeout(() => {
-         let newDeck = [...deck];
+          if(deck.length>0)
+            { 
+         const newDeck = [...deck];
          playedDeck=[]
          lost=false;
+        
          for (let i = 0; i < newDeck.length; i++) 
            {
              //newDeck.push(deck[i]);
@@ -179,7 +183,7 @@ function Counter()
         // setDeck(newDeck);
         deck=newDeck;
          setThisPlayer(ThisPlayerToView(newDeck,isActive,victoryPoints,gameMode,bet,false));
-         
+          }
        });  
       }, 100);
 
@@ -193,7 +197,7 @@ function Counter()
       new Card(true, false,  false)
     ]; 
     deck=initialDeck;
-    setThisPlayer(ThisPlayerToView(initialDeck,false,0,'setup', 0,false));
+    setThisPlayer(ThisPlayerToView(initialDeck,false,0,'setup', 0,win));
     socket.emit('Skull_start');
     
     
@@ -203,11 +207,11 @@ function Counter()
   UpdateDebounceTimeout = setTimeout(() => {
     if(socket!==null)
       {
-        //setThisPlayer(ThisPlayerToView(deck,false,0,'setup', 0,false));
+        setThisPlayer(ThisPlayerToView(deck,isActive,victoryPoints,gameMode, bet,false));
       //  socket.emit('SkullUpdate',lobbyId);
       }
   
-}, 300);
+}, 350);
 
 
 
