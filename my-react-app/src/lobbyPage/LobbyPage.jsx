@@ -45,7 +45,7 @@ export const PlayerItem = ({Img={img_playButton}, Name='player', forHost = false
 
 export const LobbyPage = ({
     RoomName = "Lobby",
-    GameName = "Diamant",
+    GameName ="Skull",
     roomId = "#1234 - система идентификаторов комнат будет добавлена позже",
     PlayersData = TestData,
 }) =>{
