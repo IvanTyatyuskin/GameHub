@@ -1,7 +1,7 @@
 import "./TicTacToe.css"
 import React, { useState, useEffect, useContext } from 'react'
-import { SocketContext } from 'C:/Users/tyaty/Documents/GitHub/GameHub/my-react-app/src/SocketContext.js'
-
+//import { SocketContext } from 'C:/Users/tyaty/Documents/GitHub/GameHub/my-react-app/src/SocketContext.js'
+import { SocketContext } from '../../SocketContext'
 
 const TicTacToe = () => {
     const [turn, setTurn] = useState("X");
