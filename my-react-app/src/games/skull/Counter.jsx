@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
-import io from 'socket.io-client';
+import { useState, useEffect, useContext } from 'react';
+//import io from 'socket.io-client';
 import skull from '../../assets/skull.png'
 import './index.css'
 import { SkullView2} from './SkullView';
 import { CardView,ThisPlayerView,PlayerView } from './Classes'; 
-//import {SocketContext} from '../../SocketContext'
+import { SocketContext } from '../../SocketContext';
 
-const socket = io.connect('http://localhost:4000');
+
 class Card {
   constructor(isSkull, isDown, isDisabled) {
     this.IsSkull = isSkull;
@@ -17,20 +17,32 @@ class Card {
 }
 let debug=0;
 let id=0;
+let lobbyId=0;
 let playedDeck=[];
 let debounceTimeout;
 let UpdateDebounceTimeout;
 let lost=false;
-function Counter() {
-  const [bet, setBet] = useState(0);
-  const [victoryPoints, setVP] = useState(0);
-  const [deck, setDeck] = useState([]);
-  const [players, setPlayers] = useState([]);
-  const [input, setInput] = useState("");
+
+let deck=[]
+let isActive=false;
+let bet=0;
+let victoryPoints=0;
+let players=[];
+//let input="";
+let gameMode="setup";
+
+function Counter() 
+{
+  const socket = useContext(SocketContext);
+ // const [bet, setBet] = useState(0);
+  //const [victoryPoints, setVP] = useState(0);
+ // const [deck, setDeck] = useState([]);
+ //const [players, setPlayers] = useState([]);
+const [input, setInput] = useState("");
  
-  const [isActive, setIsActive] = useState(false);
+ // const [isActive, setIsActive] = useState(false);
  // const [havePassed, setHavePassed] = useState(false);
-  const [gameMode, setGameMode] = useState("setup");
+ // const [gameMode, setGameMode] = useState("setup");
   const [thisPlayer, setThisPlayer] = useState([]);
   const [PlayersView, setPlayersView] = useState([]);   
  // const [winWindow, setWinWindow] = useState(false);  
@@ -76,12 +88,97 @@ function Counter() {
           //console.log(cards);
           }  
        
-        newPlayers.push(new PlayerView(playersValue[i].Id, "player"+String(i), skull, playersValue[i].VP, playersValue[i].CardsDown,cards, playersValue[i].IsActive, openChip(i)));
+        newPlayers.push(new PlayerView(playersValue[i].Id, playersValue[i].Name, skull, playersValue[i].VP, playersValue[i].CardsDown,cards, playersValue[i].IsActive, openChip(i)));
        
     }
    // setThisPlayer([...thisPlayer, ...view]);
    return newPlayers;
     }
+
+    useEffect(() => {
+      if (!socket) return;
+      socket.on('SkullPLayersUpdate', (data) => {
+        // console.log('SkullPLayersUpdate');
+         //console.log(data);
+         if(data!=null){
+         let ind=0;
+         for (let i = 0; i < data.length; i++) 
+         {
+          
+           if(data[i].Id==id) 
+             {
+              // setVP(data[i].VP);
+              // setIsActive(data[i].IsActive);
+             //  setGameMode(data[i].GameMode);
+             //  setBet(data[i].Bet);
+             //  setDeck(data[i].Cards);
+
+               victoryPoints=data[i].VP;
+               isActive=data[i].IsActive;
+               gameMode=data[i].GameMode;
+               bet=data[i].Bet;
+               deck=data[i].Cards;
+               ind=i;
+               lobbyId=data[i].LobbyId;
+             }
+            
+         }
+        // console.log(id);
+       //  setPlayers(data);
+        players=data;
+         setPlayersView(PlayersToView(data)); 
+         setThisPlayer(ThisPlayerToView(data[ind].Cards,data[ind].IsActive,data[ind].VP,data[ind].GameMode,data[ind].Bet,data[ind].WinWindow));
+       }
+       });
+     
+       socket.on('SkullGetPlayerId', (data) => {
+       id=data;
+      // console.log("got id");
+      // console.log(id);  
+       });  
+     
+       socket.on('BetFail', () => {
+         if (debounceTimeout) clearTimeout(debounceTimeout);
+         debounceTimeout = setTimeout(() => {
+     if(deck.length>0)
+       { 
+         if(lost==false)
+         {
+         const newDeck = [...deck];
+         lost=true;
+         //const enabled=deck.filter(em=>!em.IsDisabled);
+         newDeck.splice(Math.floor(Math.random()*((newDeck.length-1)+1)),1);
+        // newDeck[Math.floor(Math.random()*((deck.length-1)+1))].IsDisabled=true;
+         //const randomInd=Math.floor(Math.random()*((newDeck.length-1)+1));
+         //const removedElement = enabled.splice(randomInd, 1);
+         //const ind=newDeck.indexOf(removedElement[0]);
+         //newDeck[ind].IsDisabled=true;
+        // setDeck(newDeck);
+          deck=newDeck;
+        // console.log("fail");
+         //console.log(newDeck);
+         setThisPlayer(ThisPlayerToView(newDeck,isActive,victoryPoints,gameMode,bet,false));
+       }
+     }
+     }, 100);
+       }); 
+     
+       socket.on('Reset', () => {
+         let newDeck = [];
+         playedDeck=[]
+         lost=false;
+         for (let i = 0; i < deck.length; i++) 
+           {
+             newDeck.push(deck[i]);
+             newDeck[i].IsDown=false;
+           }
+        // setDeck(newDeck);
+        deck=newDeck;
+         setThisPlayer(ThisPlayerToView(newDeck,isActive,victoryPoints,gameMode,bet,false));
+       });  
+
+    },[]);
+
   useEffect(() => {
     const initialDeck = [
       new Card(false, false, false),
@@ -89,91 +186,29 @@ function Counter() {
       new Card(false, false, false),
       new Card(true, false,  false)
     ]; 
-    socket.emit('AddSkullPlayer');
-    setDeck([...deck, ...initialDeck]);
+    deck=initialDeck;
     setThisPlayer(ThisPlayerToView(initialDeck,false,0,'setup', 0,false));
+    socket.emit('Skull_start');
+    
     
   }, []);
 
   if (UpdateDebounceTimeout) clearTimeout(UpdateDebounceTimeout);
   UpdateDebounceTimeout = setTimeout(() => {
-  socket.emit('SkullUpdate');
-}, 100);
-
-  socket.on('SkullPLayersUpdate', (data) => {
-   // console.log('SkullPLayersUpdate');
-    //console.log(data);
-    if(data!=null){
-    let ind=0
-    for (let i = 0; i < data.length; i++) 
-    {
-     
-      if(data[i].Id==id) 
-        {
-          setVP(data[i].VP);
-          setIsActive(data[i].IsActive);
-          setGameMode(data[i].GameMode);
-          setBet(data[i].Bet);
-          ind=i;
-        }
-       
-    }
-   // console.log(id);
-    setPlayers(data);
-    setPlayersView(PlayersToView(data)); 
-    setThisPlayer(ThisPlayerToView(deck,data[ind].IsActive,data[ind].VP,data[ind].GameMode,data[ind].Bet,data[ind].WinWindow));
-  }
-  });
-
-  socket.on('SkullGetPlayerId', (data) => {
-  id=data;
- // console.log("got id");
- // console.log(id);  
-  });  
-
-  socket.on('BetFail', () => {
-    if (debounceTimeout) clearTimeout(debounceTimeout);
-    debounceTimeout = setTimeout(() => {
-if(deck.length>0)
-  { 
-    if(lost==false)
-    {
-    const newDeck = [...deck];
-    lost=true;
-    //const enabled=deck.filter(em=>!em.IsDisabled);
-    newDeck.splice(Math.floor(Math.random()*((newDeck.length-1)+1)),1);
-   // newDeck[Math.floor(Math.random()*((deck.length-1)+1))].IsDisabled=true;
-    //const randomInd=Math.floor(Math.random()*((newDeck.length-1)+1));
-    //const removedElement = enabled.splice(randomInd, 1);
-    //const ind=newDeck.indexOf(removedElement[0]);
-    //newDeck[ind].IsDisabled=true;
-    setDeck(newDeck);
-   // console.log("fail");
-    //console.log(newDeck);
-    setThisPlayer(ThisPlayerToView(newDeck,isActive,victoryPoints,gameMode,bet,false));
-  }
-}
-}, 100);
-  }); 
-
-  socket.on('Reset', () => {
-    let newDeck = [];
-    playedDeck=[]
-    lost=false;
-    for (let i = 0; i < deck.length; i++) 
+    if(socket!==null)
       {
-        newDeck.push(deck[i]);
-        newDeck[i].IsDown=false;
+        socket.emit('SkullUpdate',lobbyId);
       }
-    setDeck(newDeck);
-    setThisPlayer(ThisPlayerToView(newDeck,isActive,victoryPoints,gameMode,bet,false));
-  });  
+  
+}, 200);
+
+
 
 function CardsDown(){
   let count=0
   for (let i = 0; i < deck.length; i++) { 
     if(deck[i].IsDown){
-count++
+    count++;
     }
   }
   return count;
@@ -196,12 +231,14 @@ const updateBet = () => () => {
       {
         //setGameMode('betting');
       }
-      setBet(Bet);
-      setIsActive(false);
+     // setBet(Bet);
+     bet=Bet;
+      //setIsActive(false);
+      isActive=false;
     let downCount=CardsDown();
     let active=false;
     let pass=false;
-    socket.emit('EndTurn',{id,downCount,playedDeck,gameMode,Bet,active,pass});
+    socket.emit('EndTurn',{id,downCount,playedDeck,gameMode,Bet,active,pass,lobbyId,deck});
     }
     else if(Bet>totalCardsDown()){
       alert("Недостаточно карт на столе")
@@ -230,13 +267,14 @@ const updateBet = () => () => {
   }*/
   const Pass = () => () => {
    if(isActive)
-    {
-    setIsActive(false);
+    { 
+    //setIsActive(false);
+    isActive=false;
     let downCount=CardsDown();
     let active=false;
     let pass=true;
     let Bet=bet;
-    socket.emit('EndTurn',{id,downCount,playedDeck,gameMode,Bet,active,pass});
+    socket.emit('EndTurn',{id,downCount,playedDeck,gameMode,Bet,active,pass,lobbyId,deck});
    }
   }
   /*
@@ -245,20 +283,20 @@ const updateBet = () => () => {
   }
 */
   const FlipCard = (ind) =>() => {
-
     const newDeck = [...deck];
     if (!newDeck[ind].IsDown&&isActive)
       {
-      newDeck[ind].IsDown=true;
+      newDeck[ind].IsDown=true;  
       //newDeck[ind].Image=back;
       playedDeck.push(newDeck[ind]);
   
-    setDeck(newDeck);     
+    //setDeck(newDeck);   
+    deck=newDeck;  
     let downCount=CardsDown();
     let active=false;
     let pass=false;
     let Bet=bet;
-    socket.emit('EndTurn',{id,downCount,playedDeck,gameMode,Bet,active,pass});
+    socket.emit('EndTurn',{id,downCount,playedDeck,gameMode,Bet,active,pass,lobbyId,deck});
     //console.log(deck)
    // setThisPlayer(ThisPlayerToView(newDeck,isActive,victoryPoints,gameMode,Bet));
     //console.log(thisPlayer);
@@ -270,7 +308,7 @@ const updateBet = () => () => {
     if(gameMode=='flippingChips'&&players[ind].Id!=id&&isActive)
     {
         let targetId=players[ind].Id;
-        socket.emit('OpenChip',{targetId});
+        socket.emit('OpenChip',{targetId,lobbyId}); 
     }
     
    }
@@ -316,4 +354,4 @@ const updateBet = () => () => {
   //}
 //}
 
-export default Counter;
+export default Counter; 
