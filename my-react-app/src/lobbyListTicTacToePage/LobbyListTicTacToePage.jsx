@@ -12,14 +12,12 @@ import { Input3, InputText2 } from '../Components/common/Input'
 import Button from '../Components/common/button'
 import { Modal } from '../Components/common/Modal'
 import { useState, useEffect, useRef } from 'react'
-import io from 'socket.io-client';
 import { useNavigate } from 'react-router-dom'
-import Cookies from 'js-cookie'
 import React, { useContext } from 'react'
 import { SocketContext } from '../SocketContext'
 
-const createLobby = (roomName, isLocked, maxCount, navigate, socket, game) => {
-  socket.emit('create_lobby', { roomName, isLocked, maxCount, game});
+const createLobby = (roomName, isLocked, password, maxCount, navigate, socket, game) => {
+  socket.emit('create_lobby', { roomName, isLocked, password, maxCount, game });
   navigate('/LobbyPage');
 };
 
@@ -30,6 +28,15 @@ const joinLobby = (roomName, count, maxcount, navigate, socket) => {
   }
 };
 
+const joinPrivateLobby = (roomName, password, count, maxcount, navigate, socket) => {
+  if (count < maxcount) {
+    socket.emit('join_private_lobby', { roomName, password });
+    socket.on('password_checked', () => {
+      navigate(`/LobbyPage`);
+    });
+  }
+};
+
 export const LobbyItem = ({
   roomName = "Test Room",
   locked = false,
@@ -37,20 +44,37 @@ export const LobbyItem = ({
   maxcount = '6',
   navigate,
   socket,
-  onClick = () => joinLobby(roomName, count, maxcount, navigate, socket),
 }) => {
+  const [password, setPassword] = useState("");
+  const [showPasswordField, setShowPasswordField] = useState(false);
+  const handleJoinLobby = () => {
+    setShowPasswordField(true);
+    if (!locked) {
+      joinLobby(roomName, count, maxcount, navigate, socket);
+    }
+  }
+  const handleJoinPrivateLobby = () => {
+    joinPrivateLobby(roomName, password, count, maxcount, navigate, socket);
+  }
+
   var availability = image_unlocked;
   if (locked) availability = image_locked;
   var styleItem = styles.lobbyItem;
-  if (onClick) styleItem += ' ' + styles.clickable;
+  if (handleJoinLobby) styleItem += ' ' + styles.clickable;
   return (
-    <button className={styleItem} onClick={() => onClick(roomName, count, maxcount, navigate, socket)}>
+    <button className={styleItem} onClick={handleJoinLobby}>
       <div className={styles.lobbyIcon}>
         <img src={image_group2}/>
       </div>
       <div className={styles.lobbyname}>
         <p>{roomName}</p>
       </div>
+      {locked && showPasswordField && (
+        <>
+          <input type="password" placeholder="Введите пароль" value={password} onChange={(e) => setPassword(e.target.value)}></input>
+          <button onClick={handleJoinPrivateLobby}>Подтвердить</button>
+        </>
+      )}
       <div className={styles.playersnumber}>
         <p>{count}/{maxcount}</p>
       </div>
@@ -65,21 +89,31 @@ export const CreateLobbyModal = ({ maxPlayers = '2', minPlayers = '2', navigate,
   const playersOptions = Array.from({ length: maxPlayers - minPlayers + 1 },
     (_, i) => i + parseInt(minPlayers));
 
+    const [isLocked, setIsLocked] = useState(false);
+    const handleLockChange = () => {
+      setIsLocked(!isLocked);
+    };
+
   const handleCreateClick = () => {
     const roomName = document.querySelector('input[name="roomName"]').value;
     const isLocked = document.querySelector('input[name="isLocked"]').checked;
     const maxCount = document.querySelector('select[name="maxCount"]').value;
-    createLobby(roomName, isLocked, maxCount, navigate, socket, 'TicTacToe');
+    let password = '';
+    if (isLocked) {
+      password = document.querySelector('input[name="password"]').value;    
+    }
+    console.log(password);
+    createLobby(roomName, isLocked, password, maxCount, navigate, socket, 'TicTacToe');
   };
 
   return (
     <>
       <div className={styles.createLobbyModal}>
         <InputText2 labelText='Название лобби' name='roomName'/>
-        <InputText2 labelText='Пароль' name='password'/>
+        {isLocked && <InputText2 labelText='Пароль' name='password'/>}
         <div className={styles.checkBox}>
           <img src={image_unlocked} className='size32'/>
-          <input type='checkbox' id="switch" name='isLocked'/>
+          <input type='checkbox' id="switch" name='isLocked' checked={isLocked} onChange={handleLockChange}/>
           <label htmlFor='switch'/>
           <img src={image_locked} className='size32'/>
         </div>
@@ -149,7 +183,7 @@ export const LobbyListTicTacToePage = ({
                   maxcount={lobby.maxCount}
                   navigate={navigate}
                   socket={socket}
-                  onClick={() => joinLobby(lobby.roomName, lobby.currentCount, lobby.maxCount, navigate, socket)} // Update this line
+                  onClick={() => joinLobby(lobby.roomName, lobby.currentCount, lobby.maxCount, navigate, socket)}
                 />
               ))}
             </div>
