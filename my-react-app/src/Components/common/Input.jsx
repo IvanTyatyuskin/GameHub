@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import styles from './input.module.css'
+import PropTypes from 'prop-types';
 
 export function Inputs() {
     return (
@@ -74,6 +75,15 @@ export const InputText2 = ({ labelText,
         </div>
     )
 }
+InputText2.propTypes = {
+    labelText: PropTypes.string.isRequired,
+    name: PropTypes.string,
+    id: PropTypes.string,
+    placeholder: PropTypes.string,
+    value: PropTypes.string,
+    setValue: PropTypes.func
+  };
+
 
 export const Input3 = ({
     labelText = "Имя пользователя", 

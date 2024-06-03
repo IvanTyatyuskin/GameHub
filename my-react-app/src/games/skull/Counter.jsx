@@ -341,13 +341,14 @@ const updateBet = () => () => {
             
            } 
          
-            <SkullView2 players = {PlayersView} thisPlayerView={thisPlayer}/>
+            <SkullView2 players = {PlayersView} thisPlayerView={thisPlayer} onChange={handleChange}/>
+            {/*
             <div className='Bid'>
-           <input
-           className={styles.text_field__input}  
-                onChange={handleChange}
-                />
-                </div>
+              <input className={styles.text_field__input} 
+                style={{width: '200px'}}
+                onChange={handleChange}/>
+            </div>
+            */}
             {/*
             
             <Header/>

@@ -3,7 +3,8 @@ import './BottomPanel.css'
 import { Chip } from './chip'
 import { textDataToView } from '../textDataToView'
 import {ThisPlayerView} from '../Classes.js'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback  } from 'react'
+import InputStyles from '../../../Components/common/input.module.css'
 
 
 /**
@@ -13,7 +14,8 @@ import { useEffect, useState } from 'react'
  */
 export const BottomPanel2 = ({ 
     indexDictionary = '0',
-    thisPlayerView
+    thisPlayerView,
+    handleChange = ()=>{}
 }) => {
     const textContext = textDataToView[indexDictionary];
     //if (!thisPlayerView.Active){return(<></>)}
@@ -75,6 +77,28 @@ export const BottomPanel2 = ({
         }
     }, [thisPlayerView.Phase, thisPlayerView.IsActive]);
 
+    const  CardsView = useCallback((cards) => {
+        if (!cards.length) {
+            return (
+                <div className='Cards'>
+                    <p>Карт нет</p>
+                </div>
+            );
+        }
+        return (
+            <div className='Cards'>
+                {cards.map((card, index) => (
+                    <Chip 
+                        key={index}
+                        type={card.Type}
+                        onClick={HandIsActive ? card.Onclick : null}
+                        disabled={card.Disabled}
+                    />
+                ))}
+            </div>
+        );
+    }, [HandIsActive]);
+    /*
     function CardsView(cards)
     {
         if (cards.length === 0) return(
@@ -94,10 +118,10 @@ export const BottomPanel2 = ({
                             />
                     )
                 })}
-                {/*<h1>{HandIsActive.toString()}</h1>*/}
+                {/*<h1>{HandIsActive.toString()}</h1>
             </div>
         )
-    }
+    }*/
     function WindowWithBid()
     {
         if (!BetIsVisible) return(<></>);
@@ -108,11 +132,16 @@ export const BottomPanel2 = ({
                     onClick={thisPlayerView.UpdateBet}>
                     {textContext.placeBet}
                 </button>
+                <input className={InputStyles.text_field__input} 
+                    style={{width: '200px'}}
+                    onChange={handleChange}/>
+                {/*
                 <InputText2 
                     labelText={thisPlayerView.Bet +" >"} 
                     name='userInput' 
                     value={thisPlayerView.InputValue} 
                     setValue={thisPlayerView.SetInputValue}/>
+                    */}
                 {/*<PassButton func = {thisPlayerView.Pass}/>*/}
                 <div style={{ display: !PassIsVisible? 'none' : 'block' }}>
                     <button className="OptionButton" onClick={thisPlayerView.Pass}>
