@@ -9,6 +9,7 @@ import React, { useEffect, useState } from 'react'
 import { TestDataPlayers, TestDataThisPlayer } from './textDataToView.js'
 import { act } from 'react'
 import { Modal } from '../../Components/common/Modal.jsx'
+import Button, { SimpleButton } from '../../Components/common/button.jsx'
 
 
 /**
@@ -16,7 +17,10 @@ import { Modal } from '../../Components/common/Modal.jsx'
  */
 export const SkullView2 = ({
     thisPlayerView = TestDataThisPlayer(), 
-    players = TestDataPlayers, onChange = ()=>{}}) =>
+    players = TestDataPlayers, 
+    onChange = ()=>{},
+    returnToLobbyClick = null
+}) =>
 {    
     const [modalActive, setModalActive] = useState(false);
     const [modalContent, setModalContent] = useState(<h1>Заголовок</h1>);
@@ -70,6 +74,9 @@ function WinModal(players){
                 <img src={player.Img} className='size64'/>
                 <p>{player.Name}</p>
                 <p>{player.VP}</p>
+                <SimpleButton onClick={()=>returnToLobbyClick()}>
+                    <h1>Вернуться в лобби</h1>
+                </SimpleButton>
             </div>
         )
     }

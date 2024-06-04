@@ -331,6 +331,14 @@ const updateBet = () => () => {
     
 }
 
+return(
+  <SkullView2 
+    players = {PlayersView} 
+    thisPlayerView={thisPlayer} 
+    onChange={handleChange}
+    returnToLobbyClick={()=>{}}
+    />
+)
   if(deck.length>0&&players.length>0&&(gameMode=='play'||gameMode=='betting')){
     //if(isActive&&!isFlipping){
      // if (!showBets) {
