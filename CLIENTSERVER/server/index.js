@@ -814,8 +814,6 @@ socket.on('player_ready_Diamant', (data) => {
     io.emit('reset_game');
   });
 
-
-
   socket.on('disconnect', () => {
     console.log('User disconnected: ', socket.id);
     clientSockets.delete(socket.id);

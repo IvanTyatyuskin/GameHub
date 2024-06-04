@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Diamant from './games/diamant/Diamant.jsx';
 import ListOfGames from './ListOfGames';
-import { GameProvider } from './games/diamant/GameContext.jsx';
 import Counter from './games/skull/Counter.jsx';
 import { RegistrationPage } from './registrationPage/RegistrationPage.jsx';
 import { LobbyPage } from './lobbyPage/LobbyPage.jsx';
@@ -10,28 +9,47 @@ import LobbyListSkullPage from './lobbyListSkullPage/LobbyListSkullPage.jsx';
 import LobbyListDiamantPage from './lobbyListDiamantPage/LobbyListDiamantPage.jsx';
 import LobbyListTicTacToePage from './lobbyListTicTacToePage/LobbyListTicTacToePage.jsx';
 import TicTacToe from './games/tictactoe/TicTacToe.jsx';
-import Login from './lobby/src/Login.jsx';
-import PrivateRoute from './PrivateRoute';  // Импортируем созданный компонент
+import PrivateRoute from './PrivateRoute';  
+import { NavigationProvider, NavigationContext } from './NavigationContext';
+import PrivateGamesRoute from './PrivateGamesRoute.jsx';
+import { useContext } from 'react';
 
 function App() {
   return (
+    <NavigationProvider>
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<RegistrationPage />} />
-        <Route path="login" element={<Login />} />
         <Route path="ListOfGames" element={<PrivateRoute element={<ListOfGames />} />} />
-        <Route path="Diamant" element={<PrivateRoute element={<Diamant/>} />} />
-        <Route path="Skull" element={<PrivateRoute element={<Counter />} />} />
-        <Route path="TicTacToe" element={<PrivateRoute element={<TicTacToe />} />} />
+        <Route path="Diamant" element={<PrivateGamesRoute element={<Diamant />} redirectTo="/lobbyListDiamant" />} />
+          <Route path="Skull" element={<PrivateGamesRoute element={<Counter />} redirectTo="/lobbyListSkull" />} />
+          <Route path="TicTacToe" element={<PrivateGamesRoute element={<TicTacToe />} redirectTo="/lobbyListTicTacToe" />} />
         <Route path="LobbyPage" element={<PrivateRoute element={<LobbyPage />} />} />
         <Route path="lobbylist" element={<PrivateRoute element={<SearchLobbyPage />} />} />
-        <Route path="lobbyListSkull" element={<PrivateRoute element={<LobbyListSkullPage />} />} />
-        <Route path="lobbyListDiamant" element={<PrivateRoute element={<LobbyListDiamantPage />} />} />
-        <Route path="lobbyListTicTacToe" element={<PrivateRoute element={<LobbyListTicTacToePage />} />} />
+        <Route path="lobbyListSkull" element={<PrivateRoute element={<LobbyListSkullPageWrapper  />} />} />
+        <Route path="lobbyListDiamant" element={<PrivateRoute element={<LobbyListDiamantPageWrapper  />} />} />
+        <Route path="lobbyListTicTacToe" element={<PrivateRoute element={<LobbyListTicTacToePageWrapper  />} />} />
       </Routes>
     </BrowserRouter>
+    </NavigationProvider>
   );
 }
+const LobbyListSkullPageWrapper = () => {
+  const { setHasNavigatedThroughLobby } = useContext(NavigationContext);
+  setHasNavigatedThroughLobby(true);
+  return <LobbyListSkullPage />;
+};
 
+const LobbyListDiamantPageWrapper = () => {
+  const { setHasNavigatedThroughLobby } = useContext(NavigationContext);
+  setHasNavigatedThroughLobby(true);
+  return <LobbyListDiamantPage />;
+};
+
+const LobbyListTicTacToePageWrapper = () => {
+  const { setHasNavigatedThroughLobby } = useContext(NavigationContext);
+  setHasNavigatedThroughLobby(true);
+  return <LobbyListTicTacToePage />;
+};
 export default App;
 
