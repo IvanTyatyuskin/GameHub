@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, useRef } from 'react';
 import {playersDataJS,roundData,trapsInThisRound,Deck} from './Game.jsx'
-
+import { useNavigate } from 'react-router-dom'
 
 export const GameContext = createContext();
 
@@ -11,10 +11,11 @@ export function GameProvider({ children }) {
     const [traps, setTrapsInThisRound] = useState(trapsInThisRound);
     const [modalContent, setModalContent] = useState(<h1>Text</h1>);
     const [modalActive, setModalActive] = useState(false);
+    const navigate = useNavigate();
     const returnToLobby = () =>{
-        return (alert("Выход в лобби"))
+        return ( navigate(`/LobbyPage`))
     }
-    const isHost = useRef(false)
+    const isHost = useRef(true)
 
     return (
         <GameContext.Provider value={{ playersData, setPlayersData, 

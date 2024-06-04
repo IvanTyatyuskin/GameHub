@@ -42,7 +42,7 @@ function Diamant() {
                 <p>{textContent.winWindow_count}: {modalContent.count}</p>
                 <p>{textContent.winWindow_relic}: {modalContent.relic}</p>
                 <p>{textContent.winWindow_relicPoints}: {modalContent.relicPoints}</p>
-                {isHost.value? 
+                {isHost.current? 
                     <SimpleButton onClick={() => returnToLobby()}>
                         <p>Вернуться в лобби</p>
                     </SimpleButton> : null

@@ -131,7 +131,7 @@ function determiningWinner() {
                 }
         })
         points+=relicPoints
-        if (points > maxPoints) {
+        if (points >= maxPoints) {
             maxPoints = points;
             winner = player;
         }
@@ -142,6 +142,7 @@ function determiningWinner() {
 function stringWinnerAlirt(){
     let winner = determiningWinner();
     let relicPoints=0
+    if(!winner) return;
     winner.getRelic().forEach(relic=>{
         relicPoints+=relic.points
     })
@@ -325,12 +326,15 @@ function Game() {
         }
         socket.emit("Diamant_begin");
         socket.on('start_Diamant', (data) => {
-           
+            roundNum=1;
+            roundData = { round: roundNum };
+            allRubyOnMap=0;
             Deck=(data.Deck.map(card => new Card(card.cardType, card.points)));
             Players = data.Players.map(player => new Player(player.socketID,player.id, player.roundPoints, player.allPoints, player.relics, player.nickName, player.exit));
             Player0 = Players.find(player => player.id === data.User.id);
             updatePlayerInfo();
             totalPlayersCount=playersDataJS.length
+            game.setRoundData(roundData)
             game.setPlayersData(playersDataJS);
             return () => {
                 socket.off('start_Diamant');
