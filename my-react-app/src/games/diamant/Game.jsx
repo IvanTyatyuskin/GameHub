@@ -319,6 +319,10 @@ function Game() {
     const [isButtonPressed, setIsButtonPressed] = useState(false);
    
     useEffect(() => {
+        if (!socket) {
+            console.error("Socket not available");
+            return;
+        }
         socket.emit("Diamant_begin");
         socket.on('start_Diamant', (data) => {
            

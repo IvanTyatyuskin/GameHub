@@ -574,7 +574,7 @@ socket.on('OpenChip', (data) => {
         console.log(playersData)
         lobby.users.forEach((u) => {
           const currentUserData = playersData.find(player => player.socketID === u.socketID);
-          console.log("user: "+JSON.stringify(currentUserData))
+
           io.to(u.actualSocketID).emit('start_Diamant', {Players:playersData, Deck: Deck,User:currentUserData});
         });
       }

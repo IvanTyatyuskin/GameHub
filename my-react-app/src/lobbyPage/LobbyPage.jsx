@@ -63,8 +63,12 @@ export const LobbyPage = ({
         socket.emit('send_chat_message', inputValue);
         setInputValue("");
     }
-
+    
     if (!isLobbyDataRequested){
+        if (!socket) {
+            console.error("Socket not available");
+            return;
+        }
         socket.emit('get_lobby_info');
         socket.on('lobby_name', (lobbyName) => {
             setLobbyName(lobbyName);
