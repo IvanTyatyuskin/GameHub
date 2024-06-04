@@ -3,8 +3,10 @@ import './BottomPanel.css'
 import { Chip } from './chip'
 import { textDataToView } from '../textDataToView'
 import {ThisPlayerView} from '../Classes.js'
-import { useEffect, useState, useCallback  } from 'react'
+import { useEffect, useState, useCallback, useMemo  } from 'react'
 import InputStyles from '../../../Components/common/input.module.css'
+import { useSkull } from '../SkullContext.jsx'
+import { useLogger } from '../../../Components/CustomHooks.jsx'
 
 
 /**
@@ -17,6 +19,8 @@ export const BottomPanel2 = ({
     thisPlayerView,
     handleChange = ()=>{}
 }) => {
+    const {betInput, Deck, ThisPlayer, ...prop} = useSkull()
+
     const textContext = textDataToView[indexDictionary];
     //if (!thisPlayerView.Active){return(<></>)}
 
@@ -77,8 +81,8 @@ export const BottomPanel2 = ({
         }
     }, [thisPlayerView.Phase, thisPlayerView.IsActive]);
 
-    const  CardsView = useCallback((cards) => {
-        if (!cards.length) {
+    const  CardsView = useMemo((cards) => {
+        if (!cards || cards.length === 0) {
             return (
                 <div className='Cards'>
                     <p>Карт нет</p>
@@ -122,12 +126,10 @@ export const BottomPanel2 = ({
             </div>
         )
     }*/
-    function WindowWithBid()
-    {
+    function WindowWithBid(){
         if (!BetIsVisible) return(<></>);
-        else return(
+        return(
             <div className='Bid'>
-
                 <button className="OptionButton" 
                     onClick={thisPlayerView.UpdateBet}>
                     {textContext.placeBet}
@@ -135,6 +137,9 @@ export const BottomPanel2 = ({
                 <input className={InputStyles.text_field__input} 
                     style={{width: '200px'}}
                     onChange={handleChange}/>
+                <input className={InputStyles.text_field__input} 
+                    style={{width: '200px'}}
+                    {...betInput.bind}/>
                 {/*
                 <InputText2 
                     labelText={thisPlayerView.Bet +" >"} 
@@ -169,9 +174,10 @@ export const BottomPanel2 = ({
             </div>
         )
     }
+    useLogger(ThisPlayer)
     return(
         <div className="BottomPanel1">
-            {CardsView(thisPlayerView.ViewCards)}
+            {CardsView(ThisPlayer.ViewCards)}
             {CounterView()}
             {CurrentBetView()}
             {WindowWithBid()}

@@ -17,7 +17,8 @@ import { Modal } from '../../Components/common/Modal.jsx'
 export const SkullView2 = ({
     thisPlayerView = TestDataThisPlayer(), 
     players = TestDataPlayers, onChange = ()=>{}}) =>
-{    
+{
+    
     const [modalActive, setModalActive] = useState(false);
     const [modalContent, setModalContent] = useState(<h1>Заголовок</h1>);
 

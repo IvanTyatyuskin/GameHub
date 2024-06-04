@@ -6,6 +6,8 @@ import { SkullView2} from './SkullView';
 import { CardView,ThisPlayerView,PlayerView } from './Classes'; 
 import { SocketContext } from '../../SocketContext';
 import styles from '../../Components/common/input.module.css'
+import { SkullProvider, useSkull } from './SkullContext';
+import { useLogger } from '../../Components/CustomHooks';
 
 class Card {
   constructor(isSkull, isDown, isDisabled) {
@@ -15,6 +17,9 @@ class Card {
   }
 
 }
+
+
+
 let debug=0;
 let id=0;
 let lobbyId=0;
@@ -32,7 +37,22 @@ let players=[];
 let input="0";
 let gameMode="setup";
 let win=false;
-function Counter() 
+
+const ThisPlayerToView = (deckValue, active, vp, gameMode, Bet, winWindow) => {
+  let cards=[];
+  for (let i = 0; i < deckValue.length; i++) { 
+    let val='0';
+    if(deckValue[i].IsSkull) { val='1'; }
+    if(deckValue[i].IsDown) { val=null; }
+    cards.push(new CardView(val,FlipCard(i), deckValue[i].IsDown,deckValue[i].IsDisabled));
+  }
+  //console.log(cards); 
+  let view= new ThisPlayerView(id,cards,active,vp,Bet,updateBet(),Pass(),null,null,winWindow,gameMode);
+  // setThisPlayer([...thisPlayer, ...view]);
+  return view;
+}
+
+export function Counter() 
 {
   const socket = useContext(SocketContext);
  // const [bet, setBet] = useState(0);
@@ -44,30 +64,13 @@ function Counter()
  // const [isActive, setIsActive] = useState(false);
  // const [havePassed, setHavePassed] = useState(false);
  // const [gameMode, setGameMode] = useState("setup");
-  const [thisPlayer, setThisPlayer] = useState([]);
-  const [PlayersView, setPlayersView] = useState([]);   
- // const [winWindow, setWinWindow] = useState(false);  
-
-  const ThisPlayerToView = (deckValue,active,vp,gameMode,Bet,winWindow) => () => {
-  let cards=[];
-  for (let i = 0; i < deckValue.length; i++) { 
-    let val='0';
-    if(deckValue[i].IsSkull)
-      {
-        val='1';
-    }
-    if(deckValue[i].IsDown)
-      {
-        val=null;
-      }
-    cards.push(new CardView(val,FlipCard(i), deckValue[i].IsDown,deckValue[i].IsDisabled));
-  }
-  //console.log(cards); 
-  let view= new ThisPlayerView(id,cards,active,vp,Bet,updateBet(),Pass(),null,null,winWindow,gameMode);
- // setThisPlayer([...thisPlayer, ...view]);
- return view;
-  }
-
+  //const [thisPlayer, setThisPlayer] = useState([]);
+  //const [PlayersView, setPlayersView] = useState([]); 
+  const {betInput, Deck, ThisPlayer, PlayersView} = useSkull()
+  const [thisPlayer, setThisPlayer] = ThisPlayer;
+  const [playersView, setPlayersView] = PlayersView; 
+  // const [winWindow, setWinWindow] = useState(false);  
+  //const SkullContext = useSkull()
 
   const PlayersToView = (playersValue) => () => {
     let newPlayers=[];
@@ -213,7 +216,12 @@ function Counter()
   
 }, 350);
 
+useEffect(()=>{
+  (Deck[1])(deck)
+}, [deck])
 
+useLogger(deck, 'deck')
+useLogger(Deck[1], 'Deck context')
 
 function CardsDown(){
   let count=0
@@ -234,22 +242,23 @@ function totalCardsDown(){
 }
 
 const updateBet = () => () => {
-   if(isActive)
-    {
-    const Bet=(Number(input));
+  if(isActive)
+  {
+    const Bet=(Number(betInput.value));
     if (Bet>bet&&Bet<=totalCardsDown()){
       if(bet==0)
       {
         //setGameMode('betting');
       }
-     // setBet(Bet);
-     bet=Bet;
+      // setBet(Bet);
+      bet=Bet;
       //setIsActive(false);
       isActive=false;
-    let downCount=CardsDown();
-    let active=false;
-    let pass=false;
-    socket.emit('EndTurn',{id,downCount,playedDeck,gameMode,Bet,active,pass,lobbyId,deck});
+      let downCount=CardsDown();
+      let active=false;
+      let pass=false;
+      socket.emit('EndTurn',{id,downCount,playedDeck,gameMode,Bet,active,pass,lobbyId,deck});
+      betInput.clear()
     }
     else if(Bet>totalCardsDown()){
       alert("Недостаточно карт на столе")
@@ -326,10 +335,13 @@ const updateBet = () => () => {
    }
 
    const handleChange = (event) => {
-    
         input=event.target.value;
-    
-}
+  }
+
+
+return (
+  <SkullView2 players = {playersView} thisPlayerView={thisPlayer} onChange={handleChange}/>
+)
 
   if(deck.length>0&&players.length>0&&(gameMode=='play'||gameMode=='betting')){
     //if(isActive&&!isFlipping){
@@ -383,4 +395,12 @@ const updateBet = () => () => {
   //}
 //}
 
-export default Counter; 
+function App(){
+  return(
+    <SkullProvider>
+      <Counter/>
+    </SkullProvider>
+  )
+}
+
+export default App; 

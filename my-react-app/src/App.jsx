@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Diamant from './games/diamant/Diamant.jsx';
 import ListOfGames from './ListOfGames';
 import { GameProvider } from './games/diamant/GameContext.jsx';
-import Counter from './games/skull/Counter.jsx';
+import Skull from './games/skull/Counter.jsx';
 import { RegistrationPage } from './registrationPage/RegistrationPage.jsx';
 import { LobbyPage } from './lobbyPage/LobbyPage.jsx';
 import SearchLobbyPage from './lobbySearchPage/LobbySearchPage.jsx';
@@ -21,7 +21,7 @@ function App() {
         <Route path="login" element={<Login />} />
         <Route path="ListOfGames" element={<PrivateRoute element={<ListOfGames />} />} />
         <Route path="Diamant" element={<PrivateRoute element={<GameProvider><Diamant /></GameProvider>} />} />
-        <Route path="Skull" element={<PrivateRoute element={<Counter />} />} />
+        <Route path="Skull" element={<PrivateRoute element={<Skull/>} />} />
         <Route path="TicTacToe" element={<PrivateRoute element={<TicTacToe />} />} />
         <Route path="LobbyPage" element={<PrivateRoute element={<LobbyPage />} />} />
         <Route path="lobbylist" element={<PrivateRoute element={<SearchLobbyPage />} />} />
