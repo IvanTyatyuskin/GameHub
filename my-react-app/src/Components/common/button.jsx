@@ -15,9 +15,9 @@ const Button = ({ type = 'button', onClick, children, color, background, width, 
     )
 }
 
-export const SimpleButton = ({children}) => {
+export const SimpleButton = ({children, onClick}) => {
     return(
-        <button className={styles.SimpleButton}>
+        <button className={styles.SimpleButton} onClick={onClick}>
             {children}
         </button>
     )
