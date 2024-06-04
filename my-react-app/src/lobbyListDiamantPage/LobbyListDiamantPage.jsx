@@ -11,7 +11,7 @@ import { Games } from '../games/DataAboutGames'
 import { Input3, InputText2 } from '../Components/common/Input'
 import Button from '../Components/common/button'
 import { Modal } from '../Components/common/Modal'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import io from 'socket.io-client';
 import { useNavigate } from 'react-router-dom'
 import Cookies from 'js-cookie'
@@ -24,19 +24,17 @@ import { LobbyItem } from '../lobbySearchPage/LobbyItem'
 import SearchLobbyPage from '../lobbySearchPage/LobbySearchPage'
 
 
-export function convertToLobbyInfoView(lobbies){
-  //console.log(lobbies);
-  const newLobbies = lobbies.map((lobby, index)=>{
+function convertToLobbyInfoView(lobbies){
+  return lobbies.map((lobby, index)=>{
     return new LobbyInfoView(
       index, 
       lobby.roomName, 
       lobby.isLocked, 
-      lobby.Password || '', 
+      lobby.password || '', 
       lobby.currentCount,
-      lobby.maxCount)    
-  })
-  //console.log(newLobbies);
-  return newLobbies;
+      lobby.maxCount
+    );    
+  });
 }
 
 const LobbyListDiamantPage = ({
@@ -46,20 +44,30 @@ const LobbyListDiamantPage = ({
   const DataAboutGame = Games[GameIndex];
   const navigate = useNavigate();
   const [lobbies, setLobbies] = useState(testRoomsData);
-  const isLobbiesLoaded = useRef(false);
+  //const isLobbiesLoaded = useRef(false);
   const navigateAddress = `/lobbyPage/Diamant`
 
+  useEffect(() => {
+    if (socket) {
+      socket.emit('get_lobbies_list');
+      socket.on('lobbies_list', (lobbiesList) => {
+        setLobbies(convertToLobbyInfoView(lobbiesList));
+      });
+
+      return () => {
+        socket.off('lobbies_list');
+      };
+    }
+  }, [socket]);
+  
   /**
    * 
    * @param {LobbyInfoView} lobbyInfo
    */
   const createLobby = (lobbyInfo) => {
-      const roomName = lobbyInfo.name;
-      const isLocked = lobbyInfo.locked;
-      const maxCount = lobbyInfo.maxCount;
-      const password = lobbyInfo.password;
+    const {name, locked, maxCount, password} = lobbyInfo;
     if (socket) {
-      socket.emit('create_lobby', { roomName, isLocked, maxCount });
+      socket.emit('create_lobby', { roomName: name, isLocked : locked, maxCount });
       navigate(navigateAddress);
     } else {
       console.error('Socket is not connected');
@@ -70,7 +78,7 @@ const LobbyListDiamantPage = ({
    * @param {LobbyInfoView} lobbyInfo
    */
   const canCreateLobby = (lobbyInfo) =>{
-    if (lobbyInfo.name.trim() === '') return [false, "Мне не нравятся твои поля"];
+    if (lobbyInfo.name.trim() === '') return [false, "Invalid lobby name"];
     return [true, ''];
   };
 
@@ -79,9 +87,9 @@ const LobbyListDiamantPage = ({
    * @param {LobbyInfoView} lobbyInfo 
    */
   function joinLobby(lobbyInfo) {
-    const Name = lobbyInfo.name
+    const {name} = lobbyInfo
     //логика подключения если комната публичная пароль игнорируем
-    socket.emit('join_lobby', {Name});
+    socket.emit('join_lobby', {name});
     navigate(navigateAddress);
   }
   /**
@@ -90,18 +98,18 @@ const LobbyListDiamantPage = ({
    * @param {*} password 
    */
   const canJoinLobby = (lobbyInfo, password) =>{
-    return [true, "Мне не нравятся твои поля"];
+    return [true, "Valid"];
   }
 
+  /*
   setTimeout(() => {
     if(socket){
       socket.emit('get_lobbies_list');
       socket.on('lobbies_list', (lobbiesList) => {
-        const convertedLobbies = convertToLobbyInfoView(lobbiesList);
-        setLobbies(convertedLobbies);
+        setLobbies(convertToLobbyInfoView(lobbiesList));
       })
     }
-  }, 1000);
+  }, 1000);*/
 
   //useEffect(() => {
   //  if (socket) {

@@ -42,26 +42,26 @@ const SearchLobbyPage = ({
             createLobbyFun(roomSettings);
         }
         else{
-            alert("Чел, ты не прав " + message);
+            alert("Error: " + message);
         }
     }
     function tryConnectToLobby(roomSettings, password){
-        const [canCreate, message] = canConnectToRoomCheck(roomSettings, password);
-        if (canCreate){ //какая-то проверка
+        const [canJoin, message] = canConnectToRoomCheck(roomSettings, password);
+        if (canJoin){ //какая-то проверка
             connectToRoomFun(roomSettings);
         }
         else{
-            alert("Чел, ты не прав " + message);
+            alert("Error: " + message);
         }
     }
 
-    function CreateLobbyButton() {
+    const CreateLobbyButton = () => {
         setModalContent(
             <CreateLobbyModal1 DataAboutGame={DataAboutGame} createFun={tryCreateLobby} />
         )
         setModalActive(true);
     }
-    function СonnectToRoomButton(lobbyInfo){
+    const СonnectToRoomButton = (lobbyInfo) => {
         setModalContent(
             <ConnectToRoomModal 
                 lobbyInfo = {lobbyInfo}
@@ -84,7 +84,7 @@ const SearchLobbyPage = ({
             const randomRoom = openLobbies[Math.floor(Math.random() * openLobbies.length)];
             СonnectToRoom(randomRoom);
         } else {
-            alert("Нет доступных открытых комнат.");
+            alert("No open rooms available.");
         }
     };
     return(
@@ -94,19 +94,22 @@ const SearchLobbyPage = ({
                 <div className='content-single horizontal'>
                     <div className={styles.box_info}>
                         <h1>{DataAboutGame.Name}</h1>
-                        <img src={DataAboutGame.Image}/>
+                        <img src={DataAboutGame.Image} alt='Game'/>
                         <p>{DataAboutGame.Description}</p>
                     </div>
                     <div className={styles.box_lobbyList}>
                         <h1>Список доступных лобби</h1>
                         <div className={styles.search_block}>
-                            <InputText2 labelText="Название комнаты"
+                            <InputText2 
+                                labelText="Название комнаты"
                                 value={searchText}
                                 setValue={handleSearchChange}/>
-                            <Button onClick={handleRandomGame}>
+                            <Button 
+                                onClick={handleRandomGame}>
                                 <p>Случайная игра</p>
                             </Button>
-                            <Button onClick={CreateLobbyButton}>
+                            <Button 
+                                onClick={CreateLobbyButton}>
                                 <p>Создать лобби</p>
                             </Button>
                         </div>
@@ -114,8 +117,10 @@ const SearchLobbyPage = ({
                         <div className={styles.lobbyList}>
                             {filteredLobbies.map((room, index) =>{
                                 return (
-                                <LobbyItem key={index} roomInfo={room}
-                                onClick={СonnectToRoomButton}
+                                <LobbyItem 
+                                    key={index} 
+                                    roomInfo={room}
+                                    onClick={СonnectToRoomButton}
                                 />);
                             })}
                         </div>
