@@ -1,6 +1,6 @@
 import React, { useState,useEffect } from 'react'
 import '../../Components/css/general.css'
-import Button from '../../Components/common/button'
+import Button, { SimpleButton } from '../../Components/common/button'
 import '../../Components/css/game.css'
 import DataList from '../../Components/common/DataList/DataList'
 import PlayersScore from './components/PlayersScore'
@@ -8,10 +8,10 @@ import PlayersLootList from './components/PlayersLootList'
 import { textDataToView } from './textDataToView.js'
 import TrapsInThisRound from './components/TrapsInThisRound'
 import Game from './Game'
-import { useGameContext } from './GameContext';
+import { GameProvider, useGameContext } from './GameContext';
 import { Modal } from '../../Components/common/Modal.jsx'
 
-export default function Diamant() {
+function Diamant() {
     const textContent = textDataToView[0]
 
     const { playersData, setPlayersData, 
@@ -19,7 +19,8 @@ export default function Diamant() {
         deck, setDeck,
         traps, setTrapsInThisRound,
         modalContent, setModalContent,
-        modalActive, setModalActive
+        modalActive, setModalActive,
+        returnToLobby, isHost
     } = useGameContext();
     
     const [now, setNow] = useState(new Date())
@@ -41,6 +42,12 @@ export default function Diamant() {
                 <p>{textContent.winWindow_count}: {modalContent.count}</p>
                 <p>{textContent.winWindow_relic}: {modalContent.relic}</p>
                 <p>{textContent.winWindow_relicPoints}: {modalContent.relicPoints}</p>
+                {isHost.value? 
+                    <SimpleButton onClick={() => returnToLobby()}>
+                        <p>Вернуться в лобби</p>
+                    </SimpleButton> : null
+                }
+                
             </>
         )
     }
@@ -75,7 +82,6 @@ export default function Diamant() {
                         <DataList heading={textContent.inThisRound} type='3'>
                             <TrapsInThisRound traps={traps} />
                         </DataList>
-                       
                     </DataList>
                 </DataList>
                 
@@ -88,5 +94,14 @@ export default function Diamant() {
                 <WinPlayer modalContent={modalContent}/>
             </Modal>
         </>
+    )
+}
+
+
+export default function App(){
+    return(
+        <GameProvider>
+            <Diamant/>
+        </GameProvider>
     )
 }

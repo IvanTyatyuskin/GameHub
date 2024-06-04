@@ -20,7 +20,7 @@ function App() {
         <Route path="/" element={<RegistrationPage />} />
         <Route path="login" element={<Login />} />
         <Route path="ListOfGames" element={<PrivateRoute element={<ListOfGames />} />} />
-        <Route path="Diamant" element={<PrivateRoute element={<GameProvider><Diamant /></GameProvider>} />} />
+        <Route path="Diamant" element={<PrivateRoute element={<Diamant/>} />} />
         <Route path="Skull" element={<PrivateRoute element={<Counter />} />} />
         <Route path="TicTacToe" element={<PrivateRoute element={<TicTacToe />} />} />
         <Route path="LobbyPage" element={<PrivateRoute element={<LobbyPage />} />} />
