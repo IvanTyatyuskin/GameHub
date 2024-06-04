@@ -1,99 +1,37 @@
-import image_group2 from './public/playersnumberimg@2x.png'
-import image_unlocked from './public/unlocked_icon.png'
-import image_locked from './public/locked_icon1.png'
 import Header from '../Components/Header'
 
 import styles from './lobbySearchPage.module.css'
 import '../Components/css/image.css'
 import '../Components/css/section.css'
 
-import { Games } from '../games/DataAboutGames'
-import { Input3, InputText2 } from '../Components/common/Input'
+import { InputText2 } from '../Components/common/Input'
 import Button from '../Components/common/button'
 import { Modal } from '../Components/common/Modal'
 import { useState } from 'react'
 import { ConnectToRoomModal, CreateLobbyModal } from './ModalWindows'
-import {Room, testRoomsData} from './testData.js'
+import LobbyItem from './LobbyItem.jsx'
+import { SearchLobbyProvider, useSearchLobby } from './SearchLobbyContext.jsx'
 
-/**
- * 
- * @param {Room} roomInfo 
- * @returns 
- */
-export const LobbyItem = ({
-    roomInfo,
-    onClick = ()=>{},
-    connectFunc
-}) =>{
-    const availability = roomInfo.locked? image_locked : image_unlocked;
-    var styleItem = styles.lobbyItem;
-    if (onClick) styleItem += ' ' + styles.clickable;
-    return(
-        <button className={styleItem} onClick={()=>
-            {
-                connectFunc(roomInfo);
-            }}>
-            <div className={styles.lobbyIcon}>
-                <img src={image_group2}/>
-            </div>
-            <div className={styles.lobbyname}>
-                <p>{roomInfo.name}</p>
-            </div>
-            <div className={styles.playersnumber}>
-                <p>{roomInfo.count}/{roomInfo.maxCount}</p>
-            </div>
-            <div className={styles.lobbyIcon}>
-                <img src={availability}/>
-            </div>
-        </button>
-    )
-} 
-
-const SearchLobbyPage = ({
-    GameIndex = "1",
-    Rooms = testRoomsData
-}) => {
-    const DataAboutGame = Games[GameIndex];
+const SearchLobbyPage = () => {
     const [modalActive, setModalActive] = useState(false);
     const [getModalContent, setModalContent] = useState("");
     const [searchText, setSearchText] = useState("");
-    const GameRestrictions = {
-        maxPlayers: DataAboutGame.maxPlayers,
-        minPlayers: DataAboutGame.minPlayers
-    }
-    const [getRoomSettings, setRoomSettings] = useState({
-        Name: '',
-        Public: false,
-        Password:'',
-        MaxOfPlayers: GameRestrictions.minPlayers
-    })
 
-    function createButtonClick(roomSettings){
-        if (roomSettings.Name === ''){ //какая-то проверка
-            alert("Чел, ты не прав");
-        }
-        else{
-            alert("Дело сделано");
-            setModalActive(false);
-        }
-    }
-    function connectToRoomClick(lobbyInfo, password) {
-        //логика подключения если комната публичная пароль игнорируем
-    }
+    const {
+        DataAboutGame,
+        Rooms,
+        setLobbyInfo
+    } = useSearchLobby()
+
     function CreateLobbyButton() {
         setModalContent(
-            <CreateLobbyModal 
-                gameRestrictions = {GameRestrictions}
-                getRoomSettings = {getRoomSettings}
-                setRoomSettings = {setRoomSettings}
-                createFunc = {createButtonClick}/>);
+            <CreateLobbyModal/>);
         setModalActive(true);
     }
-    function СonnectToRoom(lobbyInfo){
+    function СonnectToRoom(_lobbyInfo){
+        setLobbyInfo(_lobbyInfo)
         setModalContent(
-            <ConnectToRoomModal 
-                lobbyInfo = {lobbyInfo}
-                connectFunc = {connectToRoomClick}/>
+            <ConnectToRoomModal/>
         );
         setModalActive(true);
     }
@@ -139,9 +77,9 @@ const SearchLobbyPage = ({
                         </div>
                         
                         <div className={styles.lobbyList}>
-                            {filteredLobbies.map(room =>{
+                            {filteredLobbies.map((room, index) =>{
                                 return (
-                                <LobbyItem roomInfo={room}
+                                <LobbyItem key={index} roomInfo={room}
                                 connectFunc={СonnectToRoom}
                                 />);
                             })}
@@ -157,4 +95,12 @@ const SearchLobbyPage = ({
     )
 }
 
-export default SearchLobbyPage;
+const SearchLobby = ({GameIndex='0', Game='Diamant', navigateAddress='/LobbyPage'}) => {
+    return(
+        <SearchLobbyProvider GameIndex={GameIndex} Game={Game} navigateAddress={navigateAddress}>
+            <SearchLobbyPage/>
+        </SearchLobbyProvider>
+    )
+}
+
+export default SearchLobby

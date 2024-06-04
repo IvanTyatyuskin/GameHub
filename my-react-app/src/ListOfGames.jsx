@@ -24,8 +24,10 @@ export default function ListOfGames() {
                     */}
                     
                     <div className='list'>
-                        {Games.map(game => (
-                            <ListOfGamesItem gameInfo = {game}
+                        {Games.map((game, index) => (
+                            <ListOfGamesItem 
+                                key={index}
+                                gameInfo = {game}
                                 setContent={setModalContent}
                                 setActive={setModalActive}
                             />

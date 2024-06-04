@@ -7,31 +7,31 @@ import image_locked from './public/locked_icon1.png'
 import image_group2 from './public/playersnumberimg@2x.png'
 import Button from '../Components/common/button'
 import { Room } from "./testData";
+import { useSearchLobby } from "./SearchLobbyContext";
 
 
 
-export const CreateLobbyModal = (
-    {gameRestrictions, getRoomSettings, setRoomSettings, createFunc}
-) =>{
-    const playersOptions = Array.from({ length: gameRestrictions.maxPlayers - gameRestrictions.minPlayers + 1 }, 
-        (_, i) => i + parseInt(gameRestrictions.minPlayers));
-    const [getName, setName] = useState(getRoomSettings.Name);
-    const [getPassword, setPassword] = useState(getRoomSettings.Password);
-    const [isPublic, setIsPublic] = useState(getRoomSettings.Public);
-    const [maxPlayers, setMaxPlayers] = useState(getRoomSettings.MaxOfPlayers);
+export const CreateLobbyModal = () =>{
+    const {DataAboutGame, setRoomSettings, createLobbyFunc} = useSearchLobby()
+    const playersOptions = Array.from({ length: DataAboutGame.maxPlayers - DataAboutGame.minPlayers + 1 }, 
+        (_, i) => i + parseInt(DataAboutGame.minPlayers));
+    const [getName, setName] = useState('');
+    const [getPassword, setPassword] = useState('');
+    const [isPublic, setIsPublic] = useState(false);
+    const [maxPlayers, setMaxPlayers] = useState(DataAboutGame.minPlayers);
 
     const handleCreateLobby = () => {
-        createFunc(getRoomSettings);
+        createLobbyFunc()
     };
 
     useEffect(()=>{
         setRoomSettings({
-            Name: getName,
-            Public: isPublic,
-            Password: getPassword,
-            MaxOfPlayers: maxPlayers
-        });
-    }, [getName, getPassword, isPublic, maxPlayers, setRoomSettings]);
+            name: getName,
+            locked: !isPublic,
+            password: getPassword,
+            maxCount: maxPlayers
+        })
+    }, [getName, getPassword, isPublic, maxPlayers]);
 
     return(
         <>
@@ -63,15 +63,12 @@ export const CreateLobbyModal = (
     )
 }
 
-/**
- * 
- * @param {Room} lobbyInfo 
- * @returns 
- */
-export const ConnectToRoomModal = ({lobbyInfo, connectFunc}) =>{
+export const ConnectToRoomModal = () =>{
+    const {lobbyInfo, setRoomSettings, connectToRoomFunc} = useSearchLobby()
     const [password, setPassword] = useState('');
     const handleConnect = () => {
-        connectFunc(lobbyInfo, password);
+        setRoomSettings(prev => {return ({...prev, password: password})});
+        connectToRoomFunc();
     }
 
     return(

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import styles from './input.module.css'
 import PropTypes from 'prop-types';
 
@@ -41,7 +41,7 @@ export const InputText = ({ labelText='', name = 'username', id = name,
     )
 }
 
-export const InputText2 = ({ labelText, 
+export const InputText2 = ({ labelText = null, 
     name = 'username', 
     id = name,
     placeholder = '',
