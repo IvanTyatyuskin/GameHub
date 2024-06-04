@@ -127,7 +127,6 @@ function determiningWinner() {
         player.getRelic().forEach(relic=>{
             if(relic)
                 {
-                    console.log(relic)
                     relicPoints+=relic.points
                 }
         })
@@ -182,7 +181,6 @@ function PointCount(points) {
     }
     let pointsPerPlayer = Math.floor(points / 2 / (Players.length));
     let remainingPoints = points;
-    console.log("p: "+pointsPerPlayer)
     if (pointsPerPlayer === 0) {
         allRubyOnMap+=points;
         return remainingPoints
@@ -191,7 +189,6 @@ function PointCount(points) {
     Players.filter(player => player.exit === false).forEach((player) => player.addRoundPoints(pointsPerPlayer));
     remainingPoints -= pointsPerPlayer * Players.length;
     allRubyOnMap+=remainingPoints;
-    console.log("p2: "+remainingPoints)
     return remainingPoints;
    
 }
@@ -231,17 +228,6 @@ function checkTrapDuplicates() {
     console.log('Две ловушки одного типа не были найдены.');
     return false;
 }
-function checkPlayersExited(){
-    let allExited = true;
-    Players.forEach((player) => {
-        if (!player.getExit()) {
-            allExited = false;
-        }
-    });
-    console.log(allExited)
-    return allExited;
-}
-
 
 
 class Card {
@@ -335,13 +321,11 @@ function Game() {
     useEffect(() => {
         socket.emit("Diamant_begin");
         socket.on('start_Diamant', (data) => {
-            Player0 = Players.find(player => player.id === data.User.id);
-            console.log(Player0);
-            console.log(`Колода карт: ${JSON.stringify(data)}`);
+           
             Deck=(data.Deck.map(card => new Card(card.cardType, card.points)));
             Players = data.Players.map(player => new Player(player.socketID,player.id, player.roundPoints, player.allPoints, player.relics, player.nickName, player.exit));
+            Player0 = Players.find(player => player.id === data.User.id);
             updatePlayerInfo();
-            console.log(playersDataJS);
             totalPlayersCount=playersDataJS.length
             game.setPlayersData(playersDataJS);
             return () => {
@@ -444,7 +428,6 @@ function Game() {
     
     const handleExit = (LeaveCount) => {
         let countPlayerExited=LeaveCount;
-        console.log(countPlayerExited)
         let pointsPerPlayer = Math.floor(allRubyOnMap / countPlayerExited);
         let remainingPoints = allRubyOnMap;
         Players.find(player => player.id === Player0.id).addRoundPoints(pointsPerPlayer);
@@ -466,7 +449,6 @@ function Game() {
                 i--;
             }
         }
-      console.log(Players.filter(player => player.exit === true).length)
         if(LeaveCount==(totalPlayersCount-Players.filter(player => player.exit === true).length)) { 
             console.log("Все вышли")
            
@@ -495,7 +477,6 @@ function Game() {
         }
         Players.find(player => player.id === Player0.id).setExit(true)
         ///
-        console.log(Players.find(player => player.id === Player0.id))
         socket.emit("Update_Players_Data_Diamant",{currentPlayer: Players.find(player => player.id === Player0.id)})
         //Players=[]
         ///
@@ -504,26 +485,17 @@ function Game() {
     useEffect(() => {
         const handleAllPlayersReady = (data) => {
             if (Array.isArray(data.action)) {
-                const leaveActions = data.action.filter(action => action === "Leave");
-                const otherActions = data.action.filter(action => action !== "Leave");
+                const leaveActions = data.action.filter(action => action === "Leave"||action === "Exit");
+                const otherActions = data.action.filter(action => action !== "Leave"&&action != "Exit");
               
                 leaveActions.forEach(action => {
-                  console.log(action);
                   if (action === "Leave") {
-                    console.log("Уходим");
+                    console.log(roundNum+" Уходим");
                     handleExit(data.leaveCount);
-                  }
-                });
-              
-                otherActions.forEach(action => {
-                  console.log(action);
-                  if (action === "MoveOn") {
-                    console.log("Продолжаем");
-                    handleContinue();
                   }
                   if(action ==="Exit"){
                     if(data.leaveCount==(totalPlayersCount-Players.filter(player => player.exit === true).length)) { 
-                        console.log("Все вышли")
+                        console.log(roundNum+" Все вышли")
                        
                         Players.find(player => player.id === Player0.id).setExit(false);
                         
@@ -549,13 +521,22 @@ function Game() {
                     }
                   }
                 });
+                setTimeout(() => {
+                    otherActions.forEach(action => {
+                        if (action === "MoveOn") {
+                          console.log(roundNum+" Продолжаем");
+                          handleContinue();
+                        }
+                    
+                      });
+                    console.log("Выполнение кода после задержки в 3 секунды");
+                }, 500);
+              
               }
               else{
-            
-                console.log(data.action);
                 if(action ==="Exit"){
                     if(LeaveCount==(totalPlayersCount-Players.filter(player => player.exit === true).length)) { 
-                        console.log("Exit")
+                        console.log(roundNum+" Exit")
                        
                         Players.find(player => player.id === Player0.id).setExit(false);
                         
@@ -581,11 +562,11 @@ function Game() {
                     }
                   }
                 if (data.action === "MoveOn") {
-                  console.log("Продолжаем");
+                  console.log(roundNum+" Продолжаем");
                   handleContinue();
                 }
                 if (data.action === "Leave") {
-                  console.log("Уходим");
+                  console.log(roundNum+" Уходим");
                   
                   handleExit(data.leaveCount);
                 }
@@ -595,7 +576,6 @@ function Game() {
         };
       
         socket.on("PlayersDataDiamantUpdated", (data) => {
-          console.log("Player data updated:", data.uniquePlayer);
 
           const playerIndex = Players.findIndex(player => player.socketID === data.uniquePlayer.socketID);
 
@@ -608,19 +588,17 @@ function Game() {
         Players[playerIndex].nickName = data.uniquePlayer.nickName;
         Players[playerIndex].exit = data.uniquePlayer.exit;
     }
-          console.log(Players);
           if(roundNum>5) {
             winWindow();
             //alert(stringWinnerAlirt());
         }
-          setSquareValues([]);
+         
         
           allRubyOnMap=0;
          updatePlayerInfo();
          game.setRoundData(roundData);
          game.setPlayersData(playersDataJS);
-         console.log(Players.find(player => player.id === Player0.id).getExit())
-         
+         setSquareValues([]);
         });
       
         socket.on('all_players_ready_Diamant', handleAllPlayersReady);
