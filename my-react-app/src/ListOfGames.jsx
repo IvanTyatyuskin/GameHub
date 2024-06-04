@@ -4,10 +4,6 @@ import Header from './Components/Header.jsx'
 import './Components/css/section.css'
 import ListOfGamesItem from './Components/common/ListOfGamesItem.jsx'
 import { Modal } from './Components/common/Modal.jsx'
-//import { InputText } from './Components/common/Input.jsx'
-import { Link } from 'react-router-dom';
-
-
 
 export default function ListOfGames() {
     const [modalActive, setModalActive] = useState(false);
@@ -34,7 +30,6 @@ export default function ListOfGames() {
                         )
                         )}
                     </div>
-                    <Link to={'/lobbylist'}>Интерактовное лобби</Link>
                     <Modal active={modalActive} setActive={setModalActive}>
                         {modalContent}
                     </Modal>
