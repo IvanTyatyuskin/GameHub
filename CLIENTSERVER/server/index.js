@@ -191,7 +191,7 @@ function FindSkullLobbyById(id)
          }); 
      }
    }
-  } 
+  }   
    
   socket.on('Skull_start', () => {  
     
