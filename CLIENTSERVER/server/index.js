@@ -93,7 +93,11 @@ io.on('connection', (socket) => {
   clientSockets.set(socket.id, socket);
 
   socket.on('get_lobbies_list', (gameName) => {
-    io.emit('lobbies_list', Object.values(lobbies).filter(lobby => lobby.game === gameName));
+    const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
+    console.log(user);
+    if(user) {
+      io.to(user.actualSocketID).emit('lobbies_list', Object.values(lobbies).filter(lobby => lobby.game === gameName));
+    }
   })
 
   socket.on('get_lobby_info', () => {
