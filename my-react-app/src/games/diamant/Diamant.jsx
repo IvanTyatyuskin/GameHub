@@ -24,7 +24,6 @@ function Diamant() {
     } = useGameContext();
     
     const [now, setNow] = useState(new Date())
-
     useEffect(() => {
         const timer = setInterval(() => {
             setNow(new Date());

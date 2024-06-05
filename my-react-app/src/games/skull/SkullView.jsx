@@ -43,7 +43,7 @@ export const SkullView2 = ({
         }
     }, [thisPlayerView.WinWindow])
     function WinHandle(){
-        setModalContent(WinModal(players));
+        setModalContent(WinModal(players, returnToLobbyClick));
         setModalActive(true);
     }
     return (
@@ -65,7 +65,7 @@ export const SkullView2 = ({
     )
 }
 
-function WinModal(players){
+function WinModal(players, returnToLobbyClick){
     const sortedPlayers = [...players].sort((a, b) => b.VP - a.VP);
 
     function PlayerItem(player){
@@ -74,9 +74,6 @@ function WinModal(players){
                 <img src={player.Img} className='size64'/>
                 <p>{player.Name}</p>
                 <p>{player.VP}</p>
-                <SimpleButton onClick={()=>returnToLobbyClick()}>
-                    <h1>Вернуться в лобби</h1>
-                </SimpleButton>
             </div>
         )
     }
@@ -87,6 +84,9 @@ function WinModal(players){
             {sortedPlayers.map(player => (
                 PlayerItem(player)
             ))}
+            <SimpleButton onClick={()=>returnToLobbyClick()}>
+                <h1>Вернуться в лобби</h1>
+            </SimpleButton>
         </>
     );
 }

@@ -59,7 +59,7 @@ export const SearchLobbyProvider = ({children,
         }
     };
 
-    useEffect
+    //useEffect
 
     setTimeout(() => {
         if(socket){
