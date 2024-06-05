@@ -14,19 +14,16 @@ export default function ListOfGamesItem({gameInfo, setContent, setActive }) {
     return (
         <div className='item'>
             <img className='size128' src={gameInfo.Image} alt="GameImage" />
-            <Link to={`/${gameInfo.Name}`}>
+            <Link to={`/${gameInfo.Path}`}>
                 <div className='Name'><h1>{gameInfo.Name}</h1></div>
             </Link>
-            <Link to={`/${gameInfo.Path}`}>
-                <p>Список лобби</p>
-            </Link>
             <div className='Description'>
-            {gameInfo.Description}
+                {gameInfo.Description}
                 <a onClick={() => { setActive(true); 
                     setContent(<>
-                    <h1>Правила {gameInfo.Name}</h1> 
-                    <ContentRenderer content = {gameInfo.Rule} />
-                    </>) }}>
+                        <h1>Правила {gameInfo.Name}</h1> 
+                        <ContentRenderer content = {gameInfo.Rule} />
+                    </>)}} style={{color:'blue'}}>
                     Читать правила
                 </a>
             </div>

@@ -6,6 +6,8 @@ export const TextDataLobby = [
         Play: "Играть",
         Settings: "Настройки",
         Exit: "Выход",
-        Host: "Хост"
+        Host: "Хост",
+        LobbyName: 'Название лобби',
+        GameName: 'Название игры',
     }
 ]

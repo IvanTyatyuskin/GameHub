@@ -50,8 +50,8 @@ export const SkullView2 = ({
         <>
             <Body>
                 <div className="PlayingField">
-                    {players.map(player => (
-                        <PlayersTablet2 playerView = {player} 
+                    {players.map((player, index) => (
+                        <PlayersTablet2 key={index} playerView = {player} 
                         active={active} thisPlayer={IfThisPlayer(player)}/>
                     ))}
                 </div>
