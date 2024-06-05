@@ -26,8 +26,7 @@ function getCookie(cname) {
   return "";
 }
 
-export const OnlyWindow = ({children}) =>
-{
+export const OnlyWindow = ({children}) =>{
   return (
     <div className={styles_onlyWindow.registerpage}>
       <div className={styles_onlyWindow.workingArea}>
@@ -37,17 +36,22 @@ export const OnlyWindow = ({children}) =>
   )
 }
 
+const cookies = document.cookie.split(';').reduce((acc, cookie) => {
+  const [name, value] = cookie.trim().split('=');
+  acc[name] = decodeURIComponent(value);
+  return acc;
+}, {});
+
 export const RegistrationPage = ({}) =>{
 
   const socket = useContext(SocketContext);
-  const _nickname = getCookie('nickname'); //получить из cookie
-  const _avatar = 0;
-  const _background = 0;
-  const _language = getCookie('language');
+
+  const _nickname = cookies.nickname || ''; //получить из cookie
+  const _avatar = cookies.avatar ||  0;
+  const _background = cookies.background || 0;
+  const _language = cookies.background || "Rus";
 
   document.cookie = `language=${_language}; max-age=3600; path=/`; // Сохраняем никнейм в Cookie
-
-  //нужно добавть в cookie значение библиотеки языка (Rus||Eng)
 
   const [getInput, setInput] = useState(_nickname);
   const [getAvatar, setAvatar] = useState(_avatar);
@@ -83,48 +87,34 @@ export const RegistrationPage = ({}) =>{
       </div>
     )
   }
-
-  function PanelButtons(){
-    return(
-      <div className={styles_registrationPage.panelbuttons}>
-        <button id="cancel_button">
-          <img
-            alt=""
-            src={img}
-          />
-          <p>Отмена</p>
-        </button>
-        <button id="accept_button">
-          <img alt="" src={img}/>
-          <p>Принять</p>
-        </button>
-      </div>
-    )
-  }
-
   const handleAccept = () => {
-    const nickname = getInput;
+    const nickname = getInput.trim();
 
-    console.log(nickname);
+    if (nickname === '') {
+      alert('Пожалуйста, введите ваш никнейм');
+      return;
+    }
 
-    if (nickname != '') {
-      document.cookie = `nickname=${nickname}; max-age=3600; path=/`; // Сохраняем никнейм в Cookie
-      document.cookie = `avatar=${getAvatar}; max-age=3600; path=/`; // Сохраняем никнейм в Cookie
-      document.cookie = `background=${getBackground}; max-age=3600; path=/`; // Сохраняем никнейм в Cookie
-  
-      if (socket) {
-        socket.emit('setNickname', { nickname });
-      } else {
-        console.error('Socket is not connected');
+    if (nickname) {
+      if (nickname != '') {
+        document.cookie = `nickname=${nickname}; max-age=3600; path=/`; // Сохраняем никнейм в Cookie
+        document.cookie = `avatar=${getAvatar}; max-age=3600; path=/`; // Сохраняем никнейм в Cookie
+        document.cookie = `background=${getBackground}; max-age=3600; path=/`; // Сохраняем никнейм в Cookie
+    
+        if (socket) {
+          socket.emit('setNickname', nickname);
+        } else {
+          console.error('Socket is not connected');
+        }
+    
+        window.location.href = '/ListOfGames'; 
       }
-  
-      window.location.href = '/ListOfGames'; 
     }
   };
 
   const handleCancel = () => {
     //document.getElementById('inputName').value = ''; // Очищаем поле для текста
-    setInput('');
+    setInput(_nickname);
   };
 
   return(<>

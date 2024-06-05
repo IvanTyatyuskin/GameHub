@@ -31,7 +31,7 @@ let SkullCurrId=0;
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: 'http://localhost:3000',
+    origin: '*',
     methods: ['GET', 'POST'],
   },
 });
@@ -87,15 +87,13 @@ io.on('connection', (socket) => {
     console.log('actualSocketID for user', existingUser.nickname, 'changed to', existingUser.actualSocketID);
   }
 
-  addUser(socketID, '', '', false, socketID,false,null,false);
-
   if (!socket.id) {
     socket.id = socket.client.id;
   }
   clientSockets.set(socket.id, socket);
 
   socket.on('get_lobbies_list', (gameName) => {
-        io.emit('lobbies_list', Object.values(lobbies).filter(lobby => lobby.game === gameName));
+    io.emit('lobbies_list', Object.values(lobbies).filter(lobby => lobby.game === gameName));
   })
 
   socket.on('get_lobby_info', () => {
@@ -107,6 +105,7 @@ io.on('connection', (socket) => {
     io.emit('gameName', lobby.game);
     io.emit('users', lobby.users);
     io.emit('chat_history', lobby.chatHistory);
+    console.log(users);
   })
 
   socket.on('send_chat_message', (message) => {
@@ -122,11 +121,15 @@ io.on('connection', (socket) => {
     }
   })
 
-  socket.on('setNickname', (data) => {
-    const { nickname } = data;
-    const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
-    user.nickname = nickname;
-  })
+  socket.on('setNickname', (nicknameData) => {
+    if (!existingUser){
+      addUser(socketID, nicknameData, '', false, socketID, false, null, false);
+    }
+    else {
+      const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
+      user.nickname = nicknameData;
+    }
+})
    
 //Skull
 function FindSkullLobbyById(id)   
@@ -188,7 +191,7 @@ function FindSkullLobbyById(id)
          }); 
      }
    }
-  } 
+  }   
    
   socket.on('Skull_start', () => {  
     
@@ -707,6 +710,20 @@ socket.on('player_ready_Diamant', (data) => {
       lobby.users.push(user);
       lobby.currentCount++;
       console.log('User: ', user.nickname, 'joined to lobby', roomName);
+    }
+  });
+
+  socket.on('join_private_lobby', ({ roomName, password }) => {
+    const lobby = lobbies[roomName];
+    if (lobby.currentCount < lobby.maxCount) {
+      const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
+      if (password === lobby.password) {
+        user.lobbyName = roomName;
+        lobby.users.push(user);
+        lobby.currentCount++;
+        console.log('User: ', user.nickname, 'joined to lobby', roomName);
+        io.to(user.actualSocketID).emit('password_checked');
+      }
     }
   });
 

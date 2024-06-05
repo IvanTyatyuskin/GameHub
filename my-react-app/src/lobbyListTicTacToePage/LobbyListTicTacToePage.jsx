@@ -109,8 +109,8 @@ export const CreateLobbyModal = ({ maxPlayers = '2', minPlayers = '2', navigate,
   return (
     <>
       <div className={styles.createLobbyModal}>
-        <InputText2 labelText='Название лобби' name='roomName'/>
-        {isLocked && <InputText2 labelText='Пароль' name='password'/>}
+        <InputText2 labelText='Название лобби' name='roomName' maxlength="20"/>
+        {isLocked && <InputText2 labelText='Пароль' name='password' maxlength="20"/>}
         <div className={styles.checkBox}>
           <img src={image_unlocked} className='size32'/>
           <input type='checkbox' id="switch" name='isLocked' checked={isLocked} onChange={handleLockChange}/>

@@ -5,6 +5,7 @@ import { textDataToView } from '../textDataToView'
 import {ThisPlayerView} from '../Classes.js'
 import { useEffect, useState, useCallback  } from 'react'
 import InputStyles from '../../../Components/common/input.module.css'
+import { useLogger } from '../../../hooks.jsx'
 
 
 /**
@@ -18,20 +19,12 @@ export const BottomPanel2 = ({
     handleChange = ()=>{}
 }) => {
     const textContext = textDataToView[indexDictionary];
-    //if (!thisPlayerView.Active){return(<></>)}
-
     const [HandIsActive, setHandIsActive] = useState(false);
     const [CounterIsVisible, setCounterIsVisible] = useState(false);
     const [BetIsVisible, setBetIsVisible] = useState(false);
     const [PassIsVisible, setPassIsVisible] = useState(false);
 
-
-    //const [Dimmed, setDimmed] = useState(<></>)
-    //var HandIsActive = false;
-    //var CounterIsVisible = false;
-    //var BetIsVisible = false;
-    //var BetIsActive = false;
-    //var PassIsVisible = false;
+    useLogger(thisPlayerView, 'bottomPanel')
 
     useEffect(()=>{
         setHandIsActive(false);
@@ -71,14 +64,11 @@ export const BottomPanel2 = ({
         if (thisPlayerView.IsActive) {
             setHandIsActive(false);
             setBetIsVisible(false);
-            //setDimmed(
-            //    <div className='dimmed'/>
-            //)
         }
     }, [thisPlayerView.Phase, thisPlayerView.IsActive]);
 
-    const  CardsView = useCallback((cards) => {
-        if (!cards.length) {
+    const  CardsView = () => {
+        if (!thisPlayerView.ViewCards || thisPlayerView.ViewCards.length === 0) {
             return (
                 <div className='Cards'>
                     <p>Карт нет</p>
@@ -87,7 +77,7 @@ export const BottomPanel2 = ({
         }
         return (
             <div className='Cards'>
-                {cards.map((card, index) => (
+                {thisPlayerView.ViewCards.map((card, index) => (
                     <Chip 
                         key={index}
                         type={card.Type}
@@ -97,31 +87,8 @@ export const BottomPanel2 = ({
                 ))}
             </div>
         );
-    }, [HandIsActive]);
-    /*
-    function CardsView(cards)
-    {
-        if (cards.length === 0) return(
-            <div className='Cards'>
-                <p>Карт нет</p>
-            </div>
-        )
-        return(
-            <div className='Cards'>
-                {cards.map((card, index)=>{
-                    return(
-                        <Chip 
-                            key={index}
-                            type={card.Type}
-                            onClick={HandIsActive? card.Onclick:null}
-                            disabled={card.Disabled}
-                            />
-                    )
-                })}
-                {/*<h1>{HandIsActive.toString()}</h1>
-            </div>
-        )
-    }*/
+    }
+
     function WindowWithBid()
     {
         if (!BetIsVisible) return(<></>);
@@ -151,6 +118,7 @@ export const BottomPanel2 = ({
             </div>
         );
     }
+
     function CounterView() {
         if (!CounterIsVisible) return (<></>)
         return (
@@ -160,6 +128,7 @@ export const BottomPanel2 = ({
             </div>
         )
     }
+
     function CurrentBetView() {
         if (!BetIsVisible) return (<></>)
         return (
@@ -169,9 +138,10 @@ export const BottomPanel2 = ({
             </div>
         )
     }
+
     return(
         <div className="BottomPanel1">
-            {CardsView(thisPlayerView.ViewCards)}
+            {CardsView()}
             {CounterView()}
             {CurrentBetView()}
             {WindowWithBid()}

@@ -13,10 +13,17 @@ import { SocketContext } from '../SocketContext'
 import { useNavigate } from 'react-router-dom'
 import UserImage1 from '../assets/UserImage1.png'
 import UserImage2 from '../assets/UserImage2.png'
+import { TextDataLobby } from './TextViewData.js'
+import { useLogger } from '../hooks.jsx'
 
-
-
-export const PlayerItem = ({Img={img_playButton}, Name='player', forHost = false, host = false}) =>{
+export const PlayerItem = ({
+    Img=img_playButton, 
+    Name='player', 
+    forHost = false, 
+    host = false,
+    TextContextId = '0',
+}) =>{
+    const TextContext = TextDataLobby[TextContextId];
     var Options = ""
     if (forHost){
         Options =<>
@@ -29,12 +36,12 @@ export const PlayerItem = ({Img={img_playButton}, Name='player', forHost = false
         </> 
     }
     if (host){
-        Options = <p>Хост</p>
+        Options = <p>{TextContext.Host}</p>
     }
     return(
         <div className={styles.Player}>
             <div>
-                <img src={Img}/>
+                <img src={Img} alt='image'/>
                 <p>{Name}</p>
             </div>
             <div>
@@ -49,11 +56,13 @@ export const LobbyPage = ({
     GameName ="Skull",
     roomId = "#1234 - система идентификаторов комнат будет добавлена позже",
     PlayersData = TestData,
+    TextContextId = '0',
 }) =>{
+    const TextContext = TextDataLobby[TextContextId];
     const socket = useContext(SocketContext);
-    const [lobbyName, setLobbyName] = useState('Popka');
+    const [lobbyName, setLobbyName] = useState('Lobby name');
     const [isCreator, setIsCreator] = useState(false);
-    const [gameName, setGameName] = useState('Hihihaha');
+    const [gameName, setGameName] = useState('Game name');
     const [usersData, setUsersData] = useState([]);
     const [isLobbyDataRequested, setIsLobbyDataRequested] = useState(false);
     const [inputValue, setInputValue] = useState("");
@@ -114,8 +123,8 @@ export const LobbyPage = ({
     const RoomData = () => {
         return(
             <div className={styles.RoomData}>
-                <h1>Название лобби: {lobbyName}</h1>
-                <p>Название игры: {gameName}</p>
+                <h1>{TextContext.LobbyName}: {lobbyName}</h1>
+                <p>{TextContext.GameName}: {gameName}</p>
                 <p>{roomId}</p>
             </div>
         )
@@ -126,10 +135,10 @@ export const LobbyPage = ({
             <div className={styles.UserListPanel}>
                 <div className={styles.UserList}>
                     {usersData.map(player => (
-                        <PlayerItem Img={player.img} Name={player.Name} host={player.host}/>
+                        <PlayerItem Img={player.img.UserImage1} Name={player.Name} host={player.host}/>
                     ))}
                     <button className={styles.ButtonAddPlayer}>
-                        <p>Пригласить игрока</p>
+                        <p>{TextContext.InviteAPlayer}</p>
                     </button>
                 </div>
             </div>
@@ -140,24 +149,26 @@ export const LobbyPage = ({
         return(
             <div className={styles.ButtonPanel}>
                 <button className={styles.SimpleButton}>
-                    123
+                    {TextContext.Exit}
                 </button>
                 <button className={styles.SimpleButton}>
-                    123
+                    {TextContext.Settings}
                 </button>
                 <button className={styles.SimpleButton + " " + styles.Large}>
-                    123
+                    {TextContext.HowToPlay}
                 </button>
                 {isCreator ? (
                     <button className={styles.SimpleButton + " " + styles.Large + ' ' + styles.WithIcon}
                     onClick={handleStartClick}>
-                        <img src={img_playButton} alt="" />
-                        Старт
+                        <img src={img_playButton} alt="Play" />
+                        {TextContext.Play}
                     </button>
                 ) : null}
             </div>
         )
     }
+
+    useLogger(usersData)
     return (
         <>
         <Header/>
@@ -177,7 +188,7 @@ export const LobbyPage = ({
                         <div id="input" className={styles.InputWithButton}>
                             <input type='text' value={inputValue} onChange={(e) => setInputValue(e.target.value)}/>
                             <button onClick={() => handleSendClick(inputValue)}>
-                                Отправить
+                                {TextContext.ToSend}
                             </button>
                         </div>
                     </div>
