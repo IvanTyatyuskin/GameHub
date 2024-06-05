@@ -99,30 +99,13 @@ export const AnimationPanel = () =>{
     const [cellContent, setCellContent] = useState([]);
     const [homeCellContent, setHomeCellContent] = useState([]);
 
-    //setCellContent([
-    //    <p key='1'>1</p>,
-    //    <div key='2' className={styles.point}/>,
-    //    <h1 key='4'>123</h1>
-    //])
-    //setHomeCellContent([<p key='1'>1</p>])
-
     const GoHome = () => {
         const pointX = parseInt(coordMainCell.X.get);
         const pointY = parseInt(coordMainCell.Y.get);
         const route = createRoute(widthCount, heightCount, pointX, pointY);
-        //const values = [];
-        //const count =  cellContent.length;
-        //for (let i = 0; i >= count; i++){
-        //    if (i === cellContent.length-1) setHomeCellContent(cellContent[i]);
-        //    else values.push(cellContent[i]);
-        //}
-        //setCellContent(values);
+
         
         if (route && route.length > 0) {
-            //setHomeVisible(true);
-            //coordHomeCell.X.set(route[0][0]);
-            //coordHomeCell.Y.set(route[0][1]);
-
             const speed = 200; // Скорость анимации в миллисекундах
             route.forEach((point, index) => {
                 if (Array.isArray(point)) {
@@ -142,11 +125,35 @@ export const AnimationPanel = () =>{
             //setHomeVisible(false);
         }
     }
-
+    const nextMoveHandle = () => {
+        const currentX = parseInt(coordMainCell.X.get);
+        const currentY = parseInt(coordMainCell.Y.get);
+    
+        // Логика для перемещения на четных строках
+        if (currentY % 2 === 0) {
+            if (currentX < widthCount - 1) {
+                // Перемещение вправо на одну клетку
+                coordMainCell.X.set(currentX + 1);
+            } else {
+                // Перемещение вниз на одну клетку в конце строки
+                coordMainCell.Y.set(currentY + 1);
+            }
+        } else {
+            // Логика для перемещения на нечетных строках
+            if (currentX > 0) {
+                // Перемещение влево на одну клетку
+                coordMainCell.X.set(currentX - 1);
+            } else {
+                // Перемещение вниз на одну клетку в конце строки
+                coordMainCell.Y.set(currentY + 1);
+            }
+        }
+    }
     return (
         <>
             <div className={styles.root} style={constValueStyle}>
                 <div style={{ width:"200px", height: "200px" }}>
+                    <Button onClick={nextMoveHandle}>Следующий ход</Button>
                     <InputText2 value={coordMainCell.X.get} setValue={coordMainCell.X.set}/>
                     <InputText2 value={coordMainCell.Y.get} setValue={coordMainCell.Y.set}/>
                     <Button onClick={GoHome}>go home</Button>
