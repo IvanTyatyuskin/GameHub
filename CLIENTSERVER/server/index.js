@@ -713,6 +713,20 @@ socket.on('player_ready_Diamant', (data) => {
     }
   });
 
+  socket.on('join_private_lobby', ({ roomName, password }) => {
+    const lobby = lobbies[roomName];
+    if (lobby.currentCount < lobby.maxCount) {
+      const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
+      if (password === lobby.password) {
+        user.lobbyName = roomName;
+        lobby.users.push(user);
+        lobby.currentCount++;
+        console.log('User: ', user.nickname, 'joined to lobby', roomName);
+        io.to(user.actualSocketID).emit('password_checked');
+      }
+    }
+  });
+
   //TicTacToe------------------------------------------------------------------------------
   socket.on('TicTacToe_start', () => {
     const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
