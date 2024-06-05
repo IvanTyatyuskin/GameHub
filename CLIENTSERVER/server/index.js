@@ -175,7 +175,7 @@ function FindSkullLobbyById(id)
     for (let i = 0; i < SkullLobbies[ind].Players.length; i++) 
     {  
       SkullLobbies[ind].Players[i].OpenCards=[];
-      SkullLobbies[ind].Players[i].GameMode='play';
+      SkullLobbies[ind].Players[i].GameMode='setup';
       SkullLobbies[ind].Players[i].Bet=0;
       SkullLobbies[ind].Players[i].CardsDown=0;
       SkullLobbies[ind].Players[i].HavePassed=false;  
