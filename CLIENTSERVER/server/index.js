@@ -94,7 +94,6 @@ io.on('connection', (socket) => {
 
   socket.on('get_lobbies_list', (gameName) => {
     const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
-    console.log(user);
     if(user) {
       io.to(user.actualSocketID).emit('lobbies_list', Object.values(lobbies).filter(lobby => lobby.game === gameName));
     }
@@ -736,14 +735,16 @@ socket.on('player_ready_Diamant', (data) => {
     const lobby = lobbies[user.lobbyName];
     const index = lobby.users.indexOf(user);
     lobby.users.splice(index, 1);
-    if (user.isCreator) {
+    if (user.isCreator && lobby.currentCount > 1) {
       user.isCreator = false;
       const newHost = lobby.users[Math.random() * lobby.users.length];
       newHost.isCreator = true;
+    } else if (lobby.currentCount === 1) {
+      delete lobbies[user.lobbyName];
     }
     lobby.currentCount--;
     user.lobbyName = '';
-    console.log('User: ', user.nickname, 'leave a lobby', roomName);
+    console.log('User: ', user.nickname, 'leave a lobby', lobby.roomName);
   });
 
   //TicTacToe------------------------------------------------------------------------------
