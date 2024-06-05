@@ -107,18 +107,20 @@ export const RegistrationPage = ({}) =>{
 
     console.log(nickname);
 
-    if (nickname != '') {
-      document.cookie = `nickname=${nickname}; max-age=3600; path=/`; // Сохраняем никнейм в Cookie
-      document.cookie = `avatar=${getAvatar}; max-age=3600; path=/`; // Сохраняем никнейм в Cookie
-      document.cookie = `background=${getBackground}; max-age=3600; path=/`; // Сохраняем никнейм в Cookie
-  
-      if (socket) {
-        socket.emit('setNickname', { nickname });
-      } else {
-        console.error('Socket is not connected');
+    if (nickname) {
+      if (nickname != '') {
+        document.cookie = `nickname=${nickname}; max-age=3600; path=/`; // Сохраняем никнейм в Cookie
+        document.cookie = `avatar=${getAvatar}; max-age=3600; path=/`; // Сохраняем никнейм в Cookie
+        document.cookie = `background=${getBackground}; max-age=3600; path=/`; // Сохраняем никнейм в Cookie
+    
+        if (socket) {
+          socket.emit('setNickname', nickname);
+        } else {
+          console.error('Socket is not connected');
+        }
+    
+        window.location.href = '/ListOfGames'; 
       }
-  
-      window.location.href = '/ListOfGames'; 
     }
   };
 

@@ -11,7 +11,7 @@ const SocketProvider = ({ children }) => {
   const storedSocketID = Cookies.get('socketID');
 
   useEffect(() => {
-    const newSocket = io('http://localhost:4000', {
+    const newSocket = io('http://85.143.66.147:4000', {
         query: {
             socketID: storedSocketID,
         },
