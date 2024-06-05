@@ -695,10 +695,10 @@ socket.on('player_ready_Diamant', (data) => {
     } 
   });
 
-  socket.on('create_lobby', ({ roomName, isLocked, maxCount, game }) => {
+  socket.on('create_lobby', ({ roomName, password, isLocked, maxCount, game }) => {
     const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
     if (user) {
-      const newLobby = { roomName, isLocked, currentCount: 1, maxCount, game, users: [], chatHistory: [] };
+      const newLobby = { roomName, isLocked, currentCount: 1, password, maxCount, game, users: [], chatHistory: [] };
       lobbies[roomName] = newLobby;
       user.isCreator = true;
       user.lobbyName = roomName;
@@ -729,6 +729,8 @@ socket.on('player_ready_Diamant', (data) => {
         lobby.currentCount++;
         console.log('User: ', user.nickname, 'joined to lobby', roomName);
         io.to(user.actualSocketID).emit('password_checked');
+      } else {
+        io.to(user.actualSocketID).emit('wrong_password');
       }
     }
   });
