@@ -182,7 +182,7 @@ function FindSkullLobbyById(id)
       SkullLobbies[ind].Players[i].PlayedCards=[];
     } 
     SkullLobbies[ind].Bet=0; 
-    SkullLobbies[ind].GameMode='play';              
+    SkullLobbies[ind].GameMode='setup';              
    // io.sockets.in('Skull').emit('Reset');
    const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
    if (user) 
