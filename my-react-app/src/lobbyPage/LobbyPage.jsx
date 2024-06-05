@@ -115,6 +115,11 @@ export const LobbyPage = ({
         socket.emit(`${gameName}_start`);
     };
 
+    const handleLeaveLobbyClick = () => {
+        socket.emit('leave_lobby');
+        navigate(`/lobbyList${gameName}`)
+    }
+
     socket.on(`${gameName}_started`, (callback) => {
         navigate(`/${gameName}`);
     })
@@ -148,7 +153,7 @@ export const LobbyPage = ({
     const ButtonPanel = () => {
         return(
             <div className={styles.ButtonPanel}>
-                <button className={styles.SimpleButton}>
+                <button className={styles.SimpleButton} onClick={handleLeaveLobbyClick}>
                     {TextContext.Exit}
                 </button>
                 <button className={styles.SimpleButton}>
