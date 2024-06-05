@@ -10,6 +10,7 @@ import TrapsInThisRound from './components/TrapsInThisRound'
 import Game from './Game'
 import { GameProvider, useGameContext } from './GameContext';
 import { Modal } from '../../Components/common/Modal.jsx'
+import { useTimer } from '../../Components/common/Timer.jsx'
 
 function Diamant() {
     const textContent = textDataToView[0]
@@ -23,16 +24,8 @@ function Diamant() {
         returnToLobby, isHost
     } = useGameContext();
     
-    const [now, setNow] = useState(new Date())
-    useEffect(() => {
-        const timer = setInterval(() => {
-            setNow(new Date());
-        }, 1000);
-    
-        return () => {
-            clearInterval(timer);
-        };
-    }, []);
+    //const now = useTimer();
+
     const WinPlayer = ({modalContent}) => {
         if (!modalContent) return(<h1>Тут искать нечего</h1>)
         return(
@@ -46,7 +39,6 @@ function Diamant() {
                         <p>Вернуться в лобби</p>
                     </SimpleButton> : null
                 }
-                
             </>
         )
     }
@@ -66,7 +58,7 @@ function Diamant() {
                         <h1>{textContent.round} {roundD.round}</h1>
                     </div>
                     <div className="header-item-r">
-                        <p>{textContent.time}: {now.toLocaleTimeString()}</p>
+                        {/*<p>{textContent.time}: {now}</p>*/}
                     </div>
 
                 </div>

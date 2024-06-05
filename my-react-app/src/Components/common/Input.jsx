@@ -47,7 +47,7 @@ export const InputText = ({ labelText='', name = 'username', maxlength, id = nam
 export const InputText2 = ({ labelText = null, 
     name = 'username', 
     id = name,
-    maxlength,
+    maxlength = '20',
     placeholder = '',
     value: propValue,
     setValue: propSetValue

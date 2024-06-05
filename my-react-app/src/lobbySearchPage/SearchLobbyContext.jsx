@@ -4,6 +4,7 @@ import { testRoomsData } from "./testData";
 import { SocketContext } from "../SocketContext";
 import { useNavigate } from "react-router-dom";
 import { Room } from '../lobbySearchPage/testData'
+import { useLogger } from "../hooks";
 
 const SearchLobbyContext = React.createContext()
 
@@ -25,11 +26,13 @@ export const SearchLobbyProvider = ({children,
             createLobby()
         }
     })
-    const connectToRoomFunc = useCallback(()=>{
+    const connectToRoomFunc = ()=>{
         if (canConnectToRoomCheck()){
-            joinLobby()
+            if (lobbyInfo.locked) 
+            return joinPrivateLobby()
+            return joinLobby()
         }
-    })
+    }
     const canCreateLobbyCheck = () =>{
         if (roomSettings.name === '') 
             return [false, "Мне не нравятся твои поля"];
@@ -40,13 +43,17 @@ export const SearchLobbyProvider = ({children,
     }
     const [roomSettings, setRoomSettings] = useState()
     const [lobbyInfo, setLobbyInfo] = useState()
+    const [password, setPassword] = useState('');
 
+    useLogger(roomSettings)
+    useLogger(lobbyInfo)
 
     const createLobby = ()=>{
         socket.emit('create_lobby', 
         { 
             roomName:roomSettings.name, 
             isLocked:roomSettings.locked, 
+            password:roomSettings.password,
             maxCount:roomSettings.maxCount, 
             game: Game
         });
@@ -58,6 +65,17 @@ export const SearchLobbyProvider = ({children,
           navigate(navigateAddress);
         }
     };
+    const joinPrivateLobby = () =>{
+        if(lobbyInfo.count < lobbyInfo.maxCount){
+            socket.emit('join_private_lobby', { roomName: lobbyInfo.name, password: password.toString() });
+            socket.on('password_checked', () =>{
+                navigate(navigateAddress);
+            })
+            socket.on('wrong_password', () =>{
+                alert('Пароль не подошел')
+            })
+        }
+    }
 
     //useEffect
 
@@ -76,7 +94,8 @@ export const SearchLobbyProvider = ({children,
         createLobbyFunc,
         connectToRoomFunc,
         roomSettings, setRoomSettings,
-        lobbyInfo, setLobbyInfo
+        lobbyInfo, setLobbyInfo,
+        password, setPassword,
     }
     return(
         <SearchLobbyContext.Provider value={values}>

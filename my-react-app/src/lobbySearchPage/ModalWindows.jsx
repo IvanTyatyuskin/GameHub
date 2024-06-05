@@ -69,10 +69,10 @@ export const CreateLobbyModal = () =>{
 }
 
 export const ConnectToRoomModal = () =>{
-    const {lobbyInfo, setRoomSettings, connectToRoomFunc} = useSearchLobby()
-    const [password, setPassword] = useState('');
+    const {lobbyInfo, connectToRoomFunc,
+        password, setPassword
+    } = useSearchLobby()
     const handleConnect = () => {
-        setRoomSettings(prev => {return ({...prev, password: password})});
         connectToRoomFunc();
     }
 
