@@ -50,7 +50,7 @@ function Counter()
   // const [havePassed, setHavePassed] = useState(false);
   // const [gameMode, setGameMode] = useState("setup");
   // const [winWindow, setWinWindow] = useState(false);  
-
+  const navigate=useNavigate();
   const ThisPlayerToView = (deckValue,active,vp,gameMode,Bet,winWindow) => () => {
     let cards=[];
     for (let i = 0; i < deckValue.length; i++) { 
@@ -230,6 +230,8 @@ function Counter()
   const updateBet = () => () => {
     if(isActive){
       const Bet=(Number(input));
+      if(!isNaN(Bet))
+        {
       if (Bet>bet&&Bet<=totalCardsDown()){
         if(bet==0){
           //setGameMode('betting');
@@ -252,6 +254,11 @@ function Counter()
       else{
         alert("Назначьте ставку")
       }
+    }
+    else
+    {
+alert('Введите число')
+    }
     }
   }
   /*
@@ -316,7 +323,7 @@ function Counter()
     input=event.target.value;
   }
   const returnToLobby = () => {
-    return useNavigate(`/LobbyPage`);
+    return navigate(`/LobbyPage`);
   }
     
   return(
