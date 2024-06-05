@@ -7,6 +7,7 @@ import { CardView,ThisPlayerView,PlayerView } from './Classes';
 import { SocketContext } from '../../SocketContext';
 import styles from '../../Components/common/input.module.css'
 import { SkullProvider, useSkull } from './SkullContext';
+import { useNavigate } from 'react-router-dom'
 
 class Card {
   constructor(isSkull, isDown, isDisabled) {
@@ -314,13 +315,16 @@ function Counter()
   const handleChange = (event) => {
     input=event.target.value;
   }
-
+  const returnToLobby = () =>() => {
+    useNavigate(`/LobbyPage`);
+    }
+    
   return(
     <SkullView2 
       players = {playersView} 
       thisPlayerView={thisPlayer} 
       onChange={handleChange}
-      returnToLobbyClick={()=>{}}
+      returnToLobbyClick={returnToLobby()}
     />
   )
 }
