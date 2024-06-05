@@ -315,16 +315,16 @@ function Counter()
   const handleChange = (event) => {
     input=event.target.value;
   }
-  const returnToLobby = () =>() => {
-    useNavigate(`/LobbyPage`);
-    }
+  const returnToLobby = () => {
+    return useNavigate(`/LobbyPage`);
+  }
     
   return(
     <SkullView2 
       players = {playersView} 
       thisPlayerView={thisPlayer} 
       onChange={handleChange}
-      returnToLobbyClick={returnToLobby()}
+      returnToLobbyClick={returnToLobby}
     />
   )
 }

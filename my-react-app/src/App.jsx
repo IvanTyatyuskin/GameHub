@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Diamant from './games/diamant/Diamant.jsx';
 import ListOfGames from './ListOfGames';
-import Counter from './games/skull/Counter.jsx';
+import Skull from './games/skull/Counter.jsx';
 import { RegistrationPage } from './registrationPage/RegistrationPage.jsx';
 import { LobbyPage } from './lobbyPage/LobbyPage.jsx';
 import SearchLobbyPage from './lobbySearchPage/LobbySearchPage.jsx';
@@ -22,7 +22,7 @@ function App() {
           <Route path="/" element={<RegistrationPage />} />
           <Route path="ListOfGames" element={<PrivateRoute element={<ListOfGames />} />} />
           <Route path="Diamant" element={<PrivateGamesRoute element={<Diamant />} redirectTo="/lobbyListDiamant" />} />
-          <Route path="Skull" element={<PrivateGamesRoute element={<Counter />} redirectTo="/lobbyListSkull" />} />
+          <Route path="Skull" element={<PrivateGamesRoute element={<Skull />} redirectTo="/lobbyListSkull" />} />
           <Route path="TicTacToe" element={<PrivateGamesRoute element={<TicTacToe />} redirectTo="/lobbyListTicTacToe" />} />
           <Route path="LobbyPage" element={<PrivateRoute element={<LobbyPage />} />} />
           {/*<Route path="lobbylist" element={<PrivateRoute element={<SearchLobbyPage />} />} />*/}
