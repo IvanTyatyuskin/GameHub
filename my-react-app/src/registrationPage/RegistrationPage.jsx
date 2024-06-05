@@ -88,9 +88,12 @@ export const RegistrationPage = ({}) =>{
     )
   }
   const handleAccept = () => {
-    const nickname = getInput;
+    const nickname = getInput.trim();
 
-    console.log(nickname);
+    if (nickname === '') {
+      alert('Пожалуйста, введите ваш никнейм');
+      return;
+    }
 
     if (nickname) {
       if (nickname != '') {

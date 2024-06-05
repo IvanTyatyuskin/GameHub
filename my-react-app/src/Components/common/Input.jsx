@@ -23,7 +23,7 @@ export function Inputs() {
     )
 }
 
-export const InputText = ({ labelText='', name = 'username', id = name, 
+export const InputText = ({ labelText='', name = 'username', maxlength, id = name, 
     placeholder = 'Username', value, setValue , 
     disabled = false, readonly = false }) => {
     
@@ -31,12 +31,15 @@ export const InputText = ({ labelText='', name = 'username', id = name,
         [value, setValue] = useState(value)
     }
     const handleChange = (event) => {
-        setValue(event.target.value)
+        const inputValue = event.target.value;
+        if (inputValue.length <= maxlength) {
+            setValue(event.target.value)
+        }
     }
     return (
         <div className={styles.text_field}>
             <label className={styles.text_field__label} htmlFor={name}>{labelText}</label>
-            <input className={styles.text_field__input} type="text" name={name} id={id} placeholder={placeholder} value={value} onChange={handleChange} disabled={disabled} readOnly={readonly} />
+            <input className={styles.text_field__input} type="text" name={name} id={id} placeholder={placeholder} value={value} onChange={handleChange} maxlength={maxlength} disabled={disabled} readOnly={readonly} />
         </div>
     )
 }
@@ -44,6 +47,7 @@ export const InputText = ({ labelText='', name = 'username', id = name,
 export const InputText2 = ({ labelText = null, 
     name = 'username', 
     id = name,
+    maxlength,
     placeholder = '',
     value: propValue,
     setValue: propSetValue
@@ -51,7 +55,9 @@ export const InputText2 = ({ labelText = null,
     const [value, setValue] = useState(propValue || '');
     const handleChange = (event) => {
         if (propSetValue){
-            propSetValue(event.target.value);
+            if (event.target.value.length <= maxlength) {
+                propSetValue(event.target.value);
+            }
         } else{
             setValue(event.target.value);
         }
@@ -63,6 +69,7 @@ export const InputText2 = ({ labelText = null,
                 type="text" 
                 name={name} 
                 id={id} 
+                maxlength={maxlength}
                 value={propSetValue ? propValue : value} 
                 placeholder={placeholder} 
                 onChange={handleChange}
@@ -79,6 +86,7 @@ InputText2.propTypes = {
     labelText: PropTypes.string.isRequired,
     name: PropTypes.string,
     id: PropTypes.string,
+    maxlength: PropTypes.number,
     placeholder: PropTypes.string,
     value: PropTypes.string,
     setValue: PropTypes.func

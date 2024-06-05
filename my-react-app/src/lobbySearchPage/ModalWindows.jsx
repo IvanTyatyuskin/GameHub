@@ -21,7 +21,12 @@ export const CreateLobbyModal = () =>{
     const [maxPlayers, setMaxPlayers] = useState(DataAboutGame.minPlayers);
 
     const handleCreateLobby = () => {
-        createLobbyFunc()
+        if (getName.trim() === '') {
+            alert('Поле имени лобби не может быть пустым или состоять из пробелов');
+            return;
+        } else {
+            createLobbyFunc()
+        }
     };
 
     useEffect(()=>{
@@ -36,9 +41,9 @@ export const CreateLobbyModal = () =>{
     return(
         <>
             <div className={styles.createLobbyModal}>
-                <InputText2 labelText='Название лобби' value={getName} setValue={setName}/>
+                <InputText2 labelText='Название лобби' value={getName} setValue={setName} maxlength="20"/>
                 <div style={{ display: !isPublic ? 'none' : 'block' }}>
-                    <InputText2 labelText='Пароль' value={getPassword} setValue={setPassword}/>
+                    <InputText2 labelText='Пароль' value={getPassword} setValue={setPassword} maxlength="20"/>
                 </div>
                 <div className={styles.checkBox}>
                     <img src={image_unlocked} className='size32'/>
