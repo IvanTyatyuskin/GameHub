@@ -103,12 +103,13 @@ io.on('connection', (socket) => {
     const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
     const lobbyName = user.lobbyName;
     lobby = lobbies[lobbyName];
-    io.emit('lobby_name', lobbyName);
-    io.emit('isCreator', user.isCreator);
-    io.emit('gameName', lobby.game);
-    io.emit('users', lobby.users);
-    io.emit('chat_history', lobby.chatHistory);
-    console.log(users);
+    lobby.users.forEach((user) => {
+      io.to(user.actualSocketID).emit('lobby_name', lobbyName);
+      io.to(user.actualSocketID).emit('isCreator', user.isCreator);
+      io.to(user.actualSocketID).emit('gameName', lobby.game);
+      io.to(user.actualSocketID).emit('users', lobby.users);
+      io.to(user.actualSocketID).emit('chat_history', lobby.chatHistory);
+    });
   })
 
   socket.on('send_chat_message', (message) => {
@@ -737,7 +738,8 @@ socket.on('player_ready_Diamant', (data) => {
     lobby.users.splice(index, 1);
     if (user.isCreator && lobby.currentCount > 1) {
       user.isCreator = false;
-      const newHost = lobby.users[Math.random() * lobby.users.length];
+      const newHost = lobby.users[Math.floor(Math.random() * lobby.users.length)];
+      console.log('NewHost', newHost);
       newHost.isCreator = true;
     } else if (lobby.currentCount === 1) {
       delete lobbies[user.lobbyName];

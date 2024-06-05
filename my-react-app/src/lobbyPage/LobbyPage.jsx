@@ -110,6 +110,12 @@ export const LobbyPage = ({
         setIsLobbyDataRequested(true);
     }
 
+    if (socket) {
+        socket.on(`${gameName}_started`, (callback) => {
+            navigate(`/${gameName}`);
+        })
+    }
+
 
     const handleStartClick = () => {
         socket.emit(`${gameName}_start`);
@@ -119,11 +125,6 @@ export const LobbyPage = ({
         socket.emit('leave_lobby');
         navigate(`/lobbyList${gameName}`)
     }
-
-    socket.on(`${gameName}_started`, (callback) => {
-        navigate(`/${gameName}`);
-    })
-
 
     const RoomData = () => {
         return(
