@@ -696,14 +696,16 @@ socket.on('player_ready_Diamant', (data) => {
   });
 
   socket.on('create_lobby', ({ roomName, isLocked, maxCount, game }) => {
-    const newLobby = { roomName, isLocked, currentCount: 1, maxCount, game, users: [], chatHistory: [] };
-    lobbies[roomName] = newLobby;
     const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
-    user.isCreator = true;
-    user.lobbyName = roomName;
-    lobbies[roomName].users.push(user);
-    console.log('Lobby: ', roomName, ' created by ', user.nickname);
-    console.log(lobbies[roomName]);
+    if (user) {
+      const newLobby = { roomName, isLocked, currentCount: 1, maxCount, game, users: [], chatHistory: [] };
+      lobbies[roomName] = newLobby;
+      user.isCreator = true;
+      user.lobbyName = roomName;
+      lobbies[roomName].users.push(user);
+      console.log('Lobby: ', roomName, ' created by ', user.nickname);
+      console.log(lobbies[roomName]);
+    }
   });
 
   socket.on('join_lobby', ({ roomName }) => {
@@ -736,13 +738,30 @@ socket.on('player_ready_Diamant', (data) => {
     const lobby = lobbies[user.lobbyName];
     const index = lobby.users.indexOf(user);
     lobby.users.splice(index, 1);
+    user.lobbyName = '';
     if (user.isCreator && lobby.currentCount > 1) {
       user.isCreator = false;
       const newHost = lobby.users[Math.floor(Math.random() * lobby.users.length)];
       console.log('NewHost', newHost);
       newHost.isCreator = true;
+
+      lobby.users.forEach((user) => {
+        io.to(user.actualSocketID).emit('lobby_name', lobby.roomName);
+        io.to(user.actualSocketID).emit('isCreator', user.isCreator);
+        io.to(user.actualSocketID).emit('gameName', lobby.game);
+        io.to(user.actualSocketID).emit('users', lobby.users);
+        io.to(user.actualSocketID).emit('chat_history', lobby.chatHistory);
+      });
     } else if (lobby.currentCount === 1) {
       delete lobbies[user.lobbyName];
+    } else {
+      lobby.users.forEach((user) => {
+        io.to(user.actualSocketID).emit('lobby_name', lobby.roomName);
+        io.to(user.actualSocketID).emit('isCreator', user.isCreator);
+        io.to(user.actualSocketID).emit('gameName', lobby.game);
+        io.to(user.actualSocketID).emit('users', lobby.users);
+        io.to(user.actualSocketID).emit('chat_history', lobby.chatHistory);
+      });
     }
     lobby.currentCount--;
     user.lobbyName = '';
