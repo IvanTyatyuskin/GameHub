@@ -727,6 +727,21 @@ socket.on('player_ready_Diamant', (data) => {
     }
   });
 
+  socket.on('leave_lobby', () => {
+    const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
+    const lobby = lobbies[user.lobbyName];
+    const index = lobby.users.indexOf(user);
+    lobby.users.splice(index, 1);
+    if (user.isCreator) {
+      user.isCreator = false;
+      const newHost = lobby.users[Math.random() * lobby.users.length];
+      newHost.isCreator = true;
+    }
+    lobby.currentCount--;
+    user.lobbyName = '';
+    console.log('User: ', user.nickname, 'leave a lobby', roomName);
+  });
+
   //TicTacToe------------------------------------------------------------------------------
   socket.on('TicTacToe_start', () => {
     const user = users.find((user) => user.socketID === socket.handshake.query.socketID);
